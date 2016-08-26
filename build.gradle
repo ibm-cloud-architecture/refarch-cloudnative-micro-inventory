@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 jar {
     baseName = 'micro-inventory'
-    version =  '0.1.0'
+    version =  '0.0.1'
 }
 
 repositories {
@@ -33,25 +33,33 @@ dependencyManagement {
 }
 
 dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    compile('org.springframework.cloud:spring-cloud-starter-hystrix')
     // tag::jetty[]
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "spring-boot-starter-tomcat"
     }
-    compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework:spring-web")
     // end::jetty[]
-    // tag::actuator[]
     compile("org.springframework.boot:spring-boot-starter-actuator")
-    // end::actuator[]
     //testCompile("junit:junit")
     //testCompile("org.springframework.boot:spring-boot-starter-test")
     compile("org.springframework.boot:spring-boot-starter-actuator")
-
-    compile 'org.springframework.cloud:spring-cloud-starter-eureka'
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile('org.springframework.boot:spring-boot-starter-jdbc')
     compile("mysql:mysql-connector-java:5.1.28")
+}
 
+task docker {
+    doLast {
+        copy {
+            from 'build/libs/micro-inventory-0.0.1.jar'
+            into 'docker'
+        }
+        file("docker/micro-inventory-0.0.1.jar").renameTo(file("docker/app.jar"))
 
+    }
 }
 
 task wrapper(type: Wrapper) {
