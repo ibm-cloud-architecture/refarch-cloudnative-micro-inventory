@@ -49,12 +49,12 @@ This project is built to demonstrate how to build a Spring Boot Microservices ap
     You can use cURL or use Chrome POSTMAN to send insert/update/delete requests to the database.
 
     - Add new item to inventory - `POST` json payload
-    `http://localhost:8080/micro/inventory/create`
+    `http://localhost:8080/micro/inventory`
 
     - Update existing item in inventory - `PUT` json payload
     `http://localhost:8080/micro/inventory/update/{id}`
 
-    - Delete item from inventory
+    - Delete item from inventory - Send `DELETE` request
     `http://localhost:8080/micro/inventory/delete/{id}`
 
     Example curl command
