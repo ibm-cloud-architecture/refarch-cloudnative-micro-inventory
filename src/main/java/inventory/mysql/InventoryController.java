@@ -51,7 +51,7 @@ public class InventoryController {
 	}
 	
 	/**
-	 * @return item(s) by name
+	 * @return item(s) containing name
 	 */
 	@RequestMapping(value = "/inventory/name/{name}", method = RequestMethod.GET)
 	@ResponseBody List<Inventory> getByName(@PathVariable String name) {
@@ -70,7 +70,7 @@ public class InventoryController {
 	 * Add Item
 	 * @return transaction status
 	 */
-	@RequestMapping(value = "/inventory/create", method = RequestMethod.POST, consumes = "application/json")
+	@RequestMapping(value = "/inventory", method = RequestMethod.POST, consumes = "application/json")
 	@ResponseBody String create(@RequestBody Inventory payload) {
 		try {
 			itemsRepo.save(payload);
