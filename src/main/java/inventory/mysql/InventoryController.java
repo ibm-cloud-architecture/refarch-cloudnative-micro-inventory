@@ -18,7 +18,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * REST Controller to manage Inventory database
- * 
+ *
  */
 @RestController
 public class InventoryController {
@@ -33,15 +33,16 @@ public class InventoryController {
 	@ResponseBody String check() {
 		return "it works!";
 	}
-	
+
 	/**
 	 * @return all items in inventory
 	 */
+	@HystrixCommand(fallbackMethod="failGood") 
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ResponseBody Iterable<Inventory> getInventory() {
 		return itemsRepo.findAll();
 	}
-		
+
 	/**
 	 * @return item by id
 	 */
@@ -49,14 +50,14 @@ public class InventoryController {
 	@ResponseBody Inventory getById(@PathVariable long id) {
 			return itemsRepo.findOne(id);
 	}
-	
+
 	/**
 	 * @return item(s) containing name
 	 */
 	@RequestMapping(value = "/inventory/name/{name}", method = RequestMethod.GET)
 	@ResponseBody List<Inventory> getByName(@PathVariable String name) {
 			return itemsRepo.findByNameContaining(name);
-	}	
+	}
 
 	/**
 	 * @return item(s) by price lte
@@ -64,8 +65,8 @@ public class InventoryController {
 	@RequestMapping(value = "/inventory/price/{price}", method = RequestMethod.GET)
 	@ResponseBody List<Inventory> getByPrice(@PathVariable int price) {
 			return itemsRepo.findByPriceLessThanEqual(price);
-	}		
-	
+	}
+
 	/**
 	 * Add Item
 	 * @return transaction status
@@ -80,11 +81,11 @@ public class InventoryController {
 		}
 		return "Item succesfully added to inventory! (id = " + payload.getId() + ")";
 	}
-	
+
 
 	/**
 	 * Update Item
-	 * @return transaction status 
+	 * @return transaction status
 	 */
 	@RequestMapping(value = "/inventory/update/{id}", method = RequestMethod.PUT, consumes = "application/json")
 	@ResponseBody String update(@PathVariable long id, @RequestBody Inventory payload) {
@@ -92,7 +93,7 @@ public class InventoryController {
 			if (itemsRepo.exists(id)) {
 				payload.setId(id);
 				itemsRepo.save(payload);
-			} else 
+			} else
 				return "Item not found, nothing to update.";
 		}
 		catch (Exception ex) {
