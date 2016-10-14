@@ -54,7 +54,7 @@ then
   else
     # Enable the newrelic agent
     export JAVA_OPTS="${JAVA_OPTS} -javaagent:${agent_file}"
-    APP_NAME=${ROUTE_HOSTNAME}
+    APP_NAME=${CG_NAME}
     #APP_NAME=$(echo $VCAP_APPLICATION | jq --raw-output '.name')
     export NEW_RELIC_APP_NAME=$APP_NAME
     echo "Setting New Relic appname to ${APP_NAME}"
