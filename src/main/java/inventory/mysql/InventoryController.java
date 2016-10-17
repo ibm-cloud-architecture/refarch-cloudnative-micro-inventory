@@ -4,6 +4,7 @@ import inventory.mysql.models.Inventory;
 import inventory.mysql.models.IInventoryRepo;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,7 @@ public class InventoryController {
 	/**
 	 * @return all items in inventory
 	 */
-	@HystrixCommand(fallbackMethod="failGood") 
+	@HystrixCommand(fallbackMethod="failGood")
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ResponseBody Iterable<Inventory> getInventory() {
 		return itemsRepo.findAll();
@@ -120,8 +121,10 @@ public class InventoryController {
 		return "Item succesfully deleted from inventory!";
 	}
 
-	private String failGood() {
-		return "Circuit Breaker Tripped, try later";
+	private Iterable<Inventory> failGood() {
+		// Simply return an empty array
+		ArrayList<Inventory> inventoryList = new ArrayList<Inventory>();
+		return inventoryList;
 	}
 
 	/**

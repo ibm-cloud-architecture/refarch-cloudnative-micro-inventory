@@ -9,7 +9,7 @@ eureka:
 server:
   context-path: /micro
   port: 8080
-  
+
 # Spring properties
 spring:
   application:
@@ -18,7 +18,7 @@ spring:
   # MySQL Data source configuration
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.99.100/inventorydb
+    url: jdbc:mysql://127.0.0.1/inventorydb
     username: dbuser
     password: password
     port: 3306
