@@ -139,7 +139,7 @@ In this section you will deploy both the database server and the Spring Boot app
 
 7. Start the application in IBM Bluemix container. Replace `{ipaddr-db-container}` with private IP address of the database container, `{dbuser}` with database user name and `{password}` with database user password.
     ```
-    # cf ic group create -p 8080 -m 512 --min 1 --auto --name micro-inventory-group -e "spring.datasource.url=jdbc:mysql://{ipaddr-db-container}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" -n inventoryservice -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
+    # cf ic group create -p 8080 -m 128 --min 1 --auto --name micro-inventory-group -e "spring.datasource.url=jdbc:mysql://{ipaddr-db-container}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" -n inventoryservice -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
     ```
 
 8. Validate.
