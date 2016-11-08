@@ -92,14 +92,14 @@ In this section you will deploy the Spring Boot application to run in a local do
 
 3. Start the application in docker container.  
 
-Replace `{dbuser}` with database user name and `{password}` with database user password.  
-The `{mysql-docker-ip}` is the mysql container instance IP address. For users running on Docker version prior to v1.12, it is the IP address of the docker-machine. For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.   
+   Replace `{dbuser}` with database user name and `{password}` with database user password.  
+   The `{mysql-docker-ip}` is the mysql container instance IP address. For users running on Docker version prior to v1.12, it is the IP address of the docker-machine. For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.   
 
     ```
     # docker run -d -p 8080:8080 --name inventoryservice -e "spring.datasource.url=jdbc:mysql://{mysql-docker-ip}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" cloudnative/inventoryservice
     ```
 
-4. Validate.
+4. Validate.  
     ```
     # curl http://{docker-host}:8080/micro/inventory/13412
     {"id":13412,"name":"Selectric Typewriter","description":"Unveiled in 1961, the revolutionary Selectric typewriter eliminated the need for conventional type bars and movable carriages by using an innovative typing element on a head-and-rocker assembly, which, in turn, was mounted on a small carrier to move from left to right while typing.","price":2199,"img":"api/image/selectric.jpg","imgAlt":"Selectric Typewriter"}
