@@ -91,7 +91,8 @@ In this section you will deploy the Spring Boot application to run in a local do
 3. If not already done, [setup MySQL database `inventorydb` on local docker container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-on-local-mysql-container).
 
 3. Start the application in docker container.
-Replace `{docker-host}` with IP address of the docker-machine, `{dbuser}` with database user name and `{password}` with database user password.
+Replace `{dbuser}` with database user name and `{password}` with database user password.
+The `{mysql-docker-ip}` is the mysql container instance IP address. For users running on Docker version prior to v1.12, it is the IP address of the docker-machine. For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.   
     ```
     # docker run -d -p 8080:8080 --name inventoryservice -e "spring.datasource.url=jdbc:mysql://{docker-host}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" cloudnative/inventoryservice
     ```
