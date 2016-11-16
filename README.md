@@ -90,7 +90,7 @@ In this section you will deploy the Spring Boot application to run in a local do
 
 3. If not already done, [setup MySQL database `inventorydb` on local docker container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-on-local-mysql-container).
 
-3. Start the application in docker container. 
+3. Start the application in docker container.
 Replace `{docker-host}` with IP address of the docker-machine, `{dbuser}` with database user name and `{password}` with database user password.
     ```
     # docker run -d -p 8080:8080 --name inventoryservice -e "spring.datasource.url=jdbc:mysql://{docker-host}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" cloudnative/inventoryservice
@@ -120,27 +120,32 @@ In this section you will deploy both the database server and the Spring Boot app
     # cf ic login
     ```
 
-2. Tag and push the local docker image to bluemix private registry.
+4. Tag and push the local docker image to bluemix private registry.
     ```
     # docker tag cloudnative/inventoryservice registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
     # docker push registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
     ```
 
-3. [Setup MySQL `inventorydb` database in IBM Bluemix container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-in-bluemix-container-runtime).
+5. [Setup MySQL `inventorydb` database in IBM Bluemix container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-in-bluemix-container-runtime).
 
-4. Get private IP address of the database container.
+6. Get private IP address of the database container.
 
     ```
     # cf ic inspect mysql | grep -i ipaddress
     ```
 
-5. Start the application in IBM Bluemix container. Replace `{ipaddr-db-container}` with private IP address of the database container, `{dbuser}` with database user name and `{password}` with database user password.
+7. Start the application in IBM Bluemix container. Replace `{ipaddr-db-container}` with private IP address of the database container, `{dbuser}` with database user name and `{password}` with database user password.
     ```
     # cf ic group create -p 8080 -m 512 --min 1 --auto --name micro-inventory-group -e "spring.datasource.url=jdbc:mysql://{ipaddr-db-container}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" -n inventoryservice -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
     ```
 
-4. Validate.
+8. Validate.
     ```
     # curl http://{container-group-route-name}/micro/inventory/13412
     {"id":13412,"name":"Selectric Typewriter","description":"Unveiled in 1961, the revolutionary Selectric typewriter eliminated the need for conventional type bars and movable carriages by using an innovative typing element on a head-and-rocker assembly, which, in turn, was mounted on a small carrier to move from left to right while typing.","price":2199,"img":"api/image/selectric.jpg","imgAlt":"Selectric Typewriter"}
+    ```
+
+9. Unmap public route.
+    ```
+    # cf ic route unmap -n inventoryservice -d mybluemix.net micro-inventory-group
     ```
