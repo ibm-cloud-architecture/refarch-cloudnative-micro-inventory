@@ -88,7 +88,7 @@ public class InventoryController {
 		try {
 			
 			// check if id passed in, whether it exists already
-			if (!itemsRepo.exists(payload.getId())) {
+			if (itemsRepo.exists(payload.getId())) {
 				return ResponseEntity.badRequest().body("Id " + payload.getId() + " already exists");
 			}
 			
