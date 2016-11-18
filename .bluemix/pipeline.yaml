@@ -1,0 +1,748 @@
+---
+stages:
+- name: BUILD
+  inputs:
+  - url: https://github.com/jkwong888/refarch-cloudnative-micro-inventory.git
+    type: git
+    branch: master
+    dir_name: null
+  properties:
+  - name: MYSQL
+    value: micro-inventory-jkwong-dev
+    type: text
+  jobs:
+  - name: Build
+    type: builder
+    artifact_dir: ''
+    build_type: gradle
+    script: |-
+      #!/bin/bash
+      # The default Gradle version is 1.12
+      # To use Gradle 2.9, uncomment the following line:
+      #export PATH="$GRADLE2_HOME/bin:$PATH"
+
+      echo "Run gradle build..."
+      export JAVA_HOME=~/java8
+      export PATH=$JAVA_HOME/bin:$PATH
+      ./gradlew build
+      echo "Gradle build complete."
+- name: Build Container Images
+  inputs:
+  - type: job
+    stage: BUILD
+    job: Build
+    dir_name: null
+  triggers:
+  - type: stage
+  jobs:
+  - name: Build Inventory Microservice Image
+    type: builder
+    extension_id: ibm.devops.services.pipeline.container.builder
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    IMAGE_NAME: micro-inventory-jkwong-dev
+    USE_CACHED_LAYERS: 'true'
+    COMMAND: |-
+      # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
+      log_and_echo "$LABEL" "Starting build script"
+
+      pwd
+      ls build/libs
+
+      echo "Run Gradle docker build."
+      ./gradlew docker
+      ls -al docker
+      cp -R docker/* .
+      ls -al $PWD
+      echo "Gradle docker build complete."
+
+
+
+      # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
+      # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
+      #####################
+      # Run unit tests    #
+      #####################
+      log_and_echo "$LABEL" "No unit tests cases have been checked in"
+
+      ######################################
+      # Build Container via Dockerfile     #
+      ######################################
+      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/"
+      )
+      IMAGE_NAME=$(echo $IMAGE_NAME|sed "s/-$SPACE//")
+      REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+      FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+      # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
+
+      if [ -f Dockerfile ]; then
+          log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
+          ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
+          # build image
+          BUILD_COMMAND=""
+          if [ "${USE_CACHED_LAYERS}" == "true" ]; then
+              BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
+              ice_retry ${BUILD_COMMAND}
+              RESULT=$?
+          else
+              BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}"
+              ice_retry ${BUILD_COMMAND}
+              RESULT=$?
+          fi
+
+          if [ $RESULT -ne 0 ]; then
+              log_and_echo "$ERROR" "Error building image"
+              ice_retry info
+              ice_retry images
+              ${EXT_DIR}/print_help.sh
+              ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
+              exit 1
+          else
+              log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
+              ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
+          fi
+      else
+          log_and_echo "$ERROR" "Dockerfile not found in project"
+          ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
+          exit 1
+      fi
+
+      ######################################################################################
+      # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
+      ######################################################################################
+      echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
+  - name: Build MySQL Image
+    type: builder
+    extension_id: ibm.devops.services.pipeline.container.builder
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    IMAGE_NAME: inventorydb-mysql-jkwong-dev
+    USE_CACHED_LAYERS: 'true'
+    COMMAND: "#!/bin/bash\n# The following colors have been defined to help with presentation\
+      \ of logs: green, red, label_color, no_color.  \nlog_and_echo \"$LABEL\" \"\
+      Starting build script\"\n\ncd mysql\n\n# The IBM Container BM Containers plug-in\
+      \ (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.\n\
+      # Based on the organization and space selected in the Job credentials are in\
+      \ place for both IBM Container Service and IBM Bluemix \n#####################\n\
+      # Run unit tests    #\n#####################\nlog_and_echo \"$LABEL\" \"No unit\
+      \ tests cases have been checked in\"\n\n######################################\n\
+      # Build Container via Dockerfile     #\n######################################\n\
+      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed \"s/\\(.*\\\
+      )\\((.*\\)/\\1/\")\nIMAGE_NAME=$(echo $IMAGE_NAME|sed \"s/-$SPACE//\")\nREGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\n\
+      FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}\n\n# REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\n\
+      # FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}\n\
+      # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property\
+      \ on the stage.\n\nif [ -f Dockerfile ]; then \n    log_and_echo \"$LABEL\"\
+      \ \"Building ${FULL_REPOSITORY_NAME}\"\n    ${EXT_DIR}/utilities/sendMessage.sh\
+      \ -l info -m \"New container build requested for ${FULL_REPOSITORY_NAME}\"\n\
+      \    # build image\n    BUILD_COMMAND=\"\"\n    if [ \"${USE_CACHED_LAYERS}\"\
+      \ == \"true\" ]; then \n        BUILD_COMMAND=\"build --pull --tag ${FULL_REPOSITORY_NAME}\
+      \ ${WORKSPACE}/mysql\"\n        ice_retry ${BUILD_COMMAND}\n        RESULT=$?\n\
+      \    else \n        BUILD_COMMAND=\"build --no-cache --tag ${FULL_REPOSITORY_NAME}\
+      \ ${WORKSPACE}/mysql\"\n        ice_retry ${BUILD_COMMAND}\n        RESULT=$?\n\
+      \    fi \n\n    if [ $RESULT -ne 0 ]; then\n        log_and_echo \"$ERROR\"\
+      \ \"Error building image\"\n        ice_retry info \n        ice_retry images\n\
+      \        ${EXT_DIR}/print_help.sh\n        ${EXT_DIR}/utilities/sendMessage.sh\
+      \ -l bad -m \"Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)\"\
+      \n        exit 1\n    else\n        log_and_echo \"$SUCCESSFUL\" \"Container\
+      \ build of ${FULL_REPOSITORY_NAME} was successful\"\n        ${EXT_DIR}/utilities/sendMessage.sh\
+      \ -l good -m \"Container build of ${FULL_REPOSITORY_NAME} was successful\"\n\
+      \    fi  \nelse \n    log_and_echo \"$ERROR\" \"Dockerfile not found in project\"\
+      \n    ${EXT_DIR}/utilities/sendMessage.sh -l bad -m \"Failed to get Dockerfile.\
+      \ $(get_error_info)\"\n    exit 1\nfi  \n\n######################################################################################\n\
+      # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE\
+      \    #\n######################################################################################\n\
+      echo \"IMAGE_NAME=${FULL_REPOSITORY_NAME}\" >> $ARCHIVE_DIR/build.properties"
+- name: Scan Image
+  inputs:
+  - type: job
+    stage: Build Container Images
+    job: Build Inventory Microservice Image
+    dir_name: null
+  jobs:
+  - name: Vulnerability Scan
+    type: tester
+    extension_id: ibm.devops.services.pipeline.crawler.tester
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    WAIT_TIME: '10'
+- name: Deploy MySQL Container
+  inputs:
+  - type: job
+    stage: Build Container Images
+    job: Build MySQL Image
+    dir_name: null
+  triggers:
+  - type: stage
+  properties:
+  - name: MYSQL_CONTAINER_NAME
+    value: inventorydb-mysql
+    type: text
+  - name: MYSQL_IMAGE_NAME
+    value: inventorydb-mysql
+    type: text
+  - name: MYSQL_MEMORY
+    value: '128'
+    type: text
+  - name: MYSQL_DATABASE
+    value: inventorydb
+    type: text
+  - name: MYSQL_USER
+    value: dbuser
+    type: text
+  - name: MYSQL_PASSWORD
+    type: secure
+  - name: MYSQL_ROOT_PASSWORD
+    type: secure
+  jobs:
+  - name: Redeploy MySQL Container
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    PORT: '3306'
+    OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    CONTAINER_NAME: ignored
+    DEPLOY_TYPE: clean
+    COMMAND: |-
+      #!/bin/sh -e
+
+      # Build Container via Dockerfile     #
+      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/")
+      IMAGE_NAME=$(echo ${MYSQL_IMAGE_NAME}|sed "s/-$SPACE//")
+      REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+      IMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+      CONTAINER_NAME=${MYSQL_CONTAINER_NAME}
+
+      cleanup_container() {
+          log_and_echo "command: ${IC_COMMAND} rm --force ${CONTAINER_NAME}"
+          ${IC_COMMAND} rm --force ${CONTAINER_NAME}
+
+          COUNTER=0
+          STATE="unknown"
+          while [[ ( $COUNTER -lt 25 ) ]]; do
+              let COUNTER=COUNTER+1
+              STATE=$(${IC_COMMAND} inspect ${CONTAINER_NAME} 2>/dev/null |grep "Status"|awk '{print $2}'|sed 's/"//g')
+              if [ ! -z "${STATE}" ]; then
+                  STATE="waiting for container to exit..."
+              else
+                  break
+              fi
+              log_and_echo "${CONTAINER_NAME} Status: ${STATE}"
+              sleep 8
+          done
+      }
+
+      create_container() {
+          log_and_echo "command: ${IC_COMMAND} run --name ${CONTAINER_NAME} -p $PORT:$PORT ${OPTIONAL_ARGS}"
+          ${IC_COMMAND} run --name ${CONTAINER_NAME} -p $PORT:$PORT ${OPTIONAL_ARGS} -d ${IMAGE_NAME}
+
+          COUNTER=0
+          STATE="unknown"
+          while [[ ( $COUNTER -lt 25 ) && ("${STATE}" != "Running") && ("${STATE}" != "Crashed") ]]; do
+              let COUNTER=COUNTER+1
+              STATE=$(${IC_COMMAND} inspect ${CONTAINER_NAME} 2>/dev/null |grep "Status"|awk '{print $2}'|sed 's/"//g')
+              if [ -z "${STATE}" ]; then
+                  STATE="waiting for container to start..."
+              fi
+              log_and_echo "${CONTAINER_NAME} Status: ${STATE}"
+              sleep 8
+          done
+          if [ "$STATE" == "Running" ]; then
+              log_and_echo "${CONTAINER_NAME} container is now running."
+          elif [ "$STATE" != "Running" ]; then
+              log_and_echo "$ERROR" "${CONTAINER_NAME} container failed to start"
+              exit 1
+          elif [ "$STATE" == "Crashed" ]; then
+              log_and_echo "$ERROR" "${CONTAINER_NAME} container crashed"
+              exit 1
+          fi
+          ${IC_COMMAND} exec -it ${CONTAINER_NAME} sh load-data.sh
+      }
+
+      # attempt to clean up old container
+      cleanup_container
+
+      create_container
+      echo "inventorydb created in mysql container. Done!"
+      exit 0
+- name: Deploy Standalone Inventory Microservice
+  inputs:
+  - type: job
+    stage: Build Container Images
+    job: Build Inventory Microservice Image
+    dir_name: null
+  triggers:
+  - type: stage
+  properties:
+  - name: ROUTE_HOSTNAME
+    value: micro-inventory-jkwong-dev
+    type: text
+  - name: ROUTE_DOMAIN
+    value: mybluemix.net
+    type: text
+  - name: MYSQL_CONTAINER_NAME
+    value: inventorydb-mysql
+    type: text
+  - name: INVENTORY_MSNAME
+    value: inventory-microservice-test
+    type: text
+  - name: CTXPATH
+    value: /micro
+    type: text
+  - name: MYSQL_DATABASE
+    value: inventorydb
+    type: text
+  - name: MYSQL_USER
+    value: dbuser
+    type: text
+  - name: MYSQL_PASSWORD
+    type: secure
+  - name: CONTAINER_SIZE
+    value: '128'
+    type: text
+  jobs:
+  - name: Redeploy Inventory Microservice
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    PORT: '8080'
+    DEPLOY_TYPE: clean
+    CONTAINER_NAME: ${ROUTE_HOSTNAME}
+    COMMAND: "#!/bin/sh\n\nset -e\necho \"Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER,\
+      \ if exists\"\n$IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null\n\
+      set +e\n# The following are some example deployment scripts.  Use these as is\
+      \ or fork them and include your updates here:\necho -e \"${label_color}Starting\
+      \ deployment script${no_color}\"\n\n# To view/fork this script goto: https://github.com/Osthanes/deployscripts\n\
+      # git_retry will retry git calls to prevent pipeline failure on temporary github\
+      \ problems\n# the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer\n\
+      git_retry clone https://github.com/ssibm/deployscripts.git deployscripts\n\n\
+      # get MYSQL information\nlog_and_echo \"MySQL Container: ${MYSQL_CONTAINER_NAME}\"\
+      \n$IC_COMMAND inspect ${MYSQL_CONTAINER_NAME}|grep -E 'MYSQL|HostIp|HostPort'|sed\
+      \ 's/[\"|,|\\\" \\\"]//g'|sed 's/:/=/g' > mysql.env\n. mysql.env\nOPTIONAL_ARGS=\"\
+      ${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
+      \ -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true\
+      \ -e \"spring.application.name=${INVENTORY_MSNAME}\" -e \"server.context-path=${CTXPATH}\"\
+      \ -e \"eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}\" -e \"spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}\"\
+      \ -e \"spring.datasource.username=${MYSQL_USER}\" -e \"spring.datasource.password=${MYSQL_PASSWORD}\"\
+      \"\nlog_and_echo \"Optional Args: ${OPTIONAL_ARGS}\"\n\n# Deploy with containers:\n\
+      # Optional environment properties (can be set directly in this script, or defined\
+      \ as environment properties):\n#      NAME              Value         Description\n\
+      #   =============      =========     ==============\n#   BIND_TO           \
+      \  String       Specify a Bluemix application name that whose bound services\
+      \ you wish to make available to the container.  By default this is not set.\n\
+      #   CONTAINER_SIZE      String       Specify container size: pico (64), nano\
+      \ (128), micro (256), tiny (512), small (1024), medium (2048),\n#          \
+      \                                                  large (4096), x-large (8192),\
+      \ 2x-large (16384).\n#                                    Default is micro (256).\n\
+      #   CONCURRENT_VERSIONS Number       Number of versions of this container to\
+      \ leave active.  \n#                                    Default is 1\nexport\
+      \ DEPLOY_TYPE=clean\n/bin/bash deployscripts/deploycontainer.sh\n\nexport DEPLOY_TYPE=simple\n\
+      /bin/bash deployscripts/deploycontainer.sh\n\n\nRESULT=$?\n\n# source the deploy\
+      \ property file\nif [ -f \"${DEPLOY_PROPERTY_FILE}\" ]; then\n  source \"$DEPLOY_PROPERTY_FILE\"\
+      \nfi\n\n#########################\n# Environment DETAILS   #\n#########################\n\
+      # The environment has been setup.\n# The Cloud Foundry CLI (cf), IBM Container\
+      \ Service CLI (ice), Git client (git), IDS Inventory CLI (ids-inv) and Python\
+      \ 2.7.3 (python) have been installed.\n# Based on the organization and space\
+      \ selected in the Job credentials are in place for both IBM Container Service\
+      \ and IBM Bluemix\n\n# The following colors have been defined to help with presentation\
+      \ of logs: green, red, label_color, no_color.\nif [ $RESULT -ne 0 ]; then\n\
+      \    echo -e \"${red}Executed failed or had warnings ${no_color}\"\n    ${EXT_DIR}/print_help.sh\n\
+      \    exit $RESULT\nfi\necho -e \"${green}Execution complete${no_label}\""
+- name: Contract Validation
+  triggers:
+  - type: stage
+  properties:
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text
+  - name: ROUTE_HOSTNAME
+    value: micro-inventory-jkwong-dev
+    type: text
+  - name: ROUTE_DOMAIN
+    value: mybluemix.net
+    type: text
+  - name: MYSQL_CONTAINER_NAME
+    value: inventorydb-mysql
+    type: text
+  - name: EUREKA_REGISTRY_URL
+    value: https://netflix-eureka-jkwong-dev.mybluemix.net/eureka/
+    type: text
+  - name: AUTO_RECOVERY
+    value: 'true'
+    type: text
+  - name: MIN_INSTANCES
+    value: '1'
+    type: text
+  - name: MAX_INSTANCES
+    value: '1'
+    type: text
+  - name: DESIRED_INSTANCES
+    value: '1'
+    type: text
+  - name: INVENTORY_MSNAME
+    value: inventory-microservice-test
+    type: text
+  - name: CTXPATH
+    value: /micro
+    type: text
+  - name: MYSQL_DATABASE
+    value: inventorydb
+    type: text
+  - name: MYSQL_USER
+    value: dbuser
+    type: text
+  - name: MYSQL_PASSWORD
+    type: secure
+  - name: MYSQL_ROOT_PASSWORD
+    type: secure
+  - name: MYSQL_MEMORY
+    value: '128'
+    type: text
+  - name: MYSQL_IMAGE_NAME
+    value: inventorydb-mysql
+    type: text
+  - name: MEMORY
+    value: '128'
+    type: text
+  jobs:
+  - name: API Test
+    type: tester
+    fail_stage: false
+    script: |-
+      #!/bin/bash
+      # invoke tests here
+
+      echo "TODO"
+      env
+
+      #echo "export MY_CUSTOM_PROPERTY=asdasdgas" >> ${DEPLOY_PROPERTY_FILE}
+- name: Clean Up Unit Test Environment
+  triggers:
+  - type: stage
+  properties:
+  - name: ROUTE_HOSTNAME
+    value: micro-inventory-jkwong-dev
+    type: text
+  - name: MYSQL_CONTAINER_NAME
+    value: inventorydb-mysql
+    type: text
+  - name: IMAGE_NAME
+    value: abcd
+    type: text
+  jobs:
+  - name: Clean Containers
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    PORT: '3306'
+    DEPLOY_TYPE: clean
+    CONTAINER_NAME: ${MYSQL_CONTAINER_NAME}
+    COMMAND: |-
+      #!/bin/sh -e
+
+      # Build Container via Dockerfile     #
+      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/")
+      IMAGE_NAME=$(echo ${MYSQL_IMAGE_NAME}|sed "s/-$SPACE//")
+      REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+      IMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+
+      cleanup_container() {
+          log_and_echo "command: ${IC_COMMAND} rm --force $1"
+          ${IC_COMMAND} rm --force $1
+
+          COUNTER=0
+          STATE="unknown"
+          while [[ ( $COUNTER -lt 25 ) ]]; do
+              let COUNTER=COUNTER+1
+              STATE=$(${IC_COMMAND} inspect $1 2>/dev/null |grep "Status"|awk '{print $2}'|sed 's/"//g')
+              if [ ! -z "${STATE}" ]; then
+                  STATE="waiting for container $1 to exit..."
+              else
+                  break
+              fi
+              log_and_echo "$1 Status: ${STATE}"
+              sleep 8
+          done
+      }
+
+      # attempt to clean up old containers
+      # find the container
+      containers=`${IC_COMMAND} ic ps -a | grep ${ROUTE_HOSTNAME} | grep -oh -e "${ROUTE_HOSTNAME}_[0-9]\+"`
+      for container in "${containers}"; do
+        cleanup_container ${container}
+      done
+
+      # attempt to clean up mysql container
+      cleanup_container ${MYSQL_CONTAINER_NAME}
+
+      exit 0
+- name: Deploy VPN
+  properties:
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text
+  - name: ROUTE_HOSTNAME
+    value: micro-inventory-jkwong-dev
+    type: text
+  - name: ROUTE_DOMAIN
+    value: mybluemix.net
+    type: text
+  - name: MYSQL_CONTAINER
+    value: inventorydb-mysql-jkwong-dev
+    type: text
+  - name: EUREKA_REGISTRY_URL
+    value: https://netflix-eureka-jkwong-dev.mybluemix.net/eureka/
+    type: text
+  - name: AUTO_RECOVERY
+    value: 'true'
+    type: text
+  - name: MEMORY
+    value: '128'
+    type: text
+  - name: MIN_INSTANCES
+    value: '1'
+    type: text
+  - name: MAX_INSTANCES
+    value: '3'
+    type: text
+  - name: DESIRED_INSTANCES
+    value: '2'
+    type: text
+  - name: INVENTORY_MSNAME
+    value: inventory-microservice
+    type: text
+  - name: CTXPATH
+    value: /micro
+    type: text
+  - name: NEW_RELIC_LICENSE_KEY
+    value: ''
+    type: text
+  - name: CUSTOMER_GATEWAY_IP
+    value: 169.46.95.30
+    type: text
+  - name: CUSTOMER_SUBNET
+    value: 10.171.30.64/26
+    type: text
+  - name: CUSTOMER_PSK
+    type: secure
+  jobs:
+  - name: Deploy VPN Service
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    PORT: '80'
+    DEPLOY_TYPE: red_black
+    CONTAINER_NAME: aaa
+    COMMAND: |+
+      #!/bin/bash
+
+      oauth_token=`echo ${TOOLCHAIN_TOKEN} | awk '{print $2;}'`
+      space_guid=${CF_SPACE_ID}
+
+      echo "OAuth token=${oauth_token}"
+      echo "Space guid=${space_guid}"
+
+      vpn_service_name=`cf services | grep VPN_Service_Broker | awk '{ print $1; }'`
+
+      if [ -z ${vpn_service_name} ]; then
+          echo "Creating VPN Service for space ..."
+          cf create-service VPN_Service_Broker Standard "VPN_${CF_SPACE}"
+      fi
+
+      gateways_json=`curl -X GET \
+      -H "accept: application/json" \
+      -H "content-type: application/json" \
+      -H "x-auth-project-id: ${space_guid}" \
+      -H "x-auth-token: ${oauth_token}" \
+      https://containers-api.ng.bluemix.net/v3/vpns/gateways`
+
+      echo ${gateways_json}
+      num_gateways=`echo "${gateways_json}" | python -c "import sys,json; obj=json.load(sys.stdin); print len(obj['gateways'])"`
+
+      if [ "${num_gateways}" == "0" ]; then
+          echo "Creating gateway \"my-gateway\" ..."
+          curl -X POST \
+      -H "accept: application/json" \
+      -H "content-type: application/json" \
+      -H "x-auth-project-id: ${space_guid}" \
+      -H "x-auth-token: ${oauth_token}" \
+      -d "{ \"name\": \"my-gateway\", \"type\": \"allContainers\" }" \
+      https://containers-api.ng.bluemix.net/v3/vpns/gateways
+      fi
+
+      connections_json=`curl -X GET \
+      -H "accept: application/json" \
+      -H "content-type: application/json" \
+      -H "x-auth-project-id: ${space_guid}" \
+      -H "x-auth-token: ${oauth_token}" \
+      https://containers-api.ng.bluemix.net/v3/vpns/connections`
+
+      #echo ${connections_json}
+
+      num_connections=`echo "${connections_json}" | python -c "import sys,json; obj=json.load(sys.stdin); print len(obj['connections'])"`
+
+      echo "num connections found=${num_connections}"
+      FOUND=false
+
+      for i in `seq 0 $((num_connections - 1))`; do
+          gateway_ip=`echo "${connections_json}" | python -c "import sys,json; obj=json.load(sys.stdin); print obj['connections'][${i}]['customer_gateway']"`
+
+          if [ "${gateway_ip}" == "${CUSTOMER_GATEWAY_IP}" ]; then
+              FOUND=true
+              break
+          fi
+      done
+
+      if [ "${FOUND}" == "true" ]; then
+          echo "connection to gateway ${CUSTOMER_GATEWAY_IP} exists!"
+          exit 0
+      fi
+
+      # create the connection
+      echo "Creating connection to gateway at ${CUSTOMER_GATEWAY_IP}"
+      curl -X POST \
+      -H "accept: application/json" \
+      -H "content-type: application/json" \
+      -H "x-auth-project-id: ${space_guid}" \
+      -H "x-auth-token: ${oauth_token}" \
+      -d "{ \"ikepolicy_name\": \"default\", \"ipsecpolicy_name\": \"default\", \"gateway_name\": \"my-gateway\", \"psk\": \"${CUSTOMER_PSK}\", \"customer_gateway\": \"${CUSTOMER_GATEWAY_IP}\",  \"customer_subnets\": [ \"${CUSTOMER_SUBNET}\" ], \"name\": \"connection\" }" \
+      https://containers-api.ng.bluemix.net/v3/vpns/connections
+
+- name: Deploy Hybrid App
+  properties:
+  - name: IGNORE_MAPPING_ROUTE
+    value: 'true'
+    type: text
+  - name: ROUTE_HOSTNAME
+    value: micro-inventory-jkwong-dev
+    type: text
+  - name: ROUTE_DOMAIN
+    value: mybluemix.net
+    type: text
+  - name: MYSQL_CONTAINER
+    value: inventorydb-mysql-jkwong-dev
+    type: text
+  - name: EUREKA_REGISTRY_URL
+    value: https://netflix-eureka-jkwong-dev.mybluemix.net/eureka/
+    type: text
+  - name: AUTO_RECOVERY
+    value: 'true'
+    type: text
+  - name: MEMORY
+    value: '128'
+    type: text
+  - name: MIN_INSTANCES
+    value: '1'
+    type: text
+  - name: MAX_INSTANCES
+    value: '3'
+    type: text
+  - name: DESIRED_INSTANCES
+    value: '2'
+    type: text
+  - name: INVENTORY_MSNAME
+    value: inventory-microservice
+    type: text
+  - name: CTXPATH
+    value: /micro
+    type: text
+  - name: NEW_RELIC_LICENSE_KEY
+    value: ''
+    type: text
+  jobs:
+  - name: Deploy Inventory Microservice Container Group
+    type: deployer
+    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+    target:
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    PORT: '8080'
+    OPTIONAL_ARGS: -m ${MEMORY}
+    DEPLOY_TYPE: red_black
+    CONTAINER_NAME: ${ROUTE_HOSTNAME}
+    COMMAND: |-
+      #!/bin/sh
+
+      set -e
+      echo "Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER, if exists"
+      $IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null
+      set +e
+      # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
+      echo -e "${label_color}Starting deployment script${no_color}"
+
+      # To view/fork this script goto: https://github.com/Osthanes/deployscripts
+      # git_retry will retry git calls to prevent pipeline failure on temporary github problems
+      # the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer
+      git_retry clone https://github.com/ssibm/deployscripts.git deployscripts
+
+      # get MYSQL information
+      log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
+      $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
+      . mysql.env
+      OPTIONAL_ARGS="${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
+      log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
+
+      # Deploy Container Group:
+      # Optional environment properties (can be set directly in this script, or defined as environment properties):
+      #      NAME              Value         Description
+      #   =============      =========     ==============
+      #   ROUTE_HOSTNAME      String       Specify the Hostname for the Cloud Foundry Route you wish to assign to this container group.  By default this is not set.
+      #   ROUTE_DOMAIN        String       Specify domain name for the Cloud Foundry Route you wish to assign to this container group.  By default this is not set.
+      #   BIND_TO             String       Specify a Bluemix application name that whose bound services you wish to make available to the container.  By default this is not set.
+      #   DESIRED_INSTANCES:  Number       Specify the number of instances in the group.  Default value is 1.
+      #   AUTO_RECOVERY:      Boolean      Set auto-recovery to true/false.  Default value is false.
+
+      #                                    Default is false.
+      #   CONTAINER_SIZE      String       Specify container size: pico (64), nano (128), micro (256), tiny (512), small (1024), medium (2048),
+      #                                                            large (4096), x-large (8192), 2x-large (16384).
+      #                                    Default is micro (256).
+      #   CONCURRENT_VERSIONS Number       Number of versions of this group to leave active.
+      #                                    Default is 1
+      # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
+      /bin/bash deployscripts/deploygroup.sh
+
+      RESULT=$?
+
+      # source the deploy property file
+      if [ -f "${DEPLOY_PROPERTY_FILE}" ]; then
+        source "$DEPLOY_PROPERTY_FILE"
+      fi
+
+      #########################
+      # Environment DETAILS   #
+      #########################
+      # The environment has been setup.
+      # The Cloud Foundry CLI (cf), IBM Container Service CLI (ice), Git client (git), IDS Inventory CLI (ids-inv) and Python 2.7.3 (python) have been installed.
+      # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
+
+      # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
+      if [ $RESULT -ne 0 ]; then
+          echo -e "${red}Executed failed or had warnings ${no_color}"
+          ${EXT_DIR}/print_help.sh
+          exit $RESULT
+      fi
+      echo -e "${green}Execution complete${no_label}"
+hooks:
+- enabled: true
+  label: null
+  ssl_enabled: false
+  url: https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish
