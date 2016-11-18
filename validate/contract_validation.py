@@ -25,7 +25,7 @@ def _callUrl(req, path, expected_status=200, **kwargs):
   full_url = '%s%s' % (base_url, path)
   r = getattr(sys.modules['requests'], req)(full_url, headers=headers, **kwargs)
 
-  print ('RESPONSE: %s' % r.text)
+  print ('RESPONSE(%d): %s' % (r.status_code, r.text))
 
   assert(r.status_code == expected_status)
 
@@ -92,10 +92,10 @@ new_inv = {
 }
 new_inv_json = json.dumps(new_inv)
 
-r = _callUrl('post', "/inventory",  data=new_inv_json)
+r = _callUrl('post', "/inventory",  expected_status=201, data=new_inv_json)
 # parse out my new ID (it looks like "Item succesfully added to inventory! (id = XXXXX)")
-new_id = r.text
-new_id = re.sub(r'Item succesfully added to inventory! \(id = (.+)\)', r'\1', new_id) 
+new_id_idx = r.headers['location'].rfind('/') 
+new_id = r.headers['location'][new_id_idx+1:]
 
 print 'new id is: %s' % new_id
 new_inv['id'] = int(new_id)
