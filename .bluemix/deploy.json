@@ -50,8 +50,8 @@
         "deploy-region",
         "deploy-org",
         "deploy-space",
-        "route-domain",
-        ,
+        "route-domain"
+    ],
     "form": [
         {
             "type": "validator",
