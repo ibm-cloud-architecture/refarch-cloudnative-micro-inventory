@@ -207,7 +207,7 @@ stages:
       organization: ${ORG}
       space: ${SPACE}
     PORT: ${MYSQL_PORT}
-    OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ALLOW_EMPTY_PASSWORD=true
     DEPLOY_TYPE: red_black
     CONTAINER_NAME: ${MYSQL_CONTAINER}
     COMMAND: "#!/bin/bash \n\ndebugme() {\n  [[ $DEBUG = 1 ]] && \"$@\" || :\n}\n\n\
@@ -311,10 +311,11 @@ stages:
       # git_retry will retry git calls to prevent pipeline failure on temporary github\
       \ problems\n# the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer\n\
       git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts\n\
+      ROUTE_HOSTNAME=${ROUTE_HOSTNAME}-test\n\
       \n# get MYSQL information\nlog_and_echo \"MySQL Container: ${MYSQL_CONTAINER}\"\
       \n$IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/[\"\
       |,|\\\" \\\"]//g'|sed 's/:/=/g' > mysql.env\n. mysql.env\nOPTIONAL_ARGS=\"${OPTIONAL_ARGS}\
-      \ -e CG_NAME=${ROUTE_HOSTNAME}-cv -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
+      \ -e CG_NAME=${ROUTE_HOSTNAME}-test -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
       \ -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true\
       \ -e \"spring.application.name=${INVENTORY_MSNAME}\" -e \"server.context-path=${CTXPATH}\"\
       \ -e \"eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}\" -e \"spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}\"\
@@ -397,7 +398,7 @@ stages:
 
       cd validate
 
-      python contract_validation.py https://${ROUTE_HOSTNAME}-cv.${ROUTE_DOMAIN}${CTXPATH}
+      python contract_validation.py https://${ROUTE_HOSTNAME}-test.${ROUTE_DOMAIN}/${CTXPATH}
 - name: Clean Standalone Inventory Microservice
   triggers:
   - type: stage
@@ -433,6 +434,7 @@ stages:
       # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
       echo -e "${label_color}Starting deployment script${no_color}"
 
+      ROUTE_HOSTNAME=${ROUTE_HOSTNAME}-test
 
       debugme() {
         [[ $DEBUG = 1 ]] && "$@" || :
