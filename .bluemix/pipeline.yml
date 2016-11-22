@@ -209,7 +209,7 @@ stages:
     PORT: ${MYSQL_PORT}
     OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     DEPLOY_TYPE: red_black
-    CONTAINER_NAME: ${MYSQL_CONTAINER_NAME}
+    CONTAINER_NAME: ${MYSQL_CONTAINER}
     COMMAND: "#!/bin/bash \n\nset -x \n\n# Build Container via Dockerfile     #\n\
       SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed \"s/\\(.*\\\
       )\\((.*\\)/\\1/\")\nIMAGE_NAME=$(echo ${MYSQL_IMAGE_NAME}|sed \"s/-$SPACE//\"\
@@ -239,7 +239,7 @@ stages:
   - type: stage
   properties:
   - name: ROUTE_HOSTNAME
-    value: ${NAME}-${SPACE}
+    value: ${NAME}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN}
@@ -278,7 +278,7 @@ stages:
       space: ${SPACE}
     PORT: ${PORT}
     DEPLOY_TYPE: red_black
-    CONTAINER_NAME: ${NAME}-${SPACE}
+    CONTAINER_NAME: ${NAME}
     COMMAND: "#!/bin/bash\n# The following are some example deployment scripts.  Use\
       \ these as is or fork them and include your updates here:\necho -e \"${label_color}Starting\
       \ deployment script${no_color}\"\n\n\n# To view/fork this script goto: https://github.com/Osthanes/deployscripts\n\
@@ -288,7 +288,7 @@ stages:
       \n# get MYSQL information\nlog_and_echo \"MySQL Container: ${MYSQL_CONTAINER}\"\
       \n$IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/[\"\
       |,|\\\" \\\"]//g'|sed 's/:/=/g' > mysql.env\n. mysql.env\nOPTIONAL_ARGS=\"${OPTIONAL_ARGS}\
-      \ -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
+      \ -e CG_NAME=${ROUTE_HOSTNAME}-cv -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
       \ -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true\
       \ -e \"spring.application.name=${INVENTORY_MSNAME}\" -e \"server.context-path=${CTXPATH}\"\
       \ -e \"eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}\" -e \"spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}\"\
@@ -352,7 +352,7 @@ stages:
   - type: stage
   properties:
   - name: ROUTE_HOSTNAME
-    value: ${NAME}-${SPACE}
+    value: ${NAME}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN}
@@ -371,13 +371,13 @@ stages:
 
       cd validate
 
-      python contract_validation.py https://${ROUTE_HOSTNAME}.${ROUTE_DOMAIN}${CTXPATH}
+      python contract_validation.py https://${ROUTE_HOSTNAME}-cv.${ROUTE_DOMAIN}${CTXPATH}
 - name: Clean Standalone Inventory Microservice
   triggers:
   - type: stage
   properties:
   - name: ROUTE_HOSTNAME
-    value: ${NAME}-${SPACE}
+    value: ${NAME}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN}
@@ -401,7 +401,7 @@ stages:
       space: ${SPACE}
     PORT: ${PORT}
     DEPLOY_TYPE: clean
-    CONTAINER_NAME: ${NAME}-${SPACE}
+    CONTAINER_NAME: ${NAME}
     COMMAND: |-
       #!/bin/bash
       # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
@@ -464,9 +464,6 @@ stages:
   triggers:
   - type: stage
   properties:
-  - name: MYSQL_CONTAINER_NAME
-    value: ${MYSQL_CONTAINER}
-    type: text
   - name: IMAGE_NAME
     value: ${IMAGE_NAME}
     type: text
@@ -480,8 +477,8 @@ stages:
       space: ${SPACE}
     PORT: ${MYSQL_PORT}
     DEPLOY_TYPE: clean
-    CONTAINER_NAME: ${MYSQL_CONTAINER_NAME}
-    COMMAND: "#!/bin/bash \n\nset -x\nCONTAINER_NAME=${MYSQL_CONTAINER_NAME}\n\ndebugme()\
+    CONTAINER_NAME: ${MYSQL_CONTAINER}
+    COMMAND: "#!/bin/bash \n\nset -x\nCONTAINER_NAME=${CONTAINER_NAME}\n\ndebugme()\
       \ {\n  [[ $DEBUG = 1 ]] && \"$@\" || :\n}\n\nice_retry_save_output ps -a 2>\
       \ /dev/null\n\nCONTAINER_NAME_ARRAY=$(grep ${CONTAINER_NAME} iceretry.log |\
       \ awk '{print $2}')\n\nif [ -n \"${CONTAINER_NAME_ARRAY}\" ]; then\n\n  ice_retry\
@@ -496,7 +493,7 @@ stages:
     value: 'true'
     type: text
   - name: ROUTE_HOSTNAME
-    value: ${NAME}-${SPACE}
+    value: ${NAME}
     type: text
   - name: ROUTE_DOMAIN
     value: ${DOMAIN}
@@ -562,7 +559,7 @@ stages:
       log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
       $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
       . mysql.env
-      OPTIONAL_ARGS="${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
+      OPTIONAL_ARGS="${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME}-cv -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
       log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
       # Deploy Container Group:
