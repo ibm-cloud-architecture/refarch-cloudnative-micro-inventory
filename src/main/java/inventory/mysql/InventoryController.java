@@ -5,6 +5,7 @@ import inventory.mysql.models.IInventoryRepo;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +28,7 @@ public class InventoryController {
 	@Autowired
 	private IInventoryRepo itemsRepo;
 
+	private Iterable<Inventory>	cachedItems = new ArrayList<Inventory>();
 	/**
 	 * check
 	 */
@@ -38,15 +40,17 @@ public class InventoryController {
 	/**
 	 * @return all items in inventory
 	 */
-	@HystrixCommand(fallbackMethod="failGood")
+	@HystrixCommand(fallbackMethod="getInventoryCached")
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ResponseBody Iterable<Inventory> getInventory() {
-		return itemsRepo.findAll();
+		cachedItems = itemsRepo.findAll();
+		return cachedItems;
 	}
 
 	/**
 	 * @return item by id
 	 */
+	@HystrixCommand(fallbackMethod="getCachedItemById")
 	@RequestMapping(value = "/inventory/{id}", method = RequestMethod.GET)
 	@ResponseBody Inventory getById(@PathVariable long id) {
 			return itemsRepo.findOne(id);
@@ -121,16 +125,30 @@ public class InventoryController {
 		return "Item succesfully deleted from inventory!";
 	}
 
-	private Iterable<Inventory> failGood() {
-		// Simply return an empty array
-		ArrayList<Inventory> inventoryList = new ArrayList<Inventory>();
-		return inventoryList;
+	private Iterable<Inventory> getInventoryCached() {
+		// Return cached items
+		return cachedItems;
 	}
 
 	/**
+	 * @return cached item by id
+	 */
+	private Inventory getCachedItemById(long id) {
+
+		Iterator<Inventory> iter = cachedItems.iterator();
+		while (iter.hasNext()) {
+			Inventory item = iter.next();
+			if (item.getId() == id){
+				return item;
+			}
+		}
+
+		return new Inventory();
+	}
+	/**
 	 * @return Cirtcuit breaker tripped
 	 */
-	@HystrixCommand(fallbackMethod="failGood")
+	@HystrixCommand(fallbackMethod="getInventoryCached")
 	@RequestMapping("/circuitbreaker")
 	@ResponseBody
 	public String tripCircuitBreaker() {
