@@ -210,25 +210,51 @@ stages:
     OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     DEPLOY_TYPE: red_black
     CONTAINER_NAME: ${MYSQL_CONTAINER}
-    COMMAND: "#!/bin/bash \n\nset -x \n\n# Build Container via Dockerfile     #\n\
-      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed \"s/\\(.*\\\
-      )\\((.*\\)/\\1/\")\nIMAGE_NAME=$(echo ${MYSQL_IMAGE_NAME}|sed \"s/-$SPACE//\"\
-      )\nREGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\nIMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}\n\
-      CONTAINER_NAME=${MYSQL_CONTAINER_NAME}\n\n# Deploy with containers:\n# Optional\
-      \ environment properties (can be set directly in this script, or defined as\
-      \ environment properties):\n#      NAME              Value         Description\n\
-      #   =============      =========     ==============\n#   BIND_TO           \
-      \  String       Specify a Bluemix application name that whose bound services\
-      \ you wish to make available to the container.  By default this is not set.\n\
-      #   CONTAINER_SIZE      String       Specify container size: pico (64), nano\
-      \ (128), micro (256), tiny (512), small (1024), medium (2048),\n#          \
-      \                                                  large (4096), x-large (8192),\
-      \ 2x-large (16384).\n#                                    Default is micro (256).\n\
-      #   CONCURRENT_VERSIONS Number       Number of versions of this container to\
-      \ leave active.  \n#                                    Default is 1\n#\n#/bin/bash\
-      \ deployscripts/deploycontainer.sh\n\n\n${IC_COMMAND} exec -it ${CONTAINER_NAME}\
-      \ sh load-data.sh\necho \"inventorydb created in mysql container. Done!\"\n\
-      exit 0"
+    COMMAND: "#!/bin/bash \n\ndebugme() {\n  [[ $DEBUG = 1 ]] && \"$@\" || :\n}\n\n\
+      \n# Build Container via Dockerfile     #\nSPACE=$($IC_COMMAND info|grep 'Bluemix\
+      \ Space'|awk '{print $NF}'|sed \"s/\\(.*\\)\\((.*\\)/\\1/\")\nIMAGE_NAME=$(echo\
+      \ ${MYSQL_IMAGE_NAME}|sed \"s/-$SPACE//\")\nREGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\n\
+      IMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}\nCONTAINER_NAME=${MYSQL_CONTAINER_NAME}\n\
+      \n# git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts\n\
+      \n# function to wait for a container to start\n# takes a container name as the\
+      \ only parameter\nwait_for (){\n    local WAITING_FOR=$1\n    if [ -z ${WAITING_FOR}\
+      \ ]; then\n        log_and_echo \"$ERROR\" \"Expected container name to be passed\
+      \ into wait_for\"\n        return 1\n    fi\n    local COUNTER=0\n    local\
+      \ STATE=\"unknown\"\n    while [[ ( $COUNTER -lt 180 ) && (\"${STATE}\" != \"\
+      Running\") && (\"${STATE}\" != \"Crashed\") ]]; do\n        let COUNTER=COUNTER+1\n\
+      \        STATE=$($IC_COMMAND inspect $WAITING_FOR 2> /dev/null | grep \"Status\"\
+      \ | awk '{print $2}' | sed 's/\"//g')\n        if [ -z \"${STATE}\" ]; then\n\
+      \            STATE=\"being placed\"\n        fi\n        log_and_echo \"${WAITING_FOR}\
+      \ is ${STATE}\"\n        sleep 3\n    done\n    if [ \"$STATE\" == \"Crashed\"\
+      \ ]; then\n        return 2\n    fi\n    if [ \"$STATE\" != \"Running\" ]; then\n\
+      \        log_and_echo \"$ERROR\" \"Failed to start instance \"\n        return\
+      \ 1\n    fi\n    return 0\n}\n\n# function to wait for a container to be deleted\n\
+      # takes a container name as the only parameter\nwait_for_deleted (){\n    local\
+      \ WAITING_FOR=$1\n    if [ -z ${WAITING_FOR} ]; then\n        log_and_echo \"\
+      $ERROR\" \"Expected container name to be passed into wait_for\"\n        return\
+      \ 1\n    fi\n    local COUNTER=0\n    local FOUND=0\n    while [[ ( $COUNTER\
+      \ -lt 60 ) && (\"${STATE}\" != \"Shutdown\")  ]]; do\n        let COUNTER=COUNTER+1\n\
+      \        ice_retry inspect ${CONTAINER_NAME} 2>/dev/null\n        RESULT=$?\n\
+      \        if [ ${RESULT} -ne 0 ]; then \n            STATE=\"being deleted\"\n\
+      \        else\n            STATE=\"deleted\"\n            break\n        fi\n\
+      \        sleep 2\n    done\n    if [ \"$STATE\" != \"deleted\" ]; then\n   \
+      \     log_and_echo \"$ERROR\" \"Failed to stop instance $WAITING_FOR \"\n  \
+      \      return 1\n    else\n        log_and_echo \"Successfully stopped $WAITING_FOR\"\
+      \n    fi\n    return 0\n}\n\nlog_and_echo \"deploying container ${CONTAINER_NAME}\"\
+      \n\n# check to see if that container name is already in use\nice_retry_save_output\
+      \ ps -a 2> /dev/null\n\nCONTAINER_NAME_ARRAY=$(grep ${CONTAINER_NAME} iceretry.log\
+      \ | awk '{print $2}')\nif [ -n \"${CONTAINER_NAME_ARRAY}\" ]; then\n    log_and_echo\
+      \ \"removing container: ${CONTAINER_NAME}\"\n    ice_retry rm -f ${CONTAINER_NAME}\n\
+      \    wait_for_deleted ${CONTAINER_NAME}\nfi\n\n# run the container and check\
+      \ the results\nlog_and_echo \"run the container: $IC_COMMAND run --name ${CONTAINER_NAME}\
+      \ -p ${PORT}:${PORT} ${MEMORY} ${OPTIONAL_ARGS} ${IMAGE_NAME} \"\nice_retry\
+      \ run --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${OPTIONAL_ARGS} ${IMAGE_NAME}\
+      \ 2> /dev/null\nRESULT=$?\nif [ $RESULT -ne 0 ]; then\n    log_and_echo \"$ERROR\"\
+      \ \"Failed to deploy ${CONTAINER_NAME} using ${IMAGE_NAME}\"\n    dump_info\n\
+      \    return 1\nfi\n\n# wait for container to start\nwait_for ${CONTAINER_NAME}\n\
+      RESULT=$?\nif [ $RESULT -eq 0 ]; then\n    ${IC_COMMAND} exec -it ${CONTAINER_NAME}\
+      \ sh load-data.sh\n    echo \"inventorydb created in mysql container. Done!\"\
+      \n    exit 0\nfi\n"
 - name: Deploy Standalone Inventory Microservice
   inputs:
   - type: job
@@ -468,7 +494,7 @@ stages:
     value: ${IMAGE_NAME}
     type: text
   jobs:
-  - name: Redeploy MySQL Container
+  - name: Clean MySQL Container
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
