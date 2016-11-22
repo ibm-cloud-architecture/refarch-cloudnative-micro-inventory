@@ -29,6 +29,7 @@ pipeline-micro-inventory:
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       TEST_CONTAINER_NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}-test"
        PORT: "8080"
        MEMORY: "128"
        MIN_INSTANCES: "1"
