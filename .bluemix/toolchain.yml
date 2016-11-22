@@ -36,7 +36,7 @@ pipeline-micro-inventory:
        DESIRED_INSTANCES: "2"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
-       MYSQL_CONTAINER: "{{pipeline-inventorydb-mysql.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"

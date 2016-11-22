@@ -7,10 +7,6 @@ stages:
     branch: master
   triggers:
   - type: commit
-  properties:
-  - name: MYSQL
-    value: ${NAME}-${SPACE}
-    type: text
   jobs:
   - name: Build
     type: builder
@@ -198,6 +194,7 @@ stages:
     value: ${MYSQL_USER}
     type: text
   - name: MYSQL_PASSWORD
+    value: ${MYSQL_PASSWORD}
     type: secure
   - name: MYSQL_ROOT_PASSWORD
     type: secure
@@ -493,102 +490,6 @@ stages:
       \ command failed with return code ${RESULT}\"\n      log_and_echo \"$WARN\"\
       \ \"Cleaning up previous deployments is not completed\"\n      return 0\n  fi\n\
       fi\n"
-- name: Deploy VPN
-  properties:
-  - name: CUSTOMER_GATEWAY_IP
-    value: 169.46.95.30
-    type: text
-  - name: CUSTOMER_SUBNET
-    value: 10.171.30.64/26
-    type: text
-  - name: CUSTOMER_PSK
-    type: secure
-  jobs:
-  - name: Deploy VPN Service
-    type: deployer
-    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
-    target:
-      region_id: ${REGION}
-      organization: ${ORG}
-      space: ${SPACE}
-    PORT: '80'
-    DEPLOY_TYPE: red_black
-    CONTAINER_NAME: aaa
-    COMMAND: |+
-      #!/bin/bash
-
-      oauth_token=`echo ${TOOLCHAIN_TOKEN} | awk '{print $2;}'`
-      space_guid=${CF_SPACE_ID}
-
-      echo "OAuth token=${oauth_token}"
-      echo "Space guid=${space_guid}"
-
-      vpn_service_name=`cf services | grep VPN_Service_Broker | awk '{ print $1; }'`
-
-      if [ -z ${vpn_service_name} ]; then
-          echo "Creating VPN Service for space ..."
-          cf create-service VPN_Service_Broker Standard "VPN_${CF_SPACE}"
-      fi
-
-      gateways_json=`curl -X GET \
-      -H "accept: application/json" \
-      -H "content-type: application/json" \
-      -H "x-auth-project-id: ${space_guid}" \
-      -H "x-auth-token: ${oauth_token}" \
-      https://containers-api.ng.bluemix.net/v3/vpns/gateways`
-
-      echo ${gateways_json}
-      num_gateways=`echo "${gateways_json}" | python -c "import sys,json; obj=json.load(sys.stdin); print len(obj['gateways'])"`
-
-      if [ "${num_gateways}" == "0" ]; then
-          echo "Creating gateway \"my-gateway\" ..."
-          curl -X POST \
-      -H "accept: application/json" \
-      -H "content-type: application/json" \
-      -H "x-auth-project-id: ${space_guid}" \
-      -H "x-auth-token: ${oauth_token}" \
-      -d "{ \"name\": \"my-gateway\", \"type\": \"allContainers\" }" \
-      https://containers-api.ng.bluemix.net/v3/vpns/gateways
-      fi
-
-      connections_json=`curl -X GET \
-      -H "accept: application/json" \
-      -H "content-type: application/json" \
-      -H "x-auth-project-id: ${space_guid}" \
-      -H "x-auth-token: ${oauth_token}" \
-      https://containers-api.ng.bluemix.net/v3/vpns/connections`
-
-      #echo ${connections_json}
-
-      num_connections=`echo "${connections_json}" | python -c "import sys,json; obj=json.load(sys.stdin); print len(obj['connections'])"`
-
-      echo "num connections found=${num_connections}"
-      FOUND=false
-
-      for i in `seq 0 $((num_connections - 1))`; do
-          gateway_ip=`echo "${connections_json}" | python -c "import sys,json; obj=json.load(sys.stdin); print obj['connections'][${i}]['customer_gateway']"`
-
-          if [ "${gateway_ip}" == "${CUSTOMER_GATEWAY_IP}" ]; then
-              FOUND=true
-              break
-          fi
-      done
-
-      if [ "${FOUND}" == "true" ]; then
-          echo "connection to gateway ${CUSTOMER_GATEWAY_IP} exists!"
-          exit 0
-      fi
-
-      # create the connection
-      echo "Creating connection to gateway at ${CUSTOMER_GATEWAY_IP}"
-      curl -X POST \
-      -H "accept: application/json" \
-      -H "content-type: application/json" \
-      -H "x-auth-project-id: ${space_guid}" \
-      -H "x-auth-token: ${oauth_token}" \
-      -d "{ \"ikepolicy_name\": \"default\", \"ipsecpolicy_name\": \"default\", \"gateway_name\": \"my-gateway\", \"psk\": \"${CUSTOMER_PSK}\", \"customer_gateway\": \"${CUSTOMER_GATEWAY_IP}\",  \"customer_subnets\": [ \"${CUSTOMER_SUBNET}\" ], \"name\": \"connection\" }" \
-      https://containers-api.ng.bluemix.net/v3/vpns/connections
-
 - name: Deploy Hybrid App
   properties:
   - name: IGNORE_MAPPING_ROUTE
