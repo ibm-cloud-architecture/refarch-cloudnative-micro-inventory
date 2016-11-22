@@ -2,15 +2,14 @@
 stages:
 - name: BUILD
   inputs:
-  - url: https://github.com/jkwong888/refarch-cloudnative-micro-inventory.git
+  - service: ${REPO}
     type: git
     branch: master
-    dir_name: null
   triggers:
   - type: commit
   properties:
   - name: MYSQL
-    value: micro-inventory-jkwong-dev
+    value: ${NAME}-${SPACE}
     type: text
   jobs:
   - name: Build
@@ -41,10 +40,10 @@ stages:
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
-      url: https://api.ng.bluemix.net
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    IMAGE_NAME: micro-inventory-jkwong-dev
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    IMAGE_NAME: ${NAME}-${SPACE}
     USE_CACHED_LAYERS: 'true'
     COMMAND: |-
       # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
@@ -119,10 +118,10 @@ stages:
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
-      url: https://api.ng.bluemix.net
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    IMAGE_NAME: inventorydb-mysql-jkwong-dev
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    IMAGE_NAME: ${MYSQL_CONTAINER}-${SPACE}
     USE_CACHED_LAYERS: 'true'
     COMMAND: "#!/bin/bash\n# The following colors have been defined to help with presentation\
       \ of logs: green, red, label_color, no_color.  \nlog_and_echo \"$LABEL\" \"\
@@ -170,9 +169,9 @@ stages:
     type: tester
     extension_id: ibm.devops.services.pipeline.crawler.tester
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
     WAIT_TIME: '10'
 - name: Deploy MySQL Container
   inputs:
@@ -184,19 +183,19 @@ stages:
   - type: stage
   properties:
   - name: MYSQL_CONTAINER_NAME
-    value: inventorydb-mysql
+    value: ${MYSQL_CONTAINER}
     type: text
   - name: MYSQL_IMAGE_NAME
-    value: inventorydb-mysql
+    value: ${MYSQL_CONTAINER}-${SPACE}
     type: text
   - name: MYSQL_MEMORY
     value: '128'
     type: text
   - name: MYSQL_DATABASE
-    value: inventorydb
+    value: ${MYSQL_DATABASE}
     type: text
   - name: MYSQL_USER
-    value: dbuser
+    value: ${MYSQL_USER}
     type: text
   - name: MYSQL_PASSWORD
     type: secure
@@ -207,10 +206,10 @@ stages:
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    PORT: '3306'
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${MYSQL_PORT}
     OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     DEPLOY_TYPE: red_black
     CONTAINER_NAME: ${MYSQL_CONTAINER_NAME}
@@ -243,19 +242,19 @@ stages:
   - type: stage
   properties:
   - name: ROUTE_HOSTNAME
-    value: micro-inventory-jkwong-dev
+    value: ${NAME}-${SPACE}
     type: text
   - name: ROUTE_DOMAIN
-    value: mybluemix.net
+    value: ${DOMAIN}
     type: text
   - name: MYSQL_CONTAINER
-    value: inventorydb-mysql
+    value: ${MYSQL_CONTAINER}
     type: text
   - name: INVENTORY_MSNAME
-    value: inventory-microservice-test
+    value: ${NAME}
     type: text
   - name: CTXPATH
-    value: /micro
+    value: ${CTXPATH}
     type: text
   - name: CONTAINER_SIZE
     value: '128'
@@ -263,17 +262,26 @@ stages:
   - name: MEMORY
     value: '128'
     type: text
+  - name: MIN_INSTANCES
+    value: '1'
+    type: text
+  - name: MAX_INSTANCES
+    value: '1'
+    type: text
+  - name: DESIRED_INSTANCES
+    value: '1'
+    type: text
   jobs:
   - name: Deploy Inventory Microservice
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    PORT: '8080'
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${PORT}
     DEPLOY_TYPE: red_black
-    CONTAINER_NAME: micro-inventory-jkwong-dev
+    CONTAINER_NAME: ${NAME}-${SPACE}
     COMMAND: "#!/bin/bash\n# The following are some example deployment scripts.  Use\
       \ these as is or fork them and include your updates here:\necho -e \"${label_color}Starting\
       \ deployment script${no_color}\"\n\n\n# To view/fork this script goto: https://github.com/Osthanes/deployscripts\n\
@@ -346,57 +354,14 @@ stages:
   triggers:
   - type: stage
   properties:
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
   - name: ROUTE_HOSTNAME
-    value: micro-inventory-jkwong-dev
+    value: ${NAME}-${SPACE}
     type: text
   - name: ROUTE_DOMAIN
-    value: mybluemix.net
-    type: text
-  - name: MYSQL_CONTAINER_NAME
-    value: inventorydb-mysql
-    type: text
-  - name: EUREKA_REGISTRY_URL
-    value: https://netflix-eureka-jkwong-dev.mybluemix.net/eureka/
-    type: text
-  - name: AUTO_RECOVERY
-    value: 'true'
-    type: text
-  - name: MIN_INSTANCES
-    value: '1'
-    type: text
-  - name: MAX_INSTANCES
-    value: '1'
-    type: text
-  - name: DESIRED_INSTANCES
-    value: '1'
-    type: text
-  - name: INVENTORY_MSNAME
-    value: inventory-microservice-test
+    value: ${DOMAIN}
     type: text
   - name: CTXPATH
-    value: /micro
-    type: text
-  - name: MYSQL_DATABASE
-    value: inventorydb
-    type: text
-  - name: MYSQL_USER
-    value: dbuser
-    type: text
-  - name: MYSQL_PASSWORD
-    type: secure
-  - name: MYSQL_ROOT_PASSWORD
-    type: secure
-  - name: MYSQL_MEMORY
-    value: '128'
-    type: text
-  - name: MYSQL_IMAGE_NAME
-    value: inventorydb-mysql
-    type: text
-  - name: MEMORY
-    value: '128'
+    value: ${CTXPATH}
     type: text
   jobs:
   - name: API Test
@@ -409,25 +374,16 @@ stages:
 
       cd validate
 
-      python contract_validation.py https://${ROUTE_HOSTNAME}.${ROUTE_DOMAIN}/micro
+      python contract_validation.py https://${ROUTE_HOSTNAME}.${ROUTE_DOMAIN}${CTXPATH}
 - name: Clean Standalone Inventory Microservice
   triggers:
   - type: stage
   properties:
   - name: ROUTE_HOSTNAME
-    value: micro-inventory-jkwong-dev
+    value: ${NAME}-${SPACE}
     type: text
   - name: ROUTE_DOMAIN
-    value: mybluemix.net
-    type: text
-  - name: MYSQL_CONTAINER
-    value: inventorydb-mysql
-    type: text
-  - name: INVENTORY_MSNAME
-    value: inventory-microservice-test
-    type: text
-  - name: CTXPATH
-    value: /micro
+    value: ${DOMAIN}
     type: text
   - name: CONTAINER_SIZE
     value: '128'
@@ -443,12 +399,12 @@ stages:
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    PORT: '8080'
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${PORT}
     DEPLOY_TYPE: clean
-    CONTAINER_NAME: micro-inventory-jkwong-dev
+    CONTAINER_NAME: ${NAME}-${SPACE}
     COMMAND: |-
       #!/bin/bash
       # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
@@ -512,33 +468,20 @@ stages:
   - type: stage
   properties:
   - name: MYSQL_CONTAINER_NAME
-    value: inventorydb-mysql
+    value: ${MYSQL_CONTAINER}
     type: text
   - name: IMAGE_NAME
-    value: inventorydb-mysql
+    value: ${NAME}-${SPACE}
     type: text
-  - name: MYSQL_MEMORY
-    value: '128'
-    type: text
-  - name: MYSQL_DATABASE
-    value: inventorydb
-    type: text
-  - name: MYSQL_USER
-    value: dbuser
-    type: text
-  - name: MYSQL_PASSWORD
-    type: secure
-  - name: MYSQL_ROOT_PASSWORD
-    type: secure
   jobs:
   - name: Redeploy MySQL Container
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    PORT: '3306'
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${MYSQL_PORT}
     DEPLOY_TYPE: clean
     CONTAINER_NAME: ${MYSQL_CONTAINER_NAME}
     COMMAND: "#!/bin/bash \n\nset -x\nCONTAINER_NAME=${MYSQL_CONTAINER_NAME}\n\ndebugme()\
@@ -552,45 +495,6 @@ stages:
       fi\n"
 - name: Deploy VPN
   properties:
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
-  - name: ROUTE_HOSTNAME
-    value: micro-inventory-jkwong-dev
-    type: text
-  - name: ROUTE_DOMAIN
-    value: mybluemix.net
-    type: text
-  - name: MYSQL_CONTAINER
-    value: inventorydb-mysql-jkwong-dev
-    type: text
-  - name: EUREKA_REGISTRY_URL
-    value: https://netflix-eureka-jkwong-dev.mybluemix.net/eureka/
-    type: text
-  - name: AUTO_RECOVERY
-    value: 'true'
-    type: text
-  - name: MEMORY
-    value: '128'
-    type: text
-  - name: MIN_INSTANCES
-    value: '1'
-    type: text
-  - name: MAX_INSTANCES
-    value: '3'
-    type: text
-  - name: DESIRED_INSTANCES
-    value: '2'
-    type: text
-  - name: INVENTORY_MSNAME
-    value: inventory-microservice
-    type: text
-  - name: CTXPATH
-    value: /micro
-    type: text
-  - name: NEW_RELIC_LICENSE_KEY
-    value: ''
-    type: text
   - name: CUSTOMER_GATEWAY_IP
     value: 169.46.95.30
     type: text
@@ -604,9 +508,9 @@ stages:
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      url: https://api.ng.bluemix.net
-      organization: cent@us.ibm.com
-      space: jkwong-dev
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
     PORT: '80'
     DEPLOY_TYPE: red_black
     CONTAINER_NAME: aaa
@@ -691,50 +595,50 @@ stages:
     value: 'true'
     type: text
   - name: ROUTE_HOSTNAME
-    value: micro-inventory-jkwong-dev
+    value: ${NAME}-${SPACE}
     type: text
   - name: ROUTE_DOMAIN
-    value: mybluemix.net
+    value: ${DOMAIN}
     type: text
   - name: MYSQL_CONTAINER
-    value: inventorydb-mysql-jkwong-dev
+    value: ${MYSQL_CONTAINER}
     type: text
   - name: EUREKA_REGISTRY_URL
-    value: https://netflix-eureka-jkwong-dev.mybluemix.net/eureka/
+    value: ${EUREKA_REGISTRY_URL}
     type: text
   - name: AUTO_RECOVERY
     value: 'true'
     type: text
   - name: MEMORY
-    value: '128'
+    value: ${MEMORY}
     type: text
   - name: MIN_INSTANCES
-    value: '1'
+    value: ${MIN_INSTANCES}
     type: text
   - name: MAX_INSTANCES
-    value: '3'
+    value: ${MAX_INSTANCES}
     type: text
   - name: DESIRED_INSTANCES
-    value: '2'
+    value: ${DESIRED_INSTANCES}
     type: text
   - name: INVENTORY_MSNAME
-    value: inventory-microservice
+    value: ${NAME}
     type: text
   - name: CTXPATH
-    value: /micro
+    value: ${CTXPATH}
     type: text
   - name: NEW_RELIC_LICENSE_KEY
-    value: ''
+    value: ${NEW_RELIC_LICENSE}
     type: text
   jobs:
   - name: Deploy Inventory Microservice Container Group
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      url: https://api.ng.bluemix.net
-      organization: cent@us.ibm.com
-      space: jkwong-dev
-    PORT: '8080'
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
+    PORT: ${PORT}
     OPTIONAL_ARGS: -m ${MEMORY}
     DEPLOY_TYPE: red_black
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
