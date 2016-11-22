@@ -43,6 +43,7 @@ pipeline-micro-inventory:
        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
+       IMAGE_NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
       execute: false
 
 deploy:

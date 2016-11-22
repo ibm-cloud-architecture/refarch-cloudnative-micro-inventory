@@ -39,7 +39,7 @@ stages:
       region_id: ${REGION}
       organization: ${ORG}
       space: ${SPACE}
-    IMAGE_NAME: ${NAME}-${SPACE}
+    IMAGE_NAME: ${IMAGE_NAME}
     USE_CACHED_LAYERS: 'true'
     COMMAND: |-
       # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
@@ -117,7 +117,7 @@ stages:
       region_id: ${REGION}
       organization: ${ORG}
       space: ${SPACE}
-    IMAGE_NAME: ${MYSQL_CONTAINER}-${SPACE}
+    IMAGE_NAME: ${MYSQL_CONTAINER}
     USE_CACHED_LAYERS: 'true'
     COMMAND: "#!/bin/bash\n# The following colors have been defined to help with presentation\
       \ of logs: green, red, label_color, no_color.  \nlog_and_echo \"$LABEL\" \"\
@@ -182,7 +182,7 @@ stages:
     value: ${MYSQL_CONTAINER}
     type: text
   - name: MYSQL_IMAGE_NAME
-    value: ${MYSQL_CONTAINER}-${SPACE}
+    value: ${MYSQL_CONTAINER}
     type: text
   - name: MYSQL_MEMORY
     value: '128'
@@ -389,7 +389,7 @@ stages:
     value: '128'
     type: text
   - name: IMAGE_NAME
-    value: abcd
+    value: ${IMAGE_NAME}
     type: text
   jobs:
   - name: Clean Inventory Microservice
@@ -468,7 +468,7 @@ stages:
     value: ${MYSQL_CONTAINER}
     type: text
   - name: IMAGE_NAME
-    value: ${NAME}-${SPACE}
+    value: ${IMAGE_NAME}
     type: text
   jobs:
   - name: Redeploy MySQL Container
