@@ -1,13 +1,14 @@
 ---
 stages:
-- name: Build MySQL Image
+- name: Build Container Image
   inputs:
   - service: ${REPO}
     type: git
     branch: master
-    dir_name: null
+  triggers:
+  - type: commit
   jobs:
-  - name: Build MySQL Image
+  - name: Build MySQL Container Image
     type: builder
     extension_id: ibm.devops.services.pipeline.container.builder
     target:
@@ -54,8 +55,8 @@ stages:
 - name: Deploy MySQL Container
   inputs:
   - type: job
-    stage: Build MySQL Image
-    job: Build MySQL Image
+    stage: Build Container Image
+    job: Build MySQL Container Image
     dir_name: null
   triggers:
   - type: stage
@@ -82,7 +83,7 @@ stages:
     type: secure
     value: ${MYSQL_ROOT_PASSWORD}
   jobs:
-  - name: Deploy MySQL Container
+  - name: Deploy
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
@@ -91,7 +92,7 @@ stages:
       space: ${SPACE}
     PORT: '3306'
     OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    CONTAINER_NAME: ${MYSQL_CONTAINER}
+    CONTAINER_NAME: inventorydb-mysql-jkwong-dev
     DEPLOY_TYPE: red_black
     COMMAND: "#!/bin/bash \n\ndebugme() {\n  [[ $DEBUG = 1 ]] && \"$@\" || :\n}\n\n\
       \n# Build Container via Dockerfile     #\nSPACE=$($IC_COMMAND info|grep 'Bluemix\
