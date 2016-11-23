@@ -1,144 +1,248 @@
----
-stages:
-- name: Build Container Image
-  inputs:
-  - service: ${REPO}
-    type: git
-    branch: master
-  jobs:
-  - name: Build MySQL Container Image
-    type: builder
-    extension_id: ibm.devops.services.pipeline.container.builder
-    target:
-      region_id: ${REGION}
-      organization: ${ORG}
-      space: ${SPACE}
-    IMAGE_NAME: ${MYSQL_CONTAINER}
-    USE_CACHED_LAYERS: 'true'
-    COMMAND: "#!/bin/bash\n# The following colors have been defined to help with presentation\
-      \ of logs: green, red, label_color, no_color.  \nlog_and_echo \"$LABEL\" \"\
-      Starting build script\"\n\ncd mysql\n\n# The IBM Container BM Containers plug-in\
-      \ (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.\n\
-      # Based on the organization and space selected in the Job credentials are in\
-      \ place for both IBM Container Service and IBM Bluemix \n#####################\n\
-      # Run unit tests    #\n#####################\nlog_and_echo \"$LABEL\" \"No unit\
-      \ tests cases have been checked in\"\n\n######################################\n\
-      # Build Container via Dockerfile     #\n######################################\n\
-      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed \"s/\\(.*\\\
-      )\\((.*\\)/\\1/\")\nIMAGE_NAME=$(echo $IMAGE_NAME|sed \"s/-$SPACE//\")\nREGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\n\
-      FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}\n\n# REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\n\
-      # FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}\n\
-      # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property\
-      \ on the stage.\n\nif [ -f Dockerfile ]; then \n    log_and_echo \"$LABEL\"\
-      \ \"Building ${FULL_REPOSITORY_NAME}\"\n    ${EXT_DIR}/utilities/sendMessage.sh\
-      \ -l info -m \"New container build requested for ${FULL_REPOSITORY_NAME}\"\n\
-      \    # build image\n    BUILD_COMMAND=\"\"\n    if [ \"${USE_CACHED_LAYERS}\"\
-      \ == \"true\" ]; then \n        BUILD_COMMAND=\"build --pull --tag ${FULL_REPOSITORY_NAME}\
-      \ ${WORKSPACE}/mysql\"\n        ice_retry ${BUILD_COMMAND}\n        RESULT=$?\n\
-      \    else \n        BUILD_COMMAND=\"build --no-cache --tag ${FULL_REPOSITORY_NAME}\
-      \ ${WORKSPACE}/mysql\"\n        ice_retry ${BUILD_COMMAND}\n        RESULT=$?\n\
-      \    fi \n\n    if [ $RESULT -ne 0 ]; then\n        log_and_echo \"$ERROR\"\
-      \ \"Error building image\"\n        ice_retry info \n        ice_retry images\n\
-      \        ${EXT_DIR}/print_help.sh\n        ${EXT_DIR}/utilities/sendMessage.sh\
-      \ -l bad -m \"Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)\"\
-      \n        exit 1\n    else\n        log_and_echo \"$SUCCESSFUL\" \"Container\
-      \ build of ${FULL_REPOSITORY_NAME} was successful\"\n        ${EXT_DIR}/utilities/sendMessage.sh\
-      \ -l good -m \"Container build of ${FULL_REPOSITORY_NAME} was successful\"\n\
-      \    fi  \nelse \n    log_and_echo \"$ERROR\" \"Dockerfile not found in project\"\
-      \n    ${EXT_DIR}/utilities/sendMessage.sh -l bad -m \"Failed to get Dockerfile.\
-      \ $(get_error_info)\"\n    exit 1\nfi  \n\n######################################################################################\n\
-      # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE\
-      \    #\n######################################################################################\n\
-      echo \"IMAGE_NAME=${FULL_REPOSITORY_NAME}\" >> $ARCHIVE_DIR/build.properties"
-- name: Deploy MySQL Container
-  inputs:
-  - type: job
-    stage: Build Container Image
-    job: Build MySQL Container Image
-    dir_name: null
-  triggers:
-  - type: stage
-  properties:
-  - name: MYSQL_CONTAINER_NAME
-    value: ${MYSQL_CONTAINER}
-    type: text
-  - name: MYSQL_IMAGE_NAME
-    value: ${MYSQL_CONTAINER}
-    type: text
-  - name: MYSQL_MEMORY
-    value: '128'
-    type: text
-  - name: MYSQL_DATABASE
-    value: ${MYSQL_DATABASE}
-    type: text
-  - name: MYSQL_USER
-    value: ${MYSQL_USER}
-    type: text
-  - name: MYSQL_PASSWORD
-    type: secure
-    value: ${MYSQL_PASSWORD}
-  - name: MYSQL_ROOT_PASSWORD
-    type: secure
-    value: ${MYSQL_ROOT_PASSWORD}
-  jobs:
-  - name: Deploy
-    type: deployer
-    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
-    target:
-      region_id: ${REGION}
-      organization: ${ORG}
-      space: ${SPACE}
-    PORT: '3306'
-    OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    CONTAINER_NAME: inventorydb-mysql-jkwong-dev
-    DEPLOY_TYPE: red_black
-    COMMAND: "#!/bin/bash \n\ndebugme() {\n  [[ $DEBUG = 1 ]] && \"$@\" || :\n}\n\n\
-      \n# Build Container via Dockerfile     #\nSPACE=$($IC_COMMAND info|grep 'Bluemix\
-      \ Space'|awk '{print $NF}'|sed \"s/\\(.*\\)\\((.*\\)/\\1/\")\nIMAGE_NAME=$(echo\
-      \ ${MYSQL_IMAGE_NAME}|sed \"s/-$SPACE//\")\nREGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}\n\
-      IMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}\nCONTAINER_NAME=${MYSQL_CONTAINER_NAME}\n\
-      \n# git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts\n\
-      \n# function to wait for a container to start\n# takes a container name as the\
-      \ only parameter\nwait_for (){\n    local WAITING_FOR=$1\n    if [ -z ${WAITING_FOR}\
-      \ ]; then\n        log_and_echo \"$ERROR\" \"Expected container name to be passed\
-      \ into wait_for\"\n        return 1\n    fi\n    local COUNTER=0\n    local\
-      \ STATE=\"unknown\"\n    while [[ ( $COUNTER -lt 180 ) && (\"${STATE}\" != \"\
-      Running\") && (\"${STATE}\" != \"Crashed\") ]]; do\n        let COUNTER=COUNTER+1\n\
-      \        STATE=$($IC_COMMAND inspect $WAITING_FOR 2> /dev/null | grep \"Status\"\
-      \ | awk '{print $2}' | sed 's/\"//g')\n        if [ -z \"${STATE}\" ]; then\n\
-      \            STATE=\"being placed\"\n        fi\n        log_and_echo \"${WAITING_FOR}\
-      \ is ${STATE}\"\n        sleep 3\n    done\n    if [ \"$STATE\" == \"Crashed\"\
-      \ ]; then\n        return 2\n    fi\n    if [ \"$STATE\" != \"Running\" ]; then\n\
-      \        log_and_echo \"$ERROR\" \"Failed to start instance \"\n        return\
-      \ 1\n    fi\n    return 0\n}\n\n# function to wait for a container to be deleted\n\
-      # takes a container name as the only parameter\nwait_for_deleted (){\n    local\
-      \ WAITING_FOR=$1\n    if [ -z ${WAITING_FOR} ]; then\n        log_and_echo \"\
-      $ERROR\" \"Expected container name to be passed into wait_for\"\n        return\
-      \ 1\n    fi\n    local COUNTER=0\n    local FOUND=0\n    while [[ ( $COUNTER\
-      \ -lt 60 ) && (\"${STATE}\" != \"Shutdown\")  ]]; do\n        let COUNTER=COUNTER+1\n\
-      \        ice_retry inspect ${CONTAINER_NAME} 2>/dev/null\n        RESULT=$?\n\
-      \        if [ ${RESULT} -ne 0 ]; then \n            STATE=\"being deleted\"\n\
-      \        else\n            STATE=\"deleted\"\n            break\n        fi\n\
-      \        sleep 2\n    done\n    if [ \"$STATE\" != \"deleted\" ]; then\n   \
-      \     log_and_echo \"$ERROR\" \"Failed to stop instance $WAITING_FOR \"\n  \
-      \      return 1\n    else\n        log_and_echo \"Successfully stopped $WAITING_FOR\"\
-      \n    fi\n    return 0\n}\n\nlog_and_echo \"deploying container ${CONTAINER_NAME}\"\
-      \n\n# check to see if that container name is already in use\nice_retry_save_output\
-      \ ps -a 2> /dev/null\n\nCONTAINER_NAME_ARRAY=$(grep ${CONTAINER_NAME} iceretry.log\
-      \ | awk '{print $2}')\nif [ -n \"${CONTAINER_NAME_ARRAY}\" ]; then\n    log_and_echo\
-      \ \"removing container: ${CONTAINER_NAME}\"\n    ice_retry rm -f ${CONTAINER_NAME}\n\
-      \    wait_for_deleted ${CONTAINER_NAME}\nfi\n\n# run the container and check\
-      \ the results\nlog_and_echo \"run the container: $IC_COMMAND run --name ${CONTAINER_NAME}\
-      \ -p ${PORT}:${PORT} ${MEMORY} ${OPTIONAL_ARGS} ${IMAGE_NAME} \"\nice_retry\
-      \ run --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${OPTIONAL_ARGS} ${IMAGE_NAME}\
-      \ 2> /dev/null\nRESULT=$?\nif [ $RESULT -ne 0 ]; then\n    log_and_echo \"$ERROR\"\
-      \ \"Failed to deploy ${CONTAINER_NAME} using ${IMAGE_NAME}\"\n    dump_info\n\
-      \    return 1\nfi\n\n# wait for container to start\nwait_for ${CONTAINER_NAME}\n\
-      RESULT=$?\nif [ $RESULT -eq 0 ]; then\n    ${IC_COMMAND} exec -it ${CONTAINER_NAME}\
-      \ sh load-data.sh\n    echo \"inventorydb created in mysql container. Done!\"\
-      \n    exit 0\nfi\n"
-hooks:
-- enabled: true
-  label: null
-  ssl_enabled: false
-  url: https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish
+--- 
+hooks: 
+  - 
+    enabled: true
+    label: ~
+    ssl_enabled: false
+    url: "https://devops-api.ng.bluemix.net/v1/messaging/webhook/publish"
+stages: 
+  - 
+    inputs: 
+      - 
+        branch: master
+        service: "${REPO}"
+        type: git
+    jobs: 
+      - 
+        COMMAND: |-
+            #!/bin/bash
+            # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.  
+            log_and_echo "$LABEL" "Starting build script"
+            
+            cd mysql
+            
+            # The IBM Container BM Containers plug-in (cf ic), Git client (git), and IDS Inventory CLI (ids-inv) have been installed.
+            # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix 
+            #####################
+            # Run unit tests    #
+            #####################
+            log_and_echo "$LABEL" "No unit tests cases have been checked in"
+            
+            ######################################
+            # Build Container via Dockerfile     #
+            ######################################
+            SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/")
+            IMAGE_NAME=$(echo $IMAGE_NAME|sed "s/-$SPACE//")
+            REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+            FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+            
+            # REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+            # FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}
+            # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
+            
+            if [ -f Dockerfile ]; then 
+                log_and_echo "$LABEL" "Building ${FULL_REPOSITORY_NAME}"
+                ${EXT_DIR}/utilities/sendMessage.sh -l info -m "New container build requested for ${FULL_REPOSITORY_NAME}"
+                # build image
+                BUILD_COMMAND=""
+                if [ "${USE_CACHED_LAYERS}" == "true" ]; then 
+                    BUILD_COMMAND="build --pull --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}/mysql"
+                    ice_retry ${BUILD_COMMAND}
+                    RESULT=$?
+                else 
+                    BUILD_COMMAND="build --no-cache --tag ${FULL_REPOSITORY_NAME} ${WORKSPACE}/mysql"
+                    ice_retry ${BUILD_COMMAND}
+                    RESULT=$?
+                fi 
+            
+                if [ $RESULT -ne 0 ]; then
+                    log_and_echo "$ERROR" "Error building image"
+                    ice_retry info 
+                    ice_retry images
+                    ${EXT_DIR}/print_help.sh
+                    ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Container build of ${FULL_REPOSITORY_NAME} failed. $(get_error_info)"
+                    exit 1
+                else
+                    log_and_echo "$SUCCESSFUL" "Container build of ${FULL_REPOSITORY_NAME} was successful"
+                    ${EXT_DIR}/utilities/sendMessage.sh -l good -m "Container build of ${FULL_REPOSITORY_NAME} was successful"
+                fi  
+            else 
+                log_and_echo "$ERROR" "Dockerfile not found in project"
+                ${EXT_DIR}/utilities/sendMessage.sh -l bad -m "Failed to get Dockerfile. $(get_error_info)"
+                exit 1
+            fi  
+            
+            ######################################################################################
+            # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
+            ######################################################################################
+            echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
+        IMAGE_NAME: "${MYSQL_CONTAINER}"
+        USE_CACHED_LAYERS: "true"
+        extension_id: ibm.devops.services.pipeline.container.builder
+        name: "Build Standalone MySQL Container Image"
+        target: 
+          organization: "${ORG}"
+          region_id: "${REGION}"
+          space: "${SPACE}"
+        type: builder
+    name: "Build MySQL Container Image"
+  - 
+    inputs: 
+      - 
+        dir_name: ~
+        job: "Build Standalone MySQL Container Image"
+        stage: "Build MySQL Container Image"
+        type: job
+    jobs: 
+      - 
+        COMMAND: |
+            #!/bin/bash 
+            
+            debugme() {
+              [[ $DEBUG = 1 ]] && "$@" || :
+            }
+            
+            
+            # Build Container via Dockerfile     #
+            SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/")
+            IMAGE_NAME=$(echo ${MYSQL_IMAGE_NAME}|sed "s/-$SPACE//")
+            REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+            IMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
+            CONTAINER_NAME=${MYSQL_CONTAINER_NAME}
+            
+            # git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts
+            
+            # function to wait for a container to start
+            # takes a container name as the only parameter
+            wait_for (){
+                local WAITING_FOR=$1
+                if [ -z ${WAITING_FOR} ]; then
+                    log_and_echo "$ERROR" "Expected container name to be passed into wait_for"
+                    return 1
+                fi
+                local COUNTER=0
+                local STATE="unknown"
+                while [[ ( $COUNTER -lt 180 ) && ("${STATE}" != "Running") && ("${STATE}" != "Crashed") ]]; do
+                    let COUNTER=COUNTER+1
+                    STATE=$($IC_COMMAND inspect $WAITING_FOR 2> /dev/null | grep "Status" | awk '{print $2}' | sed 's/"//g')
+                    if [ -z "${STATE}" ]; then
+                        STATE="being placed"
+                    fi
+                    log_and_echo "${WAITING_FOR} is ${STATE}"
+                    sleep 3
+                done
+                if [ "$STATE" == "Crashed" ]; then
+                    return 2
+                fi
+                if [ "$STATE" != "Running" ]; then
+                    log_and_echo "$ERROR" "Failed to start instance "
+                    return 1
+                fi
+                return 0
+            }
+            
+            # function to wait for a container to be deleted
+            # takes a container name as the only parameter
+            wait_for_deleted (){
+                local WAITING_FOR=$1
+                if [ -z ${WAITING_FOR} ]; then
+                    log_and_echo "$ERROR" "Expected container name to be passed into wait_for"
+                    return 1
+                fi
+                local COUNTER=0
+                local FOUND=0
+                while [[ ( $COUNTER -lt 60 ) && ("${STATE}" != "Shutdown")  ]]; do
+                    let COUNTER=COUNTER+1
+                    ice_retry inspect ${CONTAINER_NAME} 2>/dev/null
+                    RESULT=$?
+                    if [ ${RESULT} -ne 0 ]; then 
+                        STATE="being deleted"
+                    else
+                        STATE="deleted"
+                        break
+                    fi
+                    sleep 2
+                done
+                if [ "$STATE" != "deleted" ]; then
+                    log_and_echo "$ERROR" "Failed to stop instance $WAITING_FOR "
+                    return 1
+                else
+                    log_and_echo "Successfully stopped $WAITING_FOR"
+                fi
+                return 0
+            }
+            
+            log_and_echo "deploying container ${CONTAINER_NAME}"
+            
+            # check to see if that container name is already in use
+            ice_retry_save_output ps -a 2> /dev/null
+            
+            CONTAINER_NAME_ARRAY=$(grep ${CONTAINER_NAME} iceretry.log | awk '{print $2}')
+            if [ -n "${CONTAINER_NAME_ARRAY}" ]; then
+                log_and_echo "removing container: ${CONTAINER_NAME}"
+                ice_retry rm -f ${CONTAINER_NAME}
+                wait_for_deleted ${CONTAINER_NAME}
+            fi
+            
+            # run the container and check the results
+            log_and_echo "run the container: $IC_COMMAND run --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${MEMORY} ${OPTIONAL_ARGS} ${IMAGE_NAME} "
+            ice_retry run --name ${CONTAINER_NAME} -p ${PORT}:${PORT} ${OPTIONAL_ARGS} ${IMAGE_NAME} 2> /dev/null
+            RESULT=$?
+            if [ $RESULT -ne 0 ]; then
+                log_and_echo "$ERROR" "Failed to deploy ${CONTAINER_NAME} using ${IMAGE_NAME}"
+                dump_info
+                return 1
+            fi
+            
+            # wait for container to start
+            wait_for ${CONTAINER_NAME}
+            RESULT=$?
+            if [ $RESULT -eq 0 ]; then
+                ${IC_COMMAND} exec -it ${CONTAINER_NAME} sh load-data.sh
+                echo "inventorydb created in mysql container. Done!"
+                exit 0
+            fi
+        CONTAINER_NAME: "${MYSQL_CONTAINER}"
+        DEPLOY_TYPE: red_black
+        OPTIONAL_ARGS: "-m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}"
+        PORT: "3306"
+        extension_id: ibm.devops.services.pipeline.docker.deploy.ice
+        name: "Deploy Standalone MySQL Container"
+        target: 
+          organization: "${ORG}"
+          region_id: "${REGION}"
+          space: "${SPACE}"
+        type: deployer
+    name: "Deploy Standalone MySQL Container"
+    properties: 
+      - 
+        name: MYSQL_CONTAINER_NAME
+        type: text
+        value: "${MYSQL_CONTAINER}"
+      - 
+        name: MYSQL_IMAGE_NAME
+        type: text
+        value: "${MYSQL_CONTAINER}"
+      - 
+        name: MYSQL_MEMORY
+        type: text
+        value: "128"
+      - 
+        name: MYSQL_DATABASE
+        type: text
+        value: "${MYSQL_DATABASE}"
+      - 
+        name: MYSQL_USER
+        type: text
+        value: "${MYSQL_USER}"
+      - 
+        name: MYSQL_PASSWORD
+        type: secure
+        value: "${MYSQL_PASSWORD}"
+      - 
+        name: MYSQL_ROOT_PASSWORD
+        type: secure
+        value: "${MYSQL_ROOT_PASSWORD}"
+    triggers: 
+      - 
+        type: stage
