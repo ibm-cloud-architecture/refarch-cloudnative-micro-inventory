@@ -26,6 +26,7 @@ pipeline-deploy-vpn:
         CUSTOMER_GATEWAY_IP: "{{deploy.parameters.customer-gateway-ip}}"
         CUSTOMER_SUBNET: "{{deploy.parameters.customer-subnet}}"
         CUSTOMER_PSK: "{{deploy.parameters.customer-psk}}"
+      execute: false
 
 pipeline-deploy-mysql:
   service_id: pipeline
@@ -43,6 +44,7 @@ pipeline-deploy-mysql:
         MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
         MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
         MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
+      execute: false
 
 pipeline-micro-inventory:
   service_id: pipeline
