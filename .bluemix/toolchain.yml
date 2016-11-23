@@ -28,23 +28,6 @@ pipeline-deploy-vpn:
         CUSTOMER_PSK: "{{deploy.parameters.customer-psk}}"
       execute: false
 
-pipeline-deploy-mysql:
-  service_id: pipeline
-  hidden: [form, description]
-  parameters:
-    name: "Deploy Standalone MySQL Container"
-    ui-pipeline: true
-    services: ["git-micro-inventory"]
-    configuration:
-      content: $file(mysql-pipeline.yml)
-      env:
-        MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
-        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
-        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
-        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
-        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
-        MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
-      execute: false
 
 pipeline-micro-inventory:
   service_id: pipeline
@@ -62,6 +45,7 @@ pipeline-micro-inventory:
        ORG: "{{deploy.parameters.deploy-org}}"
        SPACE: "{{deploy.parameters.deploy-space}}"
        NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
+       MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
        TEST_CONTAINER_NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}-test"
        PORT: "8080"
        MEMORY: "128"
@@ -70,7 +54,6 @@ pipeline-micro-inventory:
        DESIRED_INSTANCES: "2"
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
-       MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
        MYSQL_TEST_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-test-{{deploy.parameters.deploy-space}}"
        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
@@ -79,6 +62,24 @@ pipeline-micro-inventory:
        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
        NEW_RELIC_LICENSE: "{{deploy.parameters.new-relic-lic-key}}"
        IMAGE_NAME: "{{pipeline-micro-inventory.parameters.name}}-{{deploy.parameters.deploy-space}}"
+      execute: false
+
+pipeline-deploy-mysql:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "Deploy Standalone MySQL Container"
+    ui-pipeline: true
+    services: ["git-micro-inventory"]
+    configuration:
+      content: $file(mysql-pipeline.yml)
+      env:
+        MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
+        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
+        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
+        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
+        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
+        MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
       execute: false
 
 deploy:
