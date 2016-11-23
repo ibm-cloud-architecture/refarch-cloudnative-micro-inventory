@@ -86,12 +86,12 @@ stages:
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
     PORT: '3306'
     OPTIONAL_ARGS: -m ${MYSQL_MEMORY} -e MYSQL_DATABASE=${MYSQL_DATABASE} -e MYSQL_USER=${MYSQL_USER} -e MYSQL_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    CONTAINER_NAME: inventorydb-mysql-jkwong-dev
+    CONTAINER_NAME: ${MYSQL_CONTAINER}
     DEPLOY_TYPE: red_black
     COMMAND: "#!/bin/bash \n\ndebugme() {\n  [[ $DEBUG = 1 ]] && \"$@\" || :\n}\n\n\
       \n# Build Container via Dockerfile     #\nSPACE=$($IC_COMMAND info|grep 'Bluemix\
