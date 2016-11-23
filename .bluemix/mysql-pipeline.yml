@@ -5,8 +5,6 @@ stages:
   - service: ${REPO}
     type: git
     branch: master
-  triggers:
-  - type: commit
   jobs:
   - name: Build MySQL Container Image
     type: builder
