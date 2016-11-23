@@ -37,12 +37,12 @@ pipeline-deploy-mysql:
     configuration:
       content: $file(mysql-pipeline.yml)
       env:
-       MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
-       MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
-       MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
-       MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
-       MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
-       MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
+        MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
+        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
+        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
+        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
+        MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
+        MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
 
 pipeline-micro-inventory:
   service_id: pipeline
