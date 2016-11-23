@@ -397,7 +397,7 @@ stages:
 
       cd validate
 
-      python contract_validation.py https://${ROUTE_HOSTNAME}.${ROUTE_DOMAIN}/${CTXPATH}
+      python contract_validation.py https://${ROUTE_HOSTNAME}.${ROUTE_DOMAIN}${CTXPATH}
 - name: Clean Standalone Inventory Microservice
   triggers:
   - type: stage

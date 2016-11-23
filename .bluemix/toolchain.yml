@@ -60,6 +60,6 @@ deploy:
     mysql-dbuser: "dbuser"
     mysql-dbpass: "Pass4dbus3r"
     mysql-root-pass: "Pass4Admin123"
-    context-path: "micro"
+    context-path: "/micro"
     inventory-msname: "inventory-microservice"
     new-relic-lic-key: ""
