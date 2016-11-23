@@ -294,6 +294,15 @@ stages:
   - name: DESIRED_INSTANCES
     value: '1'
     type: text
+  - name: MYSQL_DATABASE
+    value: ${MYSQL_DATABASE}
+    type: text
+  - name: MYSQL_USER
+    value: ${MYSQL_USER}
+    type: text
+  - name: MYSQL_PASSWORD
+    value: ${MYSQL_PASSWORD}
+    type: secure
   jobs:
   - name: Deploy Inventory Microservice
     type: deployer
