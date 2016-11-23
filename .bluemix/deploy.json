@@ -44,6 +44,18 @@
         "new-relic-lic-key": {
             "description": "New Relic License Key",
             "type": "string"
+        },
+        "customer-gateway-ip": {
+            "description": "Customer VPN Gateway Endpoint",
+            "type": "string"
+        },
+        "customer-subnet": {
+            "description": "Customer Subnet",
+            "type": "string"
+        },
+        "customer-psk": {
+            "description": "Customer VPN Gateway Pre-shared Key",
+            "type": "string"
         }
     },
     "required": [
@@ -62,6 +74,24 @@
             "readonly": false,
             "title": "Domain name for all routes",
             "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Customer VPN Gateway IP",
+            "key": "customer-gateway-ip"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Customer Subnet",
+            "key": "customer-subnet"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Customer VPN Pre-shared Key",
+            "key": "customer-psk"
         },
         {
             "type": "text",

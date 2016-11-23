@@ -13,6 +13,37 @@ git-micro-inventory:
     type: clone
     has_issues: true
 
+pipeline-deploy-vpn:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "Deploy VPN"
+    ui-pipeline: true
+    services: []
+    configuration:
+      content: $file(vpn-pipeline.yml)
+      env:
+        CUSTOMER_GATEWAY_IP: "{{deploy.parameters.customer-gateway-ip}}"
+        CUSTOMER_SUBNET: "{{deploy.parameters.customer-subnet}}"
+        CUSTOMER_PSK: "{{deploy.parameters.customer-psk}}"
+
+pipeline-deploy-mysql:
+  service_id: pipeline
+  hidden: [form, description]
+  parameters:
+    name: "Deploy Standalone MySQL Container"
+    ui-pipeline: true
+    services: ["git-micro-inventory"]
+    configuration:
+      content: $file(mysql-pipeline.yml)
+      env:
+       MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
+       MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
+       MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
+       MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
+       MYSQL_PASSWORD: "{{deploy.parameters.mysql-dbpass}}"
+       MYSQL_ROOT_PASSWORD: "{{deploy.parameters.mysql-root-pass}}"
+
 pipeline-micro-inventory:
   service_id: pipeline
   hidden: [form, description]
@@ -38,6 +69,7 @@ pipeline-micro-inventory:
        INVENTORY_MSNAME: "{{deploy.parameters.inventory-msname}}"
        CTXPATH: "{{deploy.parameters.context-path}}"
        MYSQL_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-{{deploy.parameters.deploy-space}}"
+       MYSQL_TEST_CONTAINER: "{{deploy.parameters.mysql-database}}-mysql-test-{{deploy.parameters.deploy-space}}"
        MYSQL_PORT: "{{deploy.parameters.mysql-port}}"
        MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
        MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
@@ -63,3 +95,6 @@ deploy:
     context-path: "/micro"
     inventory-msname: "inventory-microservice"
     new-relic-lic-key: ""
+    customer-gateway-ip: ""
+    customer-subnet: ""
+    customer-psk: ""
