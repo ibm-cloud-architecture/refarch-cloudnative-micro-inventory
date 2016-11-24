@@ -320,8 +320,8 @@ stages:
       # git_retry will retry git calls to prevent pipeline failure on temporary github\
       \ problems\n# the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer\n\
       git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts\n\
-      \n# get MYSQL information\nlog_and_echo \"MySQL Container: ${MYSQL_TEST_CONTAINER}\"\
-      \n$IC_COMMAND inspect $MYSQL_TEST_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/[\"\
+      \n# get MYSQL information\nlog_and_echo \"MySQL Container: ${MYSQL_CONTAINER}\"\
+      \n$IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/[\"\
       |,|\\\" \\\"]//g'|sed 's/:/=/g' > mysql.env\n. mysql.env\nOPTIONAL_ARGS=\"${OPTIONAL_ARGS}\
       \ -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
       \ -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true\
