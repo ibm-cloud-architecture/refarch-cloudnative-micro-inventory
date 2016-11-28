@@ -523,6 +523,8 @@ stages:
       \ \"Cleaning up previous deployments is not completed\"\n      return 0\n  fi\n\
       fi\n"
 - name: Deploy Hybrid App
+  triggers:
+  - type: stage
   properties:
   - name: ROUTE_HOSTNAME
     value: ${NAME}

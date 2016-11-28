@@ -102,4 +102,4 @@ deploy:
     customer-gateway-ip: ""
     customer-subnet: ""
     customer-psk: ""
-    jdbc-url: "jdbc:mysql://10.171.30.74:3306,10.171.30.85:3306/inventorydb"
+    jdbc-url: "jdbc:mysql://<host_ip>:<port>[,<host_ip>:<port>/<dbname>"

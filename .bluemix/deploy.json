@@ -106,6 +106,18 @@
         {
             "type": "text",
             "readonly": false,
+            "title": "Database User",
+            "key": "mysql-dbuser"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Database Password",
+            "key": "mysql-dbpass"
+        },
+        {
+            "type": "text",
+            "readonly": false,
             "title": "New Relic License Key",
             "key": "new-relic-lic-key"
         },
