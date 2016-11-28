@@ -524,9 +524,6 @@ stages:
       fi\n"
 - name: Deploy Hybrid App
   properties:
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
-    type: text
   - name: ROUTE_HOSTNAME
     value: ${NAME}
     type: text
@@ -564,7 +561,7 @@ stages:
     value: ${NEW_RELIC_LICENSE_KEY}
     type: text
   - name: JDBC_URL
-    value: jdbc:mysql://10.171.30.74:3306,10.171.30.85:3306/inventorydb
+    value: ${JDBC_URL}
     type: text
   - name: MYSQL_USER
     value: ${MYSQL_USER}
@@ -580,9 +577,9 @@ stages:
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ibm:yp:us-south
-      organization: cent@us.ibm.com
-      space: jkwong-dev
+      region_id: ${REGION}
+      organization: ${ORG}
+      space: ${SPACE}
     PORT: '8080'
     OPTIONAL_ARGS: -m ${MEMORY}
     CONTAINER_NAME: ${ROUTE_HOSTNAME}

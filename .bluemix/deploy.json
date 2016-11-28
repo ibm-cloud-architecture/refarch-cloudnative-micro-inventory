@@ -56,6 +56,10 @@
         "customer-psk": {
             "description": "Customer VPN Gateway Pre-shared Key",
             "type": "string"
+        },
+        "jdbc-url": {
+            "description": "JDBC URL",
+            "type": "string"
         }
     },
     "required": [
@@ -92,6 +96,12 @@
             "readonly": false,
             "title": "Customer VPN Pre-shared Key",
             "key": "customer-psk"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "JDBC_URL",
+            "key": "jdbc-url"
         },
         {
             "type": "text",
