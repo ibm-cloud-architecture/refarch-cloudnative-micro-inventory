@@ -35,6 +35,14 @@ public class InventoryController {
 	private IInventoryRepo itemsRepo;
 
 	/**
+	 * root
+	 */
+	@RequestMapping("/")
+	ResponseEntity<?> root() {
+		return ResponseEntity.ok().build();
+	}
+
+	/**
 	 * check
 	 */
 	@RequestMapping("/check")

@@ -252,7 +252,7 @@ stages:
       \ 2> /dev/null\nRESULT=$?\nif [ $RESULT -ne 0 ]; then\n    log_and_echo \"$ERROR\"\
       \ \"Failed to deploy ${CONTAINER_NAME} using ${IMAGE_NAME}\"\n    dump_info\n\
       \    return 1\nfi\n\n# wait for container to start\nwait_for ${CONTAINER_NAME}\n\
-      RESULT=$?\nif [ $RESULT -eq 0 ]; then\n    ${IC_COMMAND} exec -it ${CONTAINER_NAME}\
+      RESULT=$?\nif [ $RESULT -eq 0 ]; then\n   /bin/sleep 10\n    ${IC_COMMAND} exec -it ${CONTAINER_NAME}\
       \ sh load-data.sh\n    echo \"inventorydb created in mysql container. Done!\"\
       \n    exit 0\nfi\n"
 - name: Deploy Standalone Inventory Microservice
@@ -324,11 +324,12 @@ stages:
       \n$IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/[\"\
       |,|\\\" \\\"]//g'|sed 's/:/=/g' > mysql.env\n. mysql.env\nOPTIONAL_ARGS=\"${OPTIONAL_ARGS}\
       \ -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY}\
-      \ -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true\
+      \ -e eureka.client.fetchRegistry=false -e eureka.client.registerWithEureka=false\
       \ -e \"spring.application.name=${INVENTORY_MSNAME}\" -e \"server.context-path=${CTXPATH}\"\
-      \ -e \"eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}\" -e \"spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}\"\
+      \ -e \"spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}\"\
       \ -e \"spring.datasource.username=${MYSQL_USER}\" -e \"spring.datasource.password=${MYSQL_PASSWORD}\"\
-      \"\nlog_and_echo \"Optional Args: ${OPTIONAL_ARGS}\"\n\n# You can deploy your\
+      \"\nlog_and_echo \"Optional Args: ${OPTIONAL_ARGS}\"\n\nexport VALIDATE_ROUTE=1\n\
+      \ \n# You can deploy your\
       \ Image as either a single Container or as a Container \n# Group.  A Container\
       \ Group deploys a number of containers to enhance\n# scalability or reliability.\
       \  By default we will deploy as a single \n# container.  To switch to a group\
@@ -533,7 +534,7 @@ stages:
     value: ${DOMAIN}
     type: text
   - name: MYSQL_CONTAINER
-    value: ${MYSQL_TEST_CONTAINER}
+    value: ${MYSQL_CONTAINER}
     type: text
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL}
@@ -542,45 +543,53 @@ stages:
     value: 'true'
     type: text
   - name: MEMORY
-    value: ${MEMORY}
+    value: '128'
     type: text
   - name: MIN_INSTANCES
-    value: ${MIN_INSTANCES}
+    value: '1'
     type: text
   - name: MAX_INSTANCES
-    value: ${MAX_INSTANCES}
+    value: '3'
     type: text
   - name: DESIRED_INSTANCES
-    value: ${DESIRED_INSTANCES}
+    value: '2'
     type: text
   - name: INVENTORY_MSNAME
     value: ${NAME}
     type: text
   - name: CTXPATH
-    value: ${CTXPATH}
+    value: ${CTX_PATH}
     type: text
   - name: NEW_RELIC_LICENSE_KEY
-    value: ${NEW_RELIC_LICENSE}
+    value: ${NEW_RELIC_LICENSE_KEY}
+    type: text
+  - name: JDBC_URL
+    value: jdbc:mysql://10.171.30.74:3306,10.171.30.85:3306/inventorydb
+    type: text
+  - name: MYSQL_USER
+    value: ${MYSQL_USER}
+    type: text
+  - name: MYSQL_PASSWORD
+    type: secure
+    value: ${MYSQL_PASSWORD}
+  - name: IMAGE_NAME
+    value: ${IMAGE_NAME}
     type: text
   jobs:
   - name: Deploy Inventory Microservice Container Group
     type: deployer
     extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
-      region_id: ${REGION}
-      organization: ${ORG}
-      space: ${SPACE}
-    PORT: ${PORT}
+      region_id: ibm:yp:us-south
+      organization: cent@us.ibm.com
+      space: jkwong-dev
+    PORT: '8080'
     OPTIONAL_ARGS: -m ${MEMORY}
-    DEPLOY_TYPE: red_black
     CONTAINER_NAME: ${ROUTE_HOSTNAME}
+    DEPLOY_TYPE: red_black
     COMMAND: |-
       #!/bin/sh
 
-      set -e
-      echo "Removing ${ROUTE_HOSTNAME}_$BUILD_NUMBER, if exists"
-      $IC_COMMAND group rm ${ROUTE_HOSTNAME}_$BUILD_NUMBER >/dev/null
-      set +e
       # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
       echo -e "${label_color}Starting deployment script${no_color}"
 
@@ -588,12 +597,21 @@ stages:
       # git_retry will retry git calls to prevent pipeline failure on temporary github problems
       # the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer
       git_retry clone https://github.com/ssibm/deployscripts.git deployscripts
+      SPACE=$($IC_COMMAND info|grep 'Bluemix Space'|awk '{print $NF}'|sed "s/\(.*\)\((.*\)/\1/"
+      )
+      IMAGE_NAME=$(echo $IMAGE_NAME|sed "s/-$SPACE//")
+      REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+      IMAGE_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${SPACE}
 
       # get MYSQL information
-      log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
-      $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
-      . mysql.env
-      OPTIONAL_ARGS="${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
+      if [ -z "${JDBC_URL}" ]; then
+          log_and_echo "MySQL Container: ${MYSQL_CONTAINER}"
+          $IC_COMMAND inspect $MYSQL_CONTAINER|grep -E 'MYSQL|HostIp|HostPort'|sed 's/["|,|\" \"]//g'|sed 's/:/=/g' > mysql.env
+          . mysql.env
+          JDBC_URL=jdbc:mysql://${HostIp}:${HostPort}/${MYSQL_DATABASE}
+      fi
+
+      OPTIONAL_ARGS="${OPTIONAL_ARGS} -e CG_NAME=${ROUTE_HOSTNAME} -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true -e "spring.application.name=${INVENTORY_MSNAME}" -e "server.context-path=${CTXPATH}" -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" -e "spring.datasource.url=${JDBC_URL}" -e "spring.datasource.username=${MYSQL_USER}" -e "spring.datasource.password=${MYSQL_PASSWORD}""
       log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
       # Deploy Container Group:
