@@ -4,16 +4,21 @@ import inventory.mysql.models.Inventory;
 import inventory.mysql.models.IInventoryRepo;
 
 import java.util.List;
+import java.net.URI;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
@@ -23,6 +28,8 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  */
 @RestController
 public class InventoryController {
+	
+	Logger logger =  LoggerFactory.getLogger(InventoryController.class);
 
 	@Autowired
 	private IInventoryRepo itemsRepo;
@@ -48,8 +55,12 @@ public class InventoryController {
 	 * @return item by id
 	 */
 	@RequestMapping(value = "/inventory/{id}", method = RequestMethod.GET)
-	@ResponseBody Inventory getById(@PathVariable long id) {
-			return itemsRepo.findOne(id);
+	ResponseEntity<?> getById(@PathVariable long id) {
+		if (!itemsRepo.exists(id)) {
+			return ResponseEntity.notFound().build();
+		}
+
+		return ResponseEntity.ok(itemsRepo.findOne(id));
 	}
 
 	/**
@@ -73,14 +84,23 @@ public class InventoryController {
 	 * @return transaction status
 	 */
 	@RequestMapping(value = "/inventory", method = RequestMethod.POST, consumes = "application/json")
-	@ResponseBody String create(@RequestBody Inventory payload) {
+	ResponseEntity<?> create(@RequestBody Inventory payload) {
 		try {
+			
+			// check if id passed in, whether it exists already
+			if (itemsRepo.exists(payload.getId())) {
+				return ResponseEntity.badRequest().body("Id " + payload.getId() + " already exists");
+			}
+			
 			itemsRepo.save(payload);
+		} catch (Exception ex) {
+			logger.error("Error creating item: " + ex);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating item: " + ex.toString());
 		}
-		catch (Exception ex) {
-			return "Error adding item to inventory: " + ex.toString();
-		}
-		return "Item succesfully added to inventory! (id = " + payload.getId() + ")";
+		
+		// HTTP 201 CREATED
+		final URI location =  ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(payload.getId()).toUri();
+        return ResponseEntity.created(location).build();
 	}
 
 
@@ -88,37 +108,41 @@ public class InventoryController {
 	 * Update Item
 	 * @return transaction status
 	 */
-	@RequestMapping(value = "/inventory/update/{id}", method = RequestMethod.PUT, consumes = "application/json")
-	@ResponseBody String update(@PathVariable long id, @RequestBody Inventory payload) {
+	@RequestMapping(value = "/inventory/{id}", method = RequestMethod.PUT, consumes = "application/json")
+	ResponseEntity<?> update(@PathVariable long id, @RequestBody Inventory payload) {
 		try {
-			if (itemsRepo.exists(id)) {
-				payload.setId(id);
-				itemsRepo.save(payload);
-			} else
-				return "Item not found, nothing to update.";
+			if (!itemsRepo.exists(id)) {
+				return ResponseEntity.notFound().build();
+			}
+			
+			payload.setId(id);
+			itemsRepo.save(payload);
+		} catch (Exception ex) {
+			logger.error("Error updating item: " + ex);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating item: " + ex.toString());
 		}
-		catch (Exception ex) {
-			return "Error updating item: " + ex.toString();
-		}
-		return "Item succesfully updated!";
+		
+		return ResponseEntity.ok().build();
 	}
 
 	/**
 	 * Delete Item
 	 * @return transaction status
 	 */
-	@RequestMapping(value = "/inventory/delete/{id}", method = RequestMethod.DELETE)
-	@ResponseBody String delete(@PathVariable long id) {
+	@RequestMapping(value = "/inventory/{id}", method = RequestMethod.DELETE)
+	ResponseEntity<?> delete(@PathVariable long id) {
 		try {
 			if (itemsRepo.exists(id))
 				itemsRepo.delete(id);
-			else
-				return "Item not found, nothing to delete.";
+			else {
+				return ResponseEntity.notFound().build();
+			}
 		}
 		catch (Exception ex) {
-			return "Error deleting item:" + ex.toString();
+			logger.error("Error deleting item: " + ex);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting item: " + ex.toString());
 		}
-		return "Item succesfully deleted from inventory!";
+		return ResponseEntity.ok().build();
 	}
 
 	private Iterable<Inventory> failGood() {
