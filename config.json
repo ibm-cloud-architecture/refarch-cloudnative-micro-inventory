@@ -1,0 +1,22 @@
+{
+  "es_connection_string": "PASTE_ELASTIC_SEARCH_CONNECTION_STRING_HERE",
+  "es_index": "api",
+  "es_doc_type": "items",
+  "mh_topic": "inventory",
+  "mh_message": "refresh_cache",
+  "VCAP_SERVICES": {
+    "messagehub": [{
+      "credentials": PASTE_MESSAGE_HUB_CREDENTIALS_OBJECT_HERE,
+      "syslog_drain_url": null,
+      "label": "messagehub",
+      "provider": null,
+      "plan": "standard",
+      "name": "Message Hub-vz",
+      "tags": [
+        "ibm_dedicated_public",
+        "web_and_app",
+        "ibm_created"
+      ]
+    }]
+  }
+}

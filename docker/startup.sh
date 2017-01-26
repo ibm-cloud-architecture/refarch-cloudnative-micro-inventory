@@ -6,6 +6,7 @@ export JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
 
 # Load agent support if required
 source ./agents/newrelic.sh
+source load_config.sh
 
 echo "Starting with Java Options ${JAVA_OPTS}"
 

@@ -14,6 +14,10 @@ RUN apt-get update && apt-get install -y jq
 # Copy agent files
 COPY agents/ /agents/
 
+# Copy configuration files
+COPY config.json config.json
+COPY load_config.sh load_config.sh
+
 # Add the new relic agent
 RUN wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip -O /tmp/newrelic.zip \
   && unzip -u -d /agents /tmp/newrelic.zip newrelic/newrelic.jar \

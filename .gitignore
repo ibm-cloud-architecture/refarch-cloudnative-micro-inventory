@@ -14,3 +14,20 @@ hs_err_pid*
 build
 .gradle
 /bin/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+log/
+target/

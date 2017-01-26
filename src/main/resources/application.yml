@@ -3,7 +3,7 @@ eureka:
      preferIpAddress: true
   client:
     serviceUrl:
-       defaultZone: http://microservices-refapp-eureka-chrisking.mybluemix.net/eureka/
+       defaultZone: http://netflix-eureka-fabio-case.mybluemix.net/eureka/
 
 # Server configuration
 server:
@@ -18,9 +18,9 @@ spring:
   # MySQL Data source configuration
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1/inventorydb
+    url: jdbc:mysql://169.46.17.110/inventorydb
     username: dbuser
-    password: password
+    password: Pass4dbUs3R
     port: 3306
     max-active: 4
     testOnBorrow: true
