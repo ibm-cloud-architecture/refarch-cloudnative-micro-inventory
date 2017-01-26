@@ -72,7 +72,7 @@ In this section you will deploy the Spring Boot application to run on your local
 2. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub) then go to instance `Service Credentials` tab, press `View credentials`, then press the copy button. You will need those credentials later.
   - Open `config.json` and paste credentials where indicated.
 
-3. Setup `ElasticSearch` container. `Docs coming soon!` Then copy its connection string (i.e. `http(s)://ip_adddress:9200` or `http(s)://username:password@ip_adddress:9200`)
+3. Setup `ElasticSearch` container. `Docs coming soon!` Meanwhile, [provision Searchly](https://console.ng.bluemix.net/catalog/services/searchly).  Then copy its connection string (i.e. `http(s)://ip_adddress:9200` or `http(s)://username:password@ip_adddress:9200`)
   - Open `config.json` and paste connection string where indicated.
 
 4. Load localhost configuration.
@@ -110,7 +110,7 @@ In this section you will deploy the Spring Boot application to run in a local do
    The `{mysql-docker-ip}` is the mysql container instance IP address. For users running on Docker version prior to v1.12, it is the IP address of the docker-machine. For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.   
 
     ```
-    # docker run -d -p 8080:8080 --name inventoryservice -e "spring.datasource.url=jdbc:mysql://{mysql-docker-ip}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" -e "es_connection_string" cloudnative/inventoryservice
+    # docker run -d -p 8080:8080 --name inventoryservice -e "spring.datasource.url=jdbc:mysql://{mysql-docker-ip}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" cloudnative/inventoryservice
     ```
 
 4. Validate.  
@@ -152,7 +152,7 @@ In this section you will deploy both the database server and the Spring Boot app
     ```
 7. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub). Later we will bind it to the container group upon container group creation.
 
-8. Setup `ElasticSearch` container. `Docs coming soon!` Then copy its `connection string` (i.e. `http(s)://ip_adddress:9200` or `http(s)://username:password@ip_adddress:9200`). 
+8. Setup `ElasticSearch` container. `Docs coming soon!` Meanwhile, [provision Searchly](https://console.ng.bluemix.net/catalog/services/searchly). Then copy its `connection string` (i.e. `http(s)://ip_adddress:9200` or `http(s)://username:password@ip_adddress:9200`). 
 
 9. Start the application in IBM Bluemix container. Replace `{ipaddr-db-container}` with private IP address of the database container, `{dbuser}` with database user name, `{password}` with database user password, `{message_hub_instance_name}` with Message Hub instance name (i.e. "Message Hub vz") and `{es_connection_string}` with Elasticsearch connection string.
     ```

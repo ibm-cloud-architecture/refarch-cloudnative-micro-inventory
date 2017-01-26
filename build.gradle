@@ -77,7 +77,7 @@ task docker {
             into 'docker'
         }
         copy {
-            from 'load_config.json'
+            from 'load_config.sh'
             into 'docker'
         }
         file("docker/micro-inventory-0.0.1.jar").renameTo(file("docker/app.jar"))
