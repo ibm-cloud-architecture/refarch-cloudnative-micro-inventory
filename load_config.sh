@@ -9,7 +9,6 @@ type jq >/dev/null 2>&1 || {
     return
 }
 
-export jaas_path=$(cat config.json | jq .jaas_path | tr -d '\"')
 export es_connection_string=$(cat config.json | jq .es_connection_string | tr -d '\"')
 export es_index=$(cat config.json | jq .es_index | tr -d '\"')
 export es_doc_type=$(cat config.json | jq .es_doc_type | tr -d '\"')
