@@ -19,6 +19,7 @@ public class InventoryControllerTest {
 		
 		long id = rnd.nextLong();
 		int price = rnd.nextInt();
+		int stock = rnd.nextInt();
 		
 		final ObjectMapper mapper = new ObjectMapper();
 		
@@ -29,6 +30,7 @@ public class InventoryControllerTest {
 		inv.setImg("/image/myimage.jpg");
 		inv.setImgAlt("image alt text");
 		inv.setPrice(price);
+		inv.setStock(stock);
 		
 		
 		final String json = mapper.writeValueAsString(inv);
@@ -43,6 +45,7 @@ public class InventoryControllerTest {
 		myJsonStr.append("\"description\":").append("\"Test inventory description\"").append(",");
 		myJsonStr.append("\"img\":").append("\"/image/myimage.jpg\"").append(",");
 		myJsonStr.append("\"imgAlt\":").append("\"image alt text\"").append(",");
+		myJsonStr.append("\"stock\":").append(stock).append(",");
 		myJsonStr.append("\"price\":").append(price);
 		myJsonStr.append("}");
 		
@@ -65,6 +68,7 @@ public class InventoryControllerTest {
 		
 		long id = rnd.nextLong();
 		int price = rnd.nextInt();
+		int stock = rnd.nextInt();
 		
 		final ObjectMapper mapper = new ObjectMapper();
 		
@@ -78,6 +82,7 @@ public class InventoryControllerTest {
 		myJsonStr.append("\"description\":").append("\"Test inventory description\"").append(",");
 		myJsonStr.append("\"img\":").append("\"/image/myimage.jpg\"").append(",");
 		myJsonStr.append("\"imgAlt\":").append("\"image alt text\"").append(",");
+		myJsonStr.append("\"stock\":").append(stock).append(",");
 		myJsonStr.append("\"price\":").append(price);
 		myJsonStr.append("}");
 		
@@ -94,6 +99,7 @@ public class InventoryControllerTest {
 		assert(inv.getDescription().equals("Test inventory description"));
 		assert(inv.getImg().equals("/image/myimage.jpg"));
 		assert(inv.getImgAlt().equals("image alt text"));
+		assert(inv.getStock() == stock);
 		assert(inv.getPrice() == price);
 		
 		

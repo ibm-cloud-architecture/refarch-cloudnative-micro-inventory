@@ -39,18 +39,23 @@ public class Inventory {
   @NotNull
   private String img;
 
+  // Item stock
+  @NotNull
+  private int stock;
+
   public Inventory() { }
 
   public Inventory(long id) { 
     this.id = id;
   }
   
-  public Inventory(String name, String description, int price, String img_alt, String img) {
+  public Inventory(String name, String description, int price, String img_alt, String img, int stock) {
     this.name = name;
     this.description = description;
     this.price = price;
     this.img = img;
-    this.img_alt = img_alt; 
+    this.img_alt = img_alt;
+    this.stock = stock;
   }
 
   public long getId() {
@@ -99,5 +104,13 @@ public class Inventory {
   
   public void setImgAlt(String img_alt) {
     this.img_alt = img_alt;
-  }  
+  }
+
+  public int getStock() {
+    return stock;
+  }
+
+  public void setStock(int value) {
+    this.stock = value;
+  }
 }
