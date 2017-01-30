@@ -10,6 +10,9 @@ import okhttp3.MediaType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class ElasticSearch {
 
     private InventoryController inventoryController;
@@ -17,6 +20,7 @@ public class ElasticSearch {
     private String connection;
     private String index;
     private String doc_type;
+    private OkHttpClient client;
 
     // Constructor
     public ElasticSearch() {
@@ -34,7 +38,9 @@ public class ElasticSearch {
             doc_type = "items";
         }
 
-        inventoryController = ((InventoryController)StaticApplicationContext.getContext().getBean("inventoryController"));
+        // Get InventoryController
+        inventoryController = ((InventoryController) StaticApplicationContext.getContext().getBean("inventoryController"));
+        client = new OkHttpClient();
     }
 
     // Subscribe to topic and start polling
@@ -52,12 +58,12 @@ public class ElasticSearch {
 
             // Build the string for JSONArray
             rows_string.append("[");
-            for (Inventory item: items) {
+            for (Inventory item : items) {
                 rows_string.append(item.toString());
                 rows_string.append(",");
             }
             // Remove last ,
-            rows_string.deleteCharAt(rows_string.length()-1);
+            rows_string.deleteCharAt(rows_string.length() - 1);
 
             // Finish array
             rows_string.append("]");
@@ -65,7 +71,12 @@ public class ElasticSearch {
             rows = new JSONArray(rows_string.toString());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            System.out.println(sw.toString());
+
+            rows = new JSONArray("[]");
         }
 
         return rows;
@@ -78,17 +89,16 @@ public class ElasticSearch {
             System.out.println(jsonObj.toString());
 
             try {
-                OkHttpClient client = new OkHttpClient();
                 MediaType mediaType = MediaType.parse("application/json");
                 RequestBody body = RequestBody.create(mediaType, jsonObj.toString());
 
                 // Build URL
                 String url = String.format("%s/%s/%s/%s", connection, index, doc_type, jsonObj.getInt("id"));
                 Request request = new Request.Builder()
-                .url(url)
-                .put(body)
-                .addHeader("content-type", "application/json")
-                .build();
+                        .url(url)
+                        .put(body)
+                        .addHeader("content-type", "application/json")
+                        .build();
 
                 Response response = client.newCall(request).execute();
                 JSONObject resp = new JSONObject(response.body().string());

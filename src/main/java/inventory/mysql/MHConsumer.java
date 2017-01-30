@@ -23,6 +23,7 @@ public class MHConsumer {
     private String servers;
     private String username;
     private String password;
+    private ElasticSearch es;
 
     // Construcor
     public MHConsumer() {
@@ -36,6 +37,9 @@ public class MHConsumer {
         if (message == null || message.equals("")) {
             message = "refresh_cache";
         }
+
+        // Setup ElasticSearch class
+        es = new ElasticSearch();
 
         try {
             // Set servers and credentials
@@ -80,7 +84,6 @@ public class MHConsumer {
                 // Check if message matches the trigger
                 if (record.value().toLowerCase().contains(message.toLowerCase())) {
                     System.out.println("Got the right message! Refreshing cache!\n\n");
-                    ElasticSearch es = new ElasticSearch();
                     es.refresh_cache();
                 }
             }
@@ -88,7 +91,7 @@ public class MHConsumer {
     }
 
     // Extracts kafka servers and Message Hub username/password from VCAP_SERVICES
-    private void set_servers_and_credentials () {
+    private void set_servers_and_credentials() {
         String vcap_string = System.getenv("VCAP_SERVICES");
         JSONObject vcap = new JSONObject(vcap_string);
         StringBuilder brokers = new StringBuilder();
@@ -119,7 +122,7 @@ public class MHConsumer {
 
     // Creates JAAS configuration file to interact with Kafka servers securely
     // Also sets path to configuration file in Java properties
-    private void set_jaas_configuration () throws IOException {
+    private void set_jaas_configuration() throws IOException {
         /*
             This is what the jass.conf file should look like
 
