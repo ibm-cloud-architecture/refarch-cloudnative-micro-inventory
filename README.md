@@ -51,6 +51,62 @@ http://<hostname>/micro/inventory
 
 ####Pre-requisite:
 - You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/machine/get-started/).
+- You need to deploy an elasticsearch container. Instructions below.
+
+####Deploy Elasticsearch on local docker container
+1. Pull elasticsearch docker image
+    ```
+    docker pull elasticsearch
+    ```
+
+2. Run docker container locally
+    ```
+    docker run -d -p 9200:9200 elasticsearch
+    ```
+
+3. Copy the following as your `Elasticsearch connection string`. It will be used later when running the app.
+    ```
+    http://localhost:9200
+    ```
+
+####Deploy Elasticsearch on Bluemix container
+1. After pulling Elasticsearch image (shown above), get the `elasticsearch` docker image id and then copy to clipboard
+    ```
+    docker images
+    ```
+
+2. Tag image NEED TO CHECK
+    ```
+    docker tag elasticsearch registry.ng.bluemix.net/$(cf ic namespace get)/elasticsearch
+    ```
+
+3. Push image to Bluemix Docker image registry
+    ```
+    docker push registry.ng.bluemix.net/$(cf ic namespace get)/elasticsearch
+    ```
+
+4. Or create single Elasticsearch container
+    ```
+    cf ic run -d -p 9200:9200 --name elasticsearch-container registry.ng.bluemix.net/$(cf ic namespace get)/elasticsearch
+    ```
+
+5. Check for installation
+    ```
+    cf ic ps | grep -i elasticsearch-container
+    ```
+ 
+6. Get container Private IP Address. 
+    ```
+    # cf ic inspect elasticsearch-container | grep -i ipaddress
+                "IPAddress": "172.29.0.240",
+                        "IPAddress": "172.29.0.240"
+    ```
+
+7. Copy the following as your `Elasticsearch connection string`. It will be used later when running the app in Bluemix.
+    ```
+    http://IP_ADDRESS:9200
+    ```
+
 
 ####Build the application
 1. Clone git repository.
@@ -72,8 +128,7 @@ In this section you will deploy the Spring Boot application to run on your local
 2. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub) then go to instance `Service Credentials` tab, press `View credentials`, then press the copy button. You will need those credentials later.
   - Open `config.json` and paste credentials where indicated.
 
-3. Setup `ElasticSearch` container. `Docs coming soon!` Meanwhile, [provision Searchly](https://console.ng.bluemix.net/catalog/services/searchly).  Then copy its connection string (i.e. `http(s)://ip_adddress:9200` or `http(s)://username:password@ip_adddress:9200`)
-  - Open `config.json` and paste connection string where indicated.
+3. Deploy `ElasticSearch` docker container locally and copy `Elasticsearch connection string`.
 
 4. Load localhost configuration.
 
@@ -152,7 +207,7 @@ In this section you will deploy both the database server and the Spring Boot app
     ```
 7. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub). Later we will bind it to the container group upon container group creation.
 
-8. Setup `ElasticSearch` container. `Docs coming soon!` Meanwhile, [provision Searchly](https://console.ng.bluemix.net/catalog/services/searchly). Then copy its `connection string` (i.e. `http(s)://ip_adddress:9200` or `http(s)://username:password@ip_adddress:9200`). 
+8. Deploy `ElasticSearch` container on Bluemix and copy `Elasticsearch connection string`.
 
 9. Start the application in IBM Bluemix container. Replace `{ipaddr-db-container}` with private IP address of the database container, `{dbuser}` with database user name, `{password}` with database user password, `{message_hub_instance_name}` with Message Hub instance name (i.e. "Message Hub vz") and `{es_connection_string}` with Elasticsearch connection string.
     ```
