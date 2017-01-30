@@ -3,12 +3,10 @@ package inventory.mysql;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 
 
 @SpringBootApplication
-@EnableDiscoveryClient
 @EnableCircuitBreaker
 public class Application {
 
@@ -18,7 +16,6 @@ public class Application {
 
         String connection = System.getenv("es_connection_string");
         String vcap = System.getenv("VCAP_SERVICES");
-
 
         if (connection == null || connection.equals("")) {
             System.out.println("Seems we don't have a connection string for Elasticsearch!");
@@ -35,6 +32,6 @@ public class Application {
 
         // Create Message HUB consumer and subscribe to topic, which initiates the polling
         MHConsumer consumer = new MHConsumer();
-        consumer.subscribe(); 
+        consumer.subscribe();
     }
 }

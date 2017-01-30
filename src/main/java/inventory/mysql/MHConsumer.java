@@ -14,9 +14,6 @@ import org.json.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.KafkaException;
-import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.errors.WakeupException;
 
 public class MHConsumer {
 
@@ -37,7 +34,7 @@ public class MHConsumer {
 
         message = System.getenv("mh_message");
         if (message == null || message.equals("")) {
-            message = "api";
+            message = "refresh_cache";
         }
 
         try {
@@ -76,7 +73,7 @@ public class MHConsumer {
         consumer.subscribe(Arrays.asList(topic));
 
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(100);
+            ConsumerRecords<String, String> records = consumer.poll(3000);
             for (ConsumerRecord<String, String> record : records) {
                 System.out.printf("Message = %s\n", record.value());
 

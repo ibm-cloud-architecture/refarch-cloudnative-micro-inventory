@@ -1,6 +1,6 @@
 package inventory.mysql;
 
-import java.io.IOException;
+import inventory.mysql.models.Inventory;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -12,11 +12,13 @@ import org.json.JSONObject;
 
 public class ElasticSearch {
 
+    private InventoryController inventoryController;
+
     private String connection;
     private String index;
     private String doc_type;
 
-    // Construcor
+    // Constructor
     public ElasticSearch() {
         // Get es_connection_string, es_index, and es_doc_type
         connection = System.getenv("es_connection_string");
@@ -32,6 +34,7 @@ public class ElasticSearch {
             doc_type = "items";
         }
 
+        inventoryController = ((InventoryController)StaticApplicationContext.getContext().getBean("inventoryController"));
     }
 
     // Subscribe to topic and start polling
@@ -44,15 +47,22 @@ public class ElasticSearch {
     public JSONArray get_all_rows() {
         JSONArray rows = null;
         try {
-            // TODO: Use some SpringBoot data approach to get the data
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder()
-            .url("http://localhost:8080/micro/inventory")
-            .get()
-            .build();
+            Iterable<Inventory> items = inventoryController.getInventory();
+            StringBuilder rows_string = new StringBuilder();
 
-            Response response = client.newCall(request).execute();
-            rows = new JSONArray(response.body().string());
+            // Build the string for JSONArray
+            rows_string.append("[");
+            for (Inventory item: items) {
+                rows_string.append(item.toString());
+                rows_string.append(",");
+            }
+            // Remove last ,
+            rows_string.deleteCharAt(rows_string.length()-1);
+
+            // Finish array
+            rows_string.append("]");
+
+            rows = new JSONArray(rows_string.toString());
 
         } catch (Exception e) {
             e.printStackTrace();

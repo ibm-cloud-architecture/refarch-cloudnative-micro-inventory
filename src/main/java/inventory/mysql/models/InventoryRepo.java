@@ -9,8 +9,9 @@ import org.springframework.data.repository.CrudRepository;
  * Inventory Repository
  * 
  */
+
 @Transactional
-public interface IInventoryRepo extends CrudRepository<Inventory, Long> {
+public interface InventoryRepo extends CrudRepository<Inventory, Long> {
 	// find all by naming like /inventory/name/{name}
 	List<Inventory> findByNameContaining(String name);
 	

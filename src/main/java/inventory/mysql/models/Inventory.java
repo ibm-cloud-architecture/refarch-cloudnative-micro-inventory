@@ -113,4 +113,19 @@ public class Inventory {
   public void setStock(int value) {
     this.stock = value;
   }
+
+  public String toString() {
+    StringBuilder string = new StringBuilder();
+    string.append("{\n");
+    string.append(String.format("\t\"id\": %s,\n", this.id));
+    string.append(String.format("\t\"name\": \"%s\",\n", this.name));
+    string.append(String.format("\t\"description\": \"%s\",\n", this.description));
+    string.append(String.format("\t\"price\": %s,\n", this.price));
+    string.append(String.format("\t\"img_alt\": \"%s\",\n", this.img_alt));
+    string.append(String.format("\t\"img\": \"%s\",\n", this.img));
+    string.append(String.format("\t\"stock\": %s\n", this.stock));
+    string.append("}");
+
+    return string.toString();
+  }
 }

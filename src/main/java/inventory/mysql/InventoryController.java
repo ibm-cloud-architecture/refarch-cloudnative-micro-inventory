@@ -1,7 +1,7 @@
 package inventory.mysql;
 
 import inventory.mysql.models.Inventory;
-import inventory.mysql.models.IInventoryRepo;
+import inventory.mysql.models.InventoryRepo;
 
 import java.util.List;
 import java.net.URI;
@@ -26,13 +26,13 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
  * REST Controller to manage Inventory database
  *
  */
-@RestController
+@RestController("inventoryController")
 public class InventoryController {
 	
 	Logger logger =  LoggerFactory.getLogger(InventoryController.class);
 
 	@Autowired
-	private IInventoryRepo itemsRepo;
+	private InventoryRepo itemsRepo;
 
 	/**
 	 * check
@@ -86,18 +86,18 @@ public class InventoryController {
 	@RequestMapping(value = "/inventory", method = RequestMethod.POST, consumes = "application/json")
 	ResponseEntity<?> create(@RequestBody Inventory payload) {
 		try {
-			
+
 			// check if id passed in, whether it exists already
 			if (itemsRepo.exists(payload.getId())) {
 				return ResponseEntity.badRequest().body("Id " + payload.getId() + " already exists");
 			}
-			
+
 			itemsRepo.save(payload);
 		} catch (Exception ex) {
 			logger.error("Error creating item: " + ex);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating item: " + ex.toString());
 		}
-		
+
 		// HTTP 201 CREATED
 		final URI location =  ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(payload.getId()).toUri();
         return ResponseEntity.created(location).build();
@@ -114,14 +114,14 @@ public class InventoryController {
 			if (!itemsRepo.exists(id)) {
 				return ResponseEntity.notFound().build();
 			}
-			
+
 			payload.setId(id);
 			itemsRepo.save(payload);
 		} catch (Exception ex) {
 			logger.error("Error updating item: " + ex);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating item: " + ex.toString());
 		}
-		
+
 		return ResponseEntity.ok().build();
 	}
 
