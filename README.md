@@ -29,28 +29,13 @@ http://<hostname>/micro/inventory
 - Get items by price less than or equal to
 `http://<hostname>/micro/inventory/price/{price}`
 
-- Add new item to inventory - `POST` json payload
-`http://<hostname>/micro/inventory`
-
-- Update existing item in inventory - `PUT` json payload
-`http://<hostname>/micro/inventory/update/{id}`
-
-- Delete item from inventory - Send `DELETE` request
-`http://<hostname>/micro/inventory/delete/{id}`
-
-- Example curl command to add item
+- Example curl command to get an item
     ```
-    curl -X POST -H "Content-Type: application/json" -d '{
-    "name": "Credit Card Reader",
-    "description": "For use with IBM Point of Sale systems",
-    "img": "CC-Reader.jpg",
-    "imgAlt": "Credit Card Reader",
-    "price": "1599.99"
-    }' "http://<hostname>/micro/inventory"
+    curl -X GET "http://localhost:8080/micro/inventory"
     ```
 
 ####Pre-requisite:
-- You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/machine/get-started/).
+- You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/engine/installation/).
 - You need to deploy an elasticsearch container. Instructions below.
 
 ####Deploy Elasticsearch on local docker container
@@ -64,7 +49,7 @@ http://<hostname>/micro/inventory
     docker run -d -p 9200:9200 elasticsearch
     ```
 
-3. Copy the following as your `Elasticsearch connection string`. It will be used later when running the app.
+3. Copy the following as your Elasticsearch REST endpoint, better known as the `Elasticsearch connection string`. It will be used later when running the app.
     ```
     http://localhost:9200
     ```
@@ -102,9 +87,9 @@ http://<hostname>/micro/inventory
                         "IPAddress": "172.29.0.240"
     ```
 
-7. Copy the following as your `Elasticsearch connection string`. It will be used later when running the app in Bluemix.
+7. Copy the following as your Elasticsearch REST endpoint, better known as the `Elasticsearch connection string`. It will be used later when running the app in Bluemix.
     ```
-    http://IP_ADDRESS:9200
+    http://CONTAINER_IP_ADDRESS:9200
     ```
 
 

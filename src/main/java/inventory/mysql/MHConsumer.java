@@ -12,7 +12,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import inventory.mysql.rest.RESTAdmin;
-import org.apache.tomcat.jni.Error;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -24,7 +23,7 @@ public class MHConsumer {
     private String servers;
     private String username;
     private String password;
-    private String admin_rest_url;
+    private String rest_url;
     private String api_key;
     private ElasticSearch es;
     private Config config;
@@ -49,7 +48,7 @@ public class MHConsumer {
         username = config.mh_user;
         password = config.mh_password;
         servers = config.mh_kafka_brokers_sasl;
-        admin_rest_url = config.mh_kafka_admin_url;
+        rest_url = config.mh_kafka_rest_url;
         api_key = config.mh_api_key;
 
         // Setup ElasticSearch class
@@ -74,8 +73,8 @@ public class MHConsumer {
             props.put("bootstrap.servers", servers);
 
             // Get topics to see if our topic exists
-            String topics_string = RESTAdmin.listTopics(admin_rest_url, api_key);
-            System.out.println("Admin REST Listing Topics: " + topics_string);
+            String topics_string = RESTAdmin.listTopics(rest_url, api_key);
+            System.out.println("REST Listing Topics: " + topics_string);
 
             // Check if topic exist
             JSONArray topics = new JSONArray(topics_string);
@@ -95,10 +94,11 @@ public class MHConsumer {
             // Create topic if it does not exist
             if (create_topic) {
                 System.out.println("Creating the topic " + topic);
-                String restResponse = RESTAdmin.createTopic(admin_rest_url, api_key, topic);
-                String error = new JSONObject(restResponse).getString("errorMessage");
+                String restResponse = RESTAdmin.createTopic(rest_url, api_key, topic);
+                JSONObject json = new JSONObject(restResponse);
+                String error = json.has("errorMessage") ? json.getString("errorMessage") : null;
 
-                if (error != null || error.equals("") != false) {
+                if (error != null) {
                     throw new Exception(error);
                 }
 

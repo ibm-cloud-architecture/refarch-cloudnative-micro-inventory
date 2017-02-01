@@ -22,9 +22,7 @@ public class Config {
 
     public String mh_user;
     public String mh_password;
-    public String mh_mqlight_lookup_url;
     public String mh_api_key;
-    public String mh_kafka_admin_url;
     public String mh_kafka_rest_url;
     public String mh_kafka_brokers_sasl;
 
@@ -84,14 +82,8 @@ public class Config {
         mh_kafka_rest_url = Config.select(System.getenv("message_hub_kafka_rest_url"),
                 messagehub.getString("kafka_rest_url"));
 
-        mh_kafka_admin_url = Config.select(System.getenv("message_hub_kafka_admin_url"),
-                messagehub.getString("kafka_admin_url"));
-
         mh_kafka_brokers_sasl = Config.select(System.getenv("message_hub_kafka_brokers_sasl"),
                 Config.get_servers(messagehub.getJSONArray("kafka_brokers_sasl")));
-
-        mh_mqlight_lookup_url = Config.select(System.getenv("message_hub_mqlight_lookup_url"),
-                messagehub.getString("mqlight_lookup_url"));
 
         // Validate all the things
         Config.validate("connection_string", es_connection_string, "elasticsearch");
@@ -103,9 +95,7 @@ public class Config {
         Config.validate("password", mh_password, "message_hub");
         Config.validate("api_key", mh_api_key, "message_hub");
         Config.validate("kafka_rest_url", mh_kafka_rest_url, "message_hub");
-        Config.validate("kafka_admin_url", mh_kafka_admin_url, "message_hub");
         Config.validate("kafka_brokers_sasl", mh_kafka_brokers_sasl, "message_hub");
-        Config.validate("mqlight_lookup_url", mh_mqlight_lookup_url, "message_hub");
     }
 
     private static void validate (String key, String value, String section) {
