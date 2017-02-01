@@ -32,3 +32,27 @@ spring:
     hibernate:
       ddl-auto: update
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+
+# Elasticsearch
+elasticsearch:
+  connection_string: http://localhost:9200
+  index: api
+  doc_type: items
+
+# Message Hub properties
+message_hub:
+  topic: inventory
+  message: refresh_cache
+  user:
+  password:
+  mqlight_lookup_url:
+  api_key:
+  kafka_admin_url:
+  kafka_rest_url:
+  # Paste broker urls here one by one
+  kafka_brokers_sasl:
+    -
+    -
+    -
+    -
+    -
