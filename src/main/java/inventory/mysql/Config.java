@@ -62,28 +62,67 @@ public class Config {
         es_doc_type = Config.select(System.getenv("elasticsearch_connection_string"),
                 elasticsearch.getString("doc_type"));
 
-        // Message Hub
+        // Get topic and message
         JSONObject messagehub = json.getJSONObject("message_hub");
+
         mh_topic = Config.select(System.getenv("message_hub_topic"),
                 messagehub.getString("topic"));
 
         mh_message = Config.select(System.getenv("message_hub_message"),
                 messagehub.getString("message"));
 
-        mh_user = Config.select(System.getenv("message_hub_user"),
-                messagehub.getString("user"));
+        // Message Hub
+        // Check if running on Bluemix and Message Hub is bound
+        String vcap_string = System.getenv("VCAP_SERVICES");
+        if (vcap_string != null && (vcap_string.equals("") == false)) {
+            System.out.println("Message Hub is IN VCAP!");
 
-        mh_password = Config.select(System.getenv("message_hub_password"),
-                messagehub.getString("password"));
+            JSONObject vcap = new JSONObject(vcap_string);
+            StringBuilder brokers = new StringBuilder();
 
-        mh_api_key = Config.select(System.getenv("message_hub_api_key"),
-                messagehub.getString("api_key"));
+            JSONArray messagehub_array = vcap.getJSONArray("messagehub");
+            JSONObject msghub = messagehub_array.getJSONObject(0);
+            JSONObject credentials = msghub.getJSONObject("credentials");
 
-        mh_kafka_rest_url = Config.select(System.getenv("message_hub_kafka_rest_url"),
-                messagehub.getString("kafka_rest_url"));
+            // Assign username and password
+            mh_user = credentials.getString("user");
+            mh_password = credentials.getString("password");
+            mh_api_key = credentials.getString("api_key");
+            mh_kafka_rest_url = credentials.getString("kafka_rest_url");
 
-        mh_kafka_brokers_sasl = Config.select(System.getenv("message_hub_kafka_brokers_sasl"),
-                Config.get_servers(messagehub.getJSONArray("kafka_brokers_sasl")));
+            // Assign servers
+            JSONArray brokers_array = credentials.getJSONArray("kafka_brokers_sasl");
+
+            for (int i = 0; i < brokers_array.length(); i++) {
+                String broker = brokers_array.getString(i);
+                brokers.append(broker);
+                // Append separator
+                if (i < (brokers_array.length() - 1)) {
+                    brokers.append(",");
+                }
+            }
+
+            // Assign servers
+            mh_kafka_brokers_sasl = brokers.toString();
+
+        } else {
+            System.out.println("Message HUB not in VCAP, using environment variables");
+
+            mh_user = Config.select(System.getenv("message_hub_user"),
+                    messagehub.getString("user"));
+
+            mh_password = Config.select(System.getenv("message_hub_password"),
+                    messagehub.getString("password"));
+
+            mh_api_key = Config.select(System.getenv("message_hub_api_key"),
+                    messagehub.getString("api_key"));
+
+            mh_kafka_rest_url = Config.select(System.getenv("message_hub_kafka_rest_url"),
+                    messagehub.getString("kafka_rest_url"));
+
+            mh_kafka_brokers_sasl = Config.select(System.getenv("message_hub_kafka_brokers_sasl"),
+                    Config.get_servers(messagehub.getJSONArray("kafka_brokers_sasl")));
+        }
 
         // Validate all the things
         Config.validate("connection_string", es_connection_string, "elasticsearch");
@@ -98,7 +137,7 @@ public class Config {
         Config.validate("kafka_brokers_sasl", mh_kafka_brokers_sasl, "message_hub");
     }
 
-    private static void validate (String key, String value, String section) {
+    private static void validate(String key, String value, String section) {
         if (value == null || value.equals("")) {
             System.out.println(String.format("\"%s\" parameter is equal to \"%s\", which is not valid", key, value));
             System.out.println(String.format("Please provide \"%s\" in the \"%s\" section in src/main/resources/application.yml OR", key, section));

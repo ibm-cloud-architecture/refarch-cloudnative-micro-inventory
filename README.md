@@ -36,6 +36,7 @@ http://<hostname>/micro/inventory
 
 ####Pre-requisite:
 - You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/engine/installation/).
+- You need to Provision `MessageHub` service instance. [Click for instructions](https://console.ng.bluemix.net/catalog/services/message-hub).
 - You need to deploy an elasticsearch container. Instructions below.
 
 ####Deploy Elasticsearch on local docker container
@@ -60,7 +61,7 @@ http://<hostname>/micro/inventory
     docker images
     ```
 
-2. Tag image NEED TO CHECK
+2. Tag image
     ```
     docker tag elasticsearch registry.ng.bluemix.net/$(cf ic namespace get)/elasticsearch
     ```
@@ -110,23 +111,20 @@ In this section you will deploy the Spring Boot application to run on your local
 
 1. [Setup MySQL database `inventorydb` on local docker container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-on-local-mysql-container).
 
-2. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub) then go to instance `Service Credentials` tab, press `View credentials`, then press the copy button. You will need those credentials later.
-  - Open `config.json` and paste credentials where indicated.
+2. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub).
+  - After provisioning, go to instance `Service Credentials` tab on Bluemix, then press `View credentials`.
+  - Open `src/main/resources/application.yml`, go to `message_hub` section, then copy and paste required message_hub fields using credentials from above.
+  
+3. Deploy `ElasticSearch` docker container locally.
+  - Open `src/main/resources/application.yml`, go to `elasticsearch` section.
+  - Type `http://localhost:9200` on the `connection_string` field.
 
-3. Deploy `ElasticSearch` docker container locally and copy `Elasticsearch connection string`.
-
-4. Load localhost configuration.
-
-    ```
-    # source load_config.sh
-    ```
-
-5. Run the application on localhost.
+4. Run the application on localhost.
     ```
     # java -jar build/libs/micro-inventory-0.0.1.jar
     ```
 
-6. Validate.
+5. Validate.
     ```
     # curl http://localhost:8080/micro/inventory/13412
     {"id":13412,"name":"Selectric Typewriter","description":"Unveiled in 1961, the revolutionary Selectric typewriter eliminated the need for conventional type bars and movable carriages by using an innovative typing element on a head-and-rocker assembly, which, in turn, was mounted on a small carrier to move from left to right while typing.","price":2199,"img":"api/image/selectric.jpg","imgAlt":"Selectric Typewriter"}
@@ -142,7 +140,7 @@ In this section you will deploy the Spring Boot application to run in a local do
     # docker build -t cloudnative/inventoryservice .
     ```
 
-3. If not already done, [setup MySQL database `inventorydb` on local docker container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-on-local-mysql-container).
+2. If not already done, [setup MySQL database `inventorydb` on local docker container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-on-local-mysql-container).
 
 3. Start the application in docker container.  
 
@@ -150,7 +148,10 @@ In this section you will deploy the Spring Boot application to run in a local do
    The `{mysql-docker-ip}` is the mysql container instance IP address. For users running on Docker version prior to v1.12, it is the IP address of the docker-machine. For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.   
 
     ```
-    # docker run -d -p 8080:8080 --name inventoryservice -e "spring.datasource.url=jdbc:mysql://{mysql-docker-ip}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" cloudnative/inventoryservice
+    # docker run -d -p 8080:8080 --name inventoryservice \
+      -e "spring.datasource.url=jdbc:mysql://{mysql-docker-ip}:3306/inventorydb" \
+      -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" \
+       cloudnative/inventoryservice
     ```
 
 4. Validate.  
@@ -190,13 +191,24 @@ In this section you will deploy both the database server and the Spring Boot app
     ```
     # cf ic inspect mysql | grep -i ipaddress
     ```
+
 7. [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub). Later we will bind it to the container group upon container group creation.
 
-8. Deploy `ElasticSearch` container on Bluemix and copy `Elasticsearch connection string`.
+8. Deploy `ElasticSearch` container on Bluemix and get the `Elasticsearch connection string`
 
 9. Start the application in IBM Bluemix container. Replace `{ipaddr-db-container}` with private IP address of the database container, `{dbuser}` with database user name, `{password}` with database user password, `{message_hub_instance_name}` with Message Hub instance name (i.e. "Message Hub vz") and `{es_connection_string}` with Elasticsearch connection string.
     ```
-    # cf ic group create -p 8080 -m 128 --min 1 --auto --name micro-inventory-group -e "spring.datasource.url=jdbc:mysql://{ipaddr-db-container}:3306/inventorydb" -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" -e eureka.client.fetchRegistry=true -e eureka.client.registerWithEureka=true -e eureka.client.serviceUrl.defaultZone=http://netflix-eureka-$(cf ic namespace get).mybluemix.net/eureka/ -e "CCS_BIND_SRV={message_hub_instance_name}" -e es_connection_string={es_connection_string} -n inventoryservice -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
+    # cf ic group create -p 8080 -m 128 --min 1 --auto --name micro-inventory-group \
+      -e "spring.datasource.url=jdbc:mysql://{ipaddr-db-container}:3306/inventorydb" \
+      -e "spring.datasource.username={dbuser}" \
+      -e "spring.datasource.password={password}" \
+      -e eureka.client.fetchRegistry=false \
+      -e eureka.client.registerWithEureka=false \
+      -e eureka.client.serviceUrl.defaultZone=http://netflix-eureka-$(cf ic namespace get).mybluemix.net/eureka/ \
+      -e "CCS_BIND_SRV={message_hub_instance_name}" \
+      -e es_connection_string={es_connection_string} \
+      -n inventoryservice \
+      -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
     ```
 
 10. Validate.
