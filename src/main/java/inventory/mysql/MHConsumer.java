@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import inventory.mysql.rest.RESTAdmin;
+import org.apache.tomcat.jni.Error;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONObject;
 
 public class MHConsumer {
 
@@ -23,27 +24,38 @@ public class MHConsumer {
     private String servers;
     private String username;
     private String password;
+    private String admin_rest_url;
+    private String api_key;
     private ElasticSearch es;
+    private Config config;
 
-    // Construcor
+    // Constructor
     public MHConsumer() {
+        // Get config object
+        config = new Config();
+
         // Assign topic and message
-        topic = System.getenv("mh_topic");
+        topic = config.mh_topic;
         if (topic == null || topic.equals("")) {
             topic = "api";
         }
 
-        message = System.getenv("mh_message");
+        message = config.mh_message;
         if (message == null || message.equals("")) {
             message = "refresh_cache";
         }
+
+        // Assign username and password
+        username = config.mh_user;
+        password = config.mh_password;
+        servers = config.mh_kafka_brokers_sasl;
+        admin_rest_url = config.mh_kafka_admin_url;
+        api_key = config.mh_api_key;
 
         // Setup ElasticSearch class
         es = new ElasticSearch();
 
         try {
-            // Set servers and credentials
-            set_servers_and_credentials();
 
             // Set JAAS config
             set_jaas_configuration();
@@ -61,11 +73,44 @@ public class MHConsumer {
             props.put("auto.offset.reset", "latest");
             props.put("bootstrap.servers", servers);
 
+            // Get topics to see if our topic exists
+            String topics_string = RESTAdmin.listTopics(admin_rest_url, api_key);
+            System.out.println("Admin REST Listing Topics: " + topics_string);
+
+            // Check if topic exist
+            JSONArray topics = new JSONArray(topics_string);
+            boolean create_topic = true;
+
+            for (int i = 0; i < topics.length(); i++) {
+                JSONObject t = topics.getJSONObject(i);
+                String t_name = t.getString("name");
+
+                if (t_name.equals(topic)) {
+                    System.out.println("Topic " + topic + " already exists!");
+                    create_topic = false;
+                    break;
+                }
+            }
+
+            // Create topic if it does not exist
+            if (create_topic) {
+                System.out.println("Creating the topic " + topic);
+                String restResponse = RESTAdmin.createTopic(admin_rest_url, api_key, topic);
+                String error = new JSONObject(restResponse).getString("errorMessage");
+
+                if (error != null || error.equals("") != false) {
+                    throw new Exception(error);
+                }
+
+                System.out.println("Successfully created the topic");
+            }
+
             consumer = new KafkaConsumer<String, String>(props);
             System.out.println("Created Kafka Consumer");
 
         } catch (Exception e) {
             System.out.println("Exception occurred, application will terminate:");
+            System.out.println(e);
             e.printStackTrace();
             System.exit(-1);
         }
@@ -88,36 +133,6 @@ public class MHConsumer {
                 }
             }
         }
-    }
-
-    // Extracts kafka servers and Message Hub username/password from VCAP_SERVICES
-    private void set_servers_and_credentials() {
-        String vcap_string = System.getenv("VCAP_SERVICES");
-        JSONObject vcap = new JSONObject(vcap_string);
-        StringBuilder brokers = new StringBuilder();
-
-        JSONArray messagehub_array = vcap.getJSONArray("messagehub");
-        JSONObject messagehub = messagehub_array.getJSONObject(0);
-        JSONObject credentials = messagehub.getJSONObject("credentials");
-        JSONArray brokers_array = credentials.getJSONArray("kafka_brokers_sasl");
-
-        // Get servers
-        for (int i = 0; i < brokers_array.length(); i++) {
-            String broker = brokers_array.getString(i);
-            brokers.append(broker);
-            // Append separator
-            if (i < (brokers_array.length() - 1)) {
-                brokers.append(",");
-            }
-        }
-
-        // Assign username and password
-        username = credentials.getString("user");
-        password = credentials.getString("password");
-
-        // Assign servers
-        servers = brokers.toString();
-        System.out.println("Got servers: " + servers);
     }
 
     // Creates JAAS configuration file to interact with Kafka servers securely

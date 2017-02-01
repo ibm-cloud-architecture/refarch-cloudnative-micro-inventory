@@ -24,16 +24,19 @@ public class ElasticSearch {
 
     // Constructor
     public ElasticSearch() {
+        // Get config object
+        Config config = new Config();
+
         // Get es_connection_string, es_index, and es_doc_type
-        connection = System.getenv("es_connection_string");
+        connection = config.es_connection_string;
 
         // Optional
-        index = System.getenv("es_index");
+        index = config.es_index;
         if (index == null || index.equals("")) {
             index = "api";
         }
 
-        doc_type = System.getenv("es_doc_type");
+        doc_type = config.es_doc_type;
         if (doc_type == null || doc_type.equals("")) {
             doc_type = "items";
         }

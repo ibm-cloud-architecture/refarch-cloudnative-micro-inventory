@@ -16,7 +16,7 @@ apply plugin: 'io.spring.dependency-management'
 
 jar {
     baseName = 'micro-inventory'
-    version =  '0.0.1'
+    version = '0.0.1'
 }
 
 repositories {
@@ -27,24 +27,20 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencyManagement {
-     imports {
-          mavenBom 'org.springframework.cloud:spring-cloud-netflix:1.0.4.RELEASE'
-     }
+    imports {
+        mavenBom 'org.springframework.cloud:spring-cloud-netflix:1.0.4.RELEASE'
+    }
 }
 
 dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-eureka')
     compile('org.springframework.cloud:spring-cloud-starter-hystrix')
-    // tag::jetty[]
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "spring-boot-starter-tomcat"
     }
     compile("org.springframework.boot:spring-boot-starter-jetty")
     compile("org.springframework:spring-web")
-    // end::jetty[]
     compile("org.springframework.boot:spring-boot-starter-actuator")
-    //testCompile("junit:junit")
-    //testCompile("org.springframework.boot:spring-boot-starter-test")
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile('org.springframework.boot:spring-boot-starter-jdbc')
@@ -52,6 +48,7 @@ dependencies {
     compile("org.apache.kafka:kafka-clients:0.10.0.+")
     compile("com.squareup.okhttp3:okhttp:3.5.0")
     compile("org.json:json:20160212")
+    compile("org.yaml:snakeyaml:1.8")
 
     testCompile('junit:junit:[4,)')
 
@@ -71,16 +68,7 @@ task docker {
             from 'build/libs/micro-inventory-0.0.1.jar'
             into 'docker'
         }
-        copy {
-            from 'config.json'
-            into 'docker'
-        }
-        copy {
-            from 'load_config.sh'
-            into 'docker'
-        }
         file("docker/micro-inventory-0.0.1.jar").renameTo(file("docker/app.jar"))
-
     }
 }
 

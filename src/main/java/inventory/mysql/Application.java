@@ -14,19 +14,20 @@ public class Application {
         ApplicationContext ctx = SpringApplication.run(Application.class, args);
         System.out.println("Inventory microservice is ready for business...");
 
-        String connection = System.getenv("es_connection_string");
-        String vcap = System.getenv("VCAP_SERVICES");
+        Config config = new Config();
+
+        String connection = config.es_connection_string;
+        String message_hub_api_key = config.mh_api_key;
 
         if (connection == null || connection.equals("")) {
             System.out.println("Seems we don't have a connection string for Elasticsearch!");
-            System.out.println("Please provide es_connection_string environment variable. i.e. http(s)://ip:9200");
-            System.out.println("You can also run 'source load_config.sh' to run locally");
+            System.out.println("Please provide Elasticsearch connection string in src/main/resources/application.yml");
             System.exit(-1);
         }
 
-        if (vcap == null || vcap.equals("")) {
-            System.out.println("Seems we don't have VCAP_SERVICES to Message Hub!");
-            System.out.println("Please bind Message Hub instance or run 'source load_config.sh' to run locally");
+        if (message_hub_api_key == null || message_hub_api_key.equals("")) {
+            System.out.println("Seems we don't have Message Hub Credentials!");
+            System.out.println("Please provide Elasticsearch connection string in src/main/resources/application.yml");
             System.exit(-1);
         }
 
