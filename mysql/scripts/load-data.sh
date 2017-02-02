@@ -46,8 +46,23 @@ if [ -z "${MYSQL_ROOT_PASSWORD}" ]; then
     _password_opt=""
 fi
 
+# Checking if MySQL has started
+while !(mysqladmin -uroot -p${_password_opt} ping)
+do
+   printf "waiting for mysql to start...\n\n"
+   sleep 1
+   echo "checking again"
+done
+printf "\n\nMySQL started!\n\n"
+
 # load data
-mysql -u root ${_password_opt} <load-data.sql
+while !(mysql -uroot -p${_password_opt} <load-data.sql)
+do
+	printf "Waiting for MySQL to fully initialize\n\n"
+	sleep 1
+   	echo "trying to load data again"
+done
+
 rm load-data.sql testdata
-echo "Data loaded to inventorydb.items."
+printf "\n\nData loaded to inventorydb.items."
 exit 0

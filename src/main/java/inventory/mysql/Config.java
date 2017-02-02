@@ -4,9 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 
 public class Config {
@@ -28,15 +26,28 @@ public class Config {
 
     public Config() {
 
+        // Manifest file json
+        // Used to pull configuration locally
         JSONObject json = null;
 
         try {
             // Get application.yml from resources folder
+            File file = null;
             ClassLoader classLoader = getClass().getClassLoader();
             String path = classLoader.getResource("application.yml").getFile();
+            file = new File(path);
+
+            // Probably running from command line
+            if (!file.exists()) {
+                System.out.println("File does not exist");
+                file = new File(System.getProperty("user.dir") + "/build/resources/main/application.yml");
+                System.out.println(file.getAbsolutePath());
+            }
+
+            System.out.println("Using resource resource file: " + file.getAbsolutePath());
 
             // Get YAML string
-            String fileContents = Config.readFileAsString(path);
+            String fileContents = Config.readFileAsString(file.getAbsolutePath());
 
             // Convert to JSON as it easier to extract data
             String jsonString = Config.convertToJson(fileContents);
@@ -44,34 +55,21 @@ public class Config {
             // Extract properties from JSON
             json = new JSONObject(jsonString);
 
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException | NullPointerException e) {
+            System.out.println("Could not open manifest file. Probably running in docker or bluemix");
+            System.out.println(e);
+            json = null;
         }
 
-        // Extract stuff
-        // Elasticsearch
-        JSONObject elasticsearch = json.getJSONObject("elasticsearch");
-        es_connection_string = Config.select(System.getenv("elasticsearch_connection_string"),
-                elasticsearch.getString("connection_string"));
+        // Get everything from env variables first
+        es_connection_string = System.getenv("elasticsearch_connection_string");
+        es_index = System.getenv("elasticsearch_index");
+        es_doc_type = System.getenv("elasticsearch_doc_type");
 
-        // Optional
-        es_index = Config.select(System.getenv("elasticsearch_connection_string"),
-                elasticsearch.getString("index"));
+        // Message HUB
+        mh_topic = System.getenv("message_hub_topic");
+        mh_message = System.getenv("message_hub_message");
 
-        es_doc_type = Config.select(System.getenv("elasticsearch_connection_string"),
-                elasticsearch.getString("doc_type"));
-
-        // Get topic and message
-        JSONObject messagehub = json.getJSONObject("message_hub");
-
-        mh_topic = Config.select(System.getenv("message_hub_topic"),
-                messagehub.getString("topic"));
-
-        mh_message = Config.select(System.getenv("message_hub_message"),
-                messagehub.getString("message"));
-
-        // Message Hub
         // Check if running on Bluemix and Message Hub is bound
         String vcap_string = System.getenv("VCAP_SERVICES");
         if (vcap_string != null && (vcap_string.equals("") == false)) {
@@ -107,21 +105,30 @@ public class Config {
 
         } else {
             System.out.println("Message HUB not in VCAP, using environment variables");
+            mh_user = System.getenv("message_hub_user");
+            mh_password = System.getenv("message_hub_password");
+            mh_api_key = System.getenv("message_hub_api_key");
+            mh_kafka_rest_url = System.getenv("message_hub_kafka_rest_url");
+            mh_kafka_brokers_sasl = System.getenv("message_hub_kafka_brokers_sasl");
+        }
 
-            mh_user = Config.select(System.getenv("message_hub_user"),
-                    messagehub.getString("user"));
+        // Last resource, check application.yml for missing configuration variable
+        if (json != null) {
+            System.out.println("Doing final check with application.yml in case we missed some variables");
+            JSONObject elasticsearch = json.getJSONObject("elasticsearch");
+            JSONObject messagehub = json.getJSONObject("message_hub");
 
-            mh_password = Config.select(System.getenv("message_hub_password"),
-                    messagehub.getString("password"));
+            es_connection_string = Config.select(es_connection_string, elasticsearch.getString("connection_string"));
+            es_index = Config.select(es_index, elasticsearch.getString("index"));
+            es_doc_type = Config.select(es_doc_type, elasticsearch.getString("doc_type"));
 
-            mh_api_key = Config.select(System.getenv("message_hub_api_key"),
-                    messagehub.getString("api_key"));
-
-            mh_kafka_rest_url = Config.select(System.getenv("message_hub_kafka_rest_url"),
-                    messagehub.getString("kafka_rest_url"));
-
-            mh_kafka_brokers_sasl = Config.select(System.getenv("message_hub_kafka_brokers_sasl"),
-                    Config.get_servers(messagehub.getJSONArray("kafka_brokers_sasl")));
+            mh_topic = Config.select(mh_topic, messagehub.getString("topic"));
+            mh_message = Config.select(mh_message, messagehub.getString("message"));
+            mh_user = Config.select(mh_user, messagehub.getString("user"));
+            mh_password = Config.select(mh_password, messagehub.getString("password"));
+            mh_api_key = Config.select(mh_api_key, messagehub.getString("api_key"));
+            mh_kafka_rest_url = Config.select(mh_kafka_rest_url, messagehub.getString("kafka_rest_url"));
+            mh_kafka_brokers_sasl = Config.select(mh_kafka_brokers_sasl, Config.get_servers(messagehub.getJSONArray("kafka_brokers_sasl")));
         }
 
         // Validate all the things

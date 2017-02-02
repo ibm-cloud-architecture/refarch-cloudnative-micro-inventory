@@ -142,19 +142,42 @@ In this section you will deploy the Spring Boot application to run in a local do
 
 2. If not already done, [setup MySQL database `inventorydb` on local docker container](https://github.com/ibm-cloud-architecture/refarch-cloudnative-mysql#setup-inventory-database-on-local-mysql-container).
 
-3. Start the application in docker container.  
+3. If not already done, Deploy `ElasticSearch` docker container locally.
+ 
+4. If not already done, [Provision `MessageHub` service instance](https://console.ng.bluemix.net/catalog/services/message-hub).
+  - After provisioning, go to instance `Service Credentials` tab on Bluemix.
+  - Then press `View credentials`. You will need those credentials below.
 
-   Replace `{dbuser}` with database user name and `{password}` with database user password.  
-   The `{mysql-docker-ip}` is the mysql container instance IP address. For users running on Docker version prior to v1.12, it is the IP address of the docker-machine. For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.   
+5. Start the application in docker container.  
 
+   - Replace `{dbuser}` with database user name and `{password}` with database user password.  
+   - The `{mysql-docker-ip}` is the mysql container instance IP address.
+     * For users running on Docker version prior to v1.12, it is the IP address of the docker-machine.
+     * For Docker 1.12 and later, you need to replace the {mysql-docker-ip} with the value from the result of executing 'docker inspect mysql'. You should look the Networking section, find the **IPAddress**.
+   - Replace `{mh_user}` with Message Hub `user`   
+   - Replace `{mh_password}` with Message Hub `password`      
+   - Replace `{mh_api_key}` with Message Hub `api_key`      
+   - Replace `{mh_kafka_rest_url}` with Message Hub `kafka_rest_url`      
+   - Replace all the `{mh_kafka_broker}` with all the URLs listed in Message Hub `kafka_brokers_sasl`
     ```
     # docker run -d -p 8080:8080 --name inventoryservice \
       -e "spring.datasource.url=jdbc:mysql://{mysql-docker-ip}:3306/inventorydb" \
       -e "spring.datasource.username={dbuser}" -e "spring.datasource.password={password}" \
+      -e "elasticsearch_connection_string=http://localhost:9200" \
+      -e "elasticsearch_index=api" \
+      -e "elasticsearch_doc_type=items" \
+      -e "message_hub_user={mh_user}" \
+      -e "message_hub_password={mh_password}" \
+      -e "message_hub_api_key={mh_api_key}" \
+      -e "message_hub_kafka_rest_url={mh_kafka_rest_url}" \
+      -e "message_hub_kafka_brokers_sasl=[{mh_kafka_broker1},{mh_kafka_broker2},{kafka_brokers_sasl_3},{kafka_brokers_sasl_4},{kafka_brokers_sasl_5
+        }]" \
+      -e "message_hub_topic=inventory" \
+      -e "message_hub_message=refresh_cache \
        cloudnative/inventoryservice
     ```
 
-4. Validate.  
+6. Validate.  
     ```
     # curl http://{docker-host}:8080/micro/inventory/13412
     {"id":13412,"name":"Selectric Typewriter","description":"Unveiled in 1961, the revolutionary Selectric typewriter eliminated the need for conventional type bars and movable carriages by using an innovative typing element on a head-and-rocker assembly, which, in turn, was mounted on a small carrier to move from left to right while typing.","price":2199,"img":"api/image/selectric.jpg","imgAlt":"Selectric Typewriter"}
