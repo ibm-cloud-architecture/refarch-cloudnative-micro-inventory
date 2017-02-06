@@ -121,7 +121,7 @@ public class Inventory {
     string.append(String.format("\t\"name\": \"%s\",\n", this.name));
     string.append(String.format("\t\"description\": \"%s\",\n", this.description));
     string.append(String.format("\t\"price\": %s,\n", this.price));
-    string.append(String.format("\t\"img_alt\": \"%s\",\n", this.img_alt));
+    string.append(String.format("\t\"imgAlt\": \"%s\",\n", this.img_alt));
     string.append(String.format("\t\"img\": \"%s\",\n", this.img));
     string.append(String.format("\t\"stock\": %s\n", this.stock));
     string.append("}");

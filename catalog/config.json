@@ -1,0 +1,36 @@
+{
+  "es_connection_string": "http://169.46.22.4:9200",
+  "es_index": "api",
+  "es_doc_type": "items",
+  "mh_topic": "inventory",
+  "mh_message": "refresh_cache",
+  "VCAP_SERVICES": {
+    "messagehub": [{
+      "credentials": {
+        "mqlight_lookup_url": "https://mqlight-lookup-prod01.messagehub.services.us-south.bluemix.net/Lookup?serviceId=f3ce0208-f203-4a0d-8bc7-74f8f5d7424a",
+        "api_key": "tz7gNdDEfJ3owVZi9b9lA5Qau0XHGp00Jl7cM9PhtDdokWyU",
+        "kafka_admin_url": "https://kafka-admin-prod01.messagehub.services.us-south.bluemix.net:443",
+        "kafka_rest_url": "https://kafka-rest-prod01.messagehub.services.us-south.bluemix.net:443",
+        "kafka_brokers_sasl": [
+          "kafka01-prod01.messagehub.services.us-south.bluemix.net:9093",
+          "kafka02-prod01.messagehub.services.us-south.bluemix.net:9093",
+          "kafka03-prod01.messagehub.services.us-south.bluemix.net:9093",
+          "kafka04-prod01.messagehub.services.us-south.bluemix.net:9093",
+          "kafka05-prod01.messagehub.services.us-south.bluemix.net:9093"
+        ],
+        "user": "tz7gNdDEfJ3owVZi",
+        "password": "9b9lA5Qau0XHGp00Jl7cM9PhtDdokWyU"
+      },
+      "syslog_drain_url": null,
+      "label": "messagehub",
+      "provider": null,
+      "plan": "standard",
+      "name": "Message Hub-vz",
+      "tags": [
+        "ibm_dedicated_public",
+        "web_and_app",
+        "ibm_created"
+      ]
+    }]
+  }
+}

@@ -1,11 +1,8 @@
 package inventory.mysql;
 
 import inventory.mysql.models.Inventory;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.MediaType;
+import inventory.mysql.models.InventoryRepo;
+import okhttp3.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,9 +12,10 @@ import java.io.StringWriter;
 
 public class ElasticSearch {
 
-    private InventoryController inventoryController;
-
-    private String connection;
+    private InventoryRepo inventoryRepo;
+    private String url;
+    private String user;
+    private String password;
     private String index;
     private String doc_type;
     private OkHttpClient client;
@@ -27,8 +25,10 @@ public class ElasticSearch {
         // Get config object
         Config config = new Config();
 
-        // Get es_connection_string, es_index, and es_doc_type
-        connection = config.es_connection_string;
+        // Get es_url, es_index, and es_doc_type
+        url = config.es_url;
+        user = config.es_user;
+        password = config.es_password;
 
         // Optional
         index = config.es_index;
@@ -41,14 +41,33 @@ public class ElasticSearch {
             doc_type = "items";
         }
 
-        // Get InventoryController
-        inventoryController = ((InventoryController) StaticApplicationContext.getContext().getBean("inventoryController"));
+        // Get InventoryRepo
+        inventoryRepo = ((InventoryRepo) StaticApplicationContext.getContext().getBean("inventoryRepo"));
         client = new OkHttpClient();
     }
 
     // Subscribe to topic and start polling
-    public void refresh_cache() {
+    public void refresh_cache(JSONObject row) {
+        long id = row.getLong("itemId");
+        // Update row in database
+        if (!inventoryRepo.exists(id)) {
+            System.out.println("Item does not exist: " + id);
+            return;
+        }
+
+        Inventory item = inventoryRepo.findOne(id);
+        int new_stock = item.getStock() - row.getInt("count");
+        System.out.println("Current stock: " + item.getStock());
+        System.out.println("New Stock: " + new_stock);
+
+        // Do the saving
+        item.setStock(new_stock);
+        inventoryRepo.save(item);
+
+        // Then fetch them all
         JSONArray rows = get_all_rows();
+
+        // Then update cache
         load_rows_into_cache(rows);
     }
 
@@ -56,10 +75,11 @@ public class ElasticSearch {
     public JSONArray get_all_rows() {
         JSONArray rows = null;
         try {
-            Iterable<Inventory> items = inventoryController.getInventory();
+            Iterable<Inventory> items = inventoryRepo.findAll();
             StringBuilder rows_string = new StringBuilder();
 
             // Build the string for JSONArray
+            System.out.println("Rows:");
             rows_string.append("[");
             for (Inventory item : items) {
                 rows_string.append(item.toString());
@@ -70,6 +90,7 @@ public class ElasticSearch {
 
             // Finish array
             rows_string.append("]");
+            System.out.println("rows_string: " + rows_string.toString());
 
             rows = new JSONArray(rows_string.toString());
 
@@ -89,22 +110,30 @@ public class ElasticSearch {
     public void load_rows_into_cache(JSONArray rows) {
         for (int i = 0; i < rows.length(); i++) {
             JSONObject jsonObj = rows.getJSONObject(i);
-            System.out.println(jsonObj.toString());
+            System.out.println("Loading row: \n" + jsonObj.toString());
 
             try {
                 MediaType mediaType = MediaType.parse("application/json");
                 RequestBody body = RequestBody.create(mediaType, jsonObj.toString());
 
                 // Build URL
-                String url = String.format("%s/%s/%s/%s", connection, index, doc_type, jsonObj.getInt("id"));
-                Request request = new Request.Builder()
-                        .url(url)
+                String url = String.format("%s/%s/%s/%s", this.url, index, doc_type, jsonObj.getInt("id"));
+
+                Request.Builder builder = new Request.Builder().url(url)
                         .put(body)
-                        .addHeader("content-type", "application/json")
-                        .build();
+                        .addHeader("content-type", "application/json");
+
+                if (user != null && !user.equals("") && password != null && !password.equals("")) {
+                    System.out.println("Adding credentials to request");
+                    builder.addHeader("Authorization", Credentials.basic(user, password));
+                }
+
+                Request request = builder.build();
 
                 Response response = client.newCall(request).execute();
-                JSONObject resp = new JSONObject(response.body().string());
+                String resp_string = response.body().string();
+                System.out.println("resp_string: \n" + resp_string);
+                JSONObject resp = new JSONObject(resp_string);
                 boolean created = resp.getBoolean("created");
 
                 System.out.printf("Item %s was %s\n\n", resp.getString("_id"), ((created == true) ? "Created" : "Updated"));

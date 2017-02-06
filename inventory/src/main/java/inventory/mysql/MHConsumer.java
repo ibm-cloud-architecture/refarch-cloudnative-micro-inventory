@@ -12,14 +12,13 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import inventory.mysql.rest.RESTAdmin;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MHConsumer {
 
     private KafkaConsumer<String, String> consumer;
     private String topic;
-    private String message;
     private String servers;
     private String username;
     private String password;
@@ -36,12 +35,7 @@ public class MHConsumer {
         // Assign topic and message
         topic = config.mh_topic;
         if (topic == null || topic.equals("")) {
-            topic = "api";
-        }
-
-        message = config.mh_message;
-        if (message == null || message.equals("")) {
-            message = "refresh_cache";
+            topic = "inventory";
         }
 
         // Assign username and password
@@ -124,12 +118,20 @@ public class MHConsumer {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(3000);
             for (ConsumerRecord<String, String> record : records) {
-                System.out.printf("Message = %s\n", record.value());
+                System.out.printf("\nMessage = %s\n", record.value());
 
-                // Check if message matches the trigger
-                if (record.value().toLowerCase().contains(message.toLowerCase())) {
-                    System.out.println("Got the right message! Refreshing cache!\n\n");
-                    es.refresh_cache();
+                try {
+                    JSONObject object = new JSONObject(record.value());
+
+                    // Check if it has required fields
+                    if (object.has("itemId") && object.has("count")) {
+                        System.out.println("Valid object: " + object.getLong("itemId"));
+                        es.refresh_cache(object);
+                    }
+
+                } catch (Exception e) {
+                    System.out.println("Something happened parsing out message (probably not valid or JSON): ");
+                    System.out.println(e);
                 }
             }
         }
