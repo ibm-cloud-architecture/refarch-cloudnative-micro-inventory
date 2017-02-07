@@ -53,7 +53,7 @@ This project is built to demonstrate how to build a Spring Boot application to u
 
 
 
-#### <a name="apis"></a> APIs in this application
+####APIs in this application
 You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the application.
 - Get all items in inventory
 http://<hostname>/micro/inventory
