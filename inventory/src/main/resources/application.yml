@@ -1,0 +1,57 @@
+eureka:
+  instance:
+     preferIpAddress: true
+  client:
+    serviceUrl:
+       defaultZone: http://microservices-refapp-eureka-chrisking.mybluemix.net/eureka/
+
+# Server configuration
+server:
+  context-path: /micro
+  port: 8080
+
+# Spring properties
+spring:
+  application:
+     name: inventory-microservice
+
+  # MySQL Data source configuration
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1/inventorydb
+    username: dbuser
+    password: password
+    port: 3306
+    max-active: 4
+    testOnBorrow: true
+    validationQuery: SELECT 1
+
+  jpa:
+    database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+
+# Elasticsearch
+elasticsearch:
+  url: http://localhost:9200
+  user:
+  password:
+  index: api
+  doc_type: items
+
+# Message Hub properties
+message_hub:
+  topic: inventory
+  user:
+  password:
+  api_key:
+  kafka_rest_url:
+  # Paste broker urls here one by one
+  kafka_brokers_sasl:
+    -
+    -
+    -
+    -
+    -

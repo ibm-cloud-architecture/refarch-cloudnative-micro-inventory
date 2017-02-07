@@ -1,0 +1,72 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.2.RELEASE")
+        classpath("io.spring.gradle:dependency-management-plugin:0.5.2.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'io.spring.dependency-management'
+
+springBoot {
+    mainClass = "catalog.Application"
+}
+
+jar {
+    baseName = 'micro-catalog'
+    version = '0.0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.cloud:spring-cloud-netflix:1.0.4.RELEASE'
+    }
+}
+
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-eureka')
+    compile('org.springframework.cloud:spring-cloud-starter-hystrix')
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    compile("com.squareup.okhttp3:okhttp:3.5.0")
+    compile("org.json:json:20160212")
+    compile("org.yaml:snakeyaml:1.8")
+    testCompile('junit:junit:[4,)')
+
+}
+
+test {
+    useJUnit()
+    testLogging {
+        events 'started', 'passed'
+        showStandardStreams = true
+    }
+}
+
+task docker {
+    doLast {
+        copy {
+            from 'build/libs/micro-catalog-0.0.1.jar'
+            into 'docker'
+        }
+        file("docker/micro-catalog-0.0.1.jar").renameTo(file("docker/app.jar"))
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
