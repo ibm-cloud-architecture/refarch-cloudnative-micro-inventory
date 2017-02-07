@@ -15,7 +15,45 @@ This project is built to demonstrate how to build a Spring Boot application to u
  - Integrate with Netflix Eureka framework.
  - Deployment option for IBM Bluemix Container runtime.
 
-####APIs in this application
+####Table of Contents
+- [APIs](#apis)
+- Pre reqs
+  - Message Hub
+  - MySQL
+    - Local
+    - Container
+    - Bluemix
+  - Elasticsearch
+    - Local
+    - Container
+    - Bluemix
+- Inventory
+  - Local
+  - Container
+  - Bluemix
+- Catalog
+  - Local
+  - Container
+  - Bluemix
+
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+      - [refarch-cloudnative-micro-inventory](#)
+- [Spring Boot Netflix OSS app Integration with MySQL Database Server](#)
+- [DIAGRAM COMING SOON!](#)
+- [Introduction](#)
+- [APIs in this application](#apis-in-this-application)
+- [Pre-requisite:](#)
+- [Deploy Elasticsearch on local docker container](#)
+- [Deploy Elasticsearch on Bluemix container](#)
+- [Build the application](#)
+- [Run Inventory Service application on localhost](#)
+- [Run Inventory Service application on local docker container](#)
+- [Deploy Inventory Service application to IBM Bluemix container](#)
+
+
+
+#### <a name="apis"></a> APIs in this application
 You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the application.
 - Get all items in inventory
 http://<hostname>/micro/inventory
