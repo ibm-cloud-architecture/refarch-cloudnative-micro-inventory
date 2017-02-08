@@ -48,7 +48,7 @@ message_hub:
   password:
   api_key:
   kafka_rest_url:
-  # Paste broker urls here one by one
+  # Add all brokers listed in Message Hub Credentials
   kafka_brokers_sasl:
     -
     -
