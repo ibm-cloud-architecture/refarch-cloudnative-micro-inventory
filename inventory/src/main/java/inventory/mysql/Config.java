@@ -2,7 +2,9 @@ package inventory.mysql;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
+
 public class Config {
 
     // Elasticsearch stuff
@@ -69,22 +71,22 @@ public class Config {
             if (mh_kafka_brokers_sasl == null || mh_kafka_brokers_sasl.equals("")) {
                 System.out.println("Passed kafka_brokers_sasl as a LIST");
 
-                // Only get 5 tops
-                int max = 10;
+                // Max of servers to parse tops
+                int i = 0;
                 StringBuilder brokers = new StringBuilder();
 
-                for (int i = 0; i < max; i++) {
-                    String broker = env.getProperty(String.format("message_hub.kafka_brokers_sasl[%d]", i));
-
-                    if (broker != null && !broker.equals("")) {
-                        brokers.append(broker);
-                        if (i < (max - 1)) {
-                            brokers.append(",");
-                        }
-                    }
+                // Get all provided brokers
+                while (Config.get_broker(i) != null) {
+                    brokers.append(Config.get_broker(i));
+                    brokers.append(",");
+                    i++;
                 }
-                mh_kafka_brokers_sasl = brokers.toString();
+
+                mh_kafka_brokers_sasl = Config.remove_last_comma(brokers.toString());
+                System.out.println(String.format("Picked up %d brokers", i));
             }
+
+            System.out.println("Brokers: " + mh_kafka_brokers_sasl);
         }
 
         // Validate all the things
@@ -99,6 +101,22 @@ public class Config {
         Config.validate("api_key", mh_api_key, "message_hub");
         Config.validate("kafka_rest_url", mh_kafka_rest_url, "message_hub");
         Config.validate("kafka_brokers_sasl", mh_kafka_brokers_sasl, "message_hub");
+    }
+
+    private static String get_broker(int i) {
+        Environment env = StaticApplicationContext.getContext().getEnvironment();
+        String broker = env.getProperty(String.format("message_hub.kafka_brokers_sasl[%d]", i));
+        if (broker != null && broker.isEmpty()) {
+            broker = null;
+        }
+        return broker;
+    }
+
+    private static String remove_last_comma(String str) {
+        if (str != null && str.length() > 0 && str.charAt(str.length() - 1) == ',') {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
     }
 
     private static void validate(String key, String value, String section) {
