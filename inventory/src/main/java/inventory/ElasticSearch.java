@@ -50,6 +50,19 @@ public class ElasticSearch {
         }
 
         client = new OkHttpClient();
+
+        // Load cache
+        System.out.println("***********\nInitializing cache:");
+        load_cache();
+        System.out.println("Cache initialized!\n***********");
+    }
+
+    public void load_cache () {
+        // Fetch all the rows
+        JSONArray rows = get_all_rows();
+
+        // Then update cache
+        load_rows_into_cache(rows);
     }
 
     // Subscribe to topic and start polling
@@ -70,11 +83,7 @@ public class ElasticSearch {
         item.setStock(new_stock);
         inventoryRepo.save(item);
 
-        // Then fetch them all
-        JSONArray rows = get_all_rows();
-
-        // Then update cache
-        load_rows_into_cache(rows);
+        load_cache();
     }
 
     // Get all rows from database
