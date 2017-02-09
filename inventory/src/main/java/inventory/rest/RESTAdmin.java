@@ -1,4 +1,4 @@
-package inventory.mysql.rest;
+package inventory.rest;
 
 /**
  * Facade to access IBM Message Hub REST Admin API

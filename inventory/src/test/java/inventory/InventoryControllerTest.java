@@ -1,4 +1,4 @@
-package inventory.mysql;
+package inventory;
 
 import java.util.Random;
 
@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import inventory.mysql.models.Inventory;
+import inventory.models.Inventory;
 
 public class InventoryControllerTest {
 	

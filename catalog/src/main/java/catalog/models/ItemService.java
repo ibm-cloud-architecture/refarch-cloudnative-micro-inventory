@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import catalog.Config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
@@ -12,61 +11,45 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ItemService {
+    @Value("${elasticsearch.url}")
     private String url;
+
+    @Value("${elasticsearch.user}")
     private String user;
+
+    @Value("${elasticsearch.password}")
     private String password;
+
+    @Value("${elasticsearch.index}")
     private String index;
+
+    @Value("${elasticsearch.doc_type}")
     private String doc_type;
+
     private OkHttpClient client;
 
     // Constructor
     public ItemService() {
-        // Get config object
-        Config config = new Config();
-
-        // Get es_url, es_index, and es_doc_type
-        url = config.es_url;
-        user = config.es_user;
-        password = config.es_password;
-
-        // Optional
-        index = config.es_index;
-        if (index == null || index.equals("")) {
-            index = "api";
-        }
-
-        doc_type = config.es_doc_type;
-        if (doc_type == null || doc_type.equals("")) {
-            doc_type = "items";
-        }
-
         client = new OkHttpClient();
     }
 
     // Get all rows from database
     public List<Item> findAll() {
-        List<Item> list = new ArrayList<Item>();
+        List<Item> list;
+        String req_url = url + "/" + index + "/" + doc_type + "/_search";
+        Response response = perform_request(req_url);
 
         try {
-            Request.Builder builder = new Request.Builder()
-                    .url(url + "/api/items/_search")
-                    .get()
-                    .addHeader("content-type", "application/json");
-
-            if (user != null && !user.equals("") && password != null && !password.equals("")) {
-                System.out.println("Adding credentials to request");
-                builder.addHeader("Authorization", Credentials.basic(user, password));
-            }
-
-            Request request = builder.build();
-            Response response = client.newCall(request).execute();
             list = getItemsFromResponse(response);
 
         } catch (IOException e) {
+            // Just to be safe
+            list = null;
             System.out.println(e);
         }
 
@@ -76,19 +59,10 @@ public class ItemService {
     // Get all rows from database
     public Item findById(long id) {
         Item item = null;
+        String req_url = url + "/" + index + "/" + doc_type + "/" + id;
+        Response response = perform_request(req_url);
 
         try {
-            Request.Builder builder = new Request.Builder()
-                    .url(url + "/api/items/" + id)
-                    .get();
-
-            if (user != null && !user.equals("") && password != null && !password.equals("")) {
-                System.out.println("Adding credentials to request");
-                builder.addHeader("Authorization", Credentials.basic(user, password));
-            }
-
-            Request request = builder.build();
-            Response response = client.newCall(request).execute();
             JSONObject resp = new JSONObject(response.body().string());
             System.out.println("Response: " + resp.toString());
 
@@ -108,11 +82,29 @@ public class ItemService {
 
     // Get all rows from database
     public List<Item> findByNameContaining(String name) {
-        List<Item> list = null;
+        List<Item> list;
+        String req_url = url + "/" + index + "/" + doc_type + "/_search?q=name:" + name;
+        Response response = perform_request(req_url);
+
+        try {
+            list = getItemsFromResponse(response);
+
+        } catch (IOException e) {
+            // Just to be safe
+            list = null;
+            System.out.println(e);
+        }
+
+        return list;
+    }
+
+    private Response perform_request(String req_url) {
+        Response response;
+        System.out.println("req_url: " + req_url);
 
         try {
             Request.Builder builder = new Request.Builder()
-                    .url(url + "/api/items/_search?q=name%3A" + name)
+                    .url(req_url)
                     .get()
                     .addHeader("content-type", "application/json");
 
@@ -122,14 +114,15 @@ public class ItemService {
             }
 
             Request request = builder.build();
-            Response response = client.newCall(request).execute();
-            list = getItemsFromResponse(response);
+            response = client.newCall(request).execute();
 
         } catch (IOException e) {
+            // Just to be safe
+            response = null;
             System.out.println(e);
         }
 
-        return list;
+        return response;
     }
 
     private List<Item> getItemsFromResponse(Response response) throws IOException {
