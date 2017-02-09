@@ -1,4 +1,4 @@
-package inventory.mysql.models;
+package inventory.models;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

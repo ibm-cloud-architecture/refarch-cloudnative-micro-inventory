@@ -1,4 +1,4 @@
-package inventory.mysql;
+package inventory;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

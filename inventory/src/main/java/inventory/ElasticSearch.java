@@ -1,18 +1,29 @@
-package inventory.mysql;
+package inventory;
 
-import inventory.mysql.models.Inventory;
-import inventory.mysql.models.InventoryRepo;
+import inventory.config.ElasticsearchConfig;
+import inventory.models.Inventory;
+import inventory.models.InventoryRepo;
 import okhttp3.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+@Component("ElasticSearch")
 public class ElasticSearch {
 
+    @Autowired
+    @Qualifier("inventoryRepo")
     private InventoryRepo inventoryRepo;
+
+    @Autowired
+    ElasticsearchConfig config;
     private String url;
     private String user;
     private String password;
@@ -20,29 +31,24 @@ public class ElasticSearch {
     private String doc_type;
     private OkHttpClient client;
 
-    // Constructor
-    public ElasticSearch() {
-        // Get config object
-        Config config = new Config();
-
+    @PostConstruct
+    public void init() {
         // Get es_url, es_index, and es_doc_type
-        url = config.es_url;
-        user = config.es_user;
-        password = config.es_password;
+        url = config.getUrl();
+        user = config.getUser();
+        password = config.getPassword();
 
         // Optional
-        index = config.es_index;
+        index = config.getIndex();
         if (index == null || index.equals("")) {
             index = "api";
         }
 
-        doc_type = config.es_doc_type;
+        doc_type = config.getDoc_type();
         if (doc_type == null || doc_type.equals("")) {
             doc_type = "items";
         }
 
-        // Get InventoryRepo
-        inventoryRepo = ((InventoryRepo) StaticApplicationContext.getContext().getBean("inventoryRepo"));
         client = new OkHttpClient();
     }
 

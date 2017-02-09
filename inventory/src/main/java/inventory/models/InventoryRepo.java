@@ -1,4 +1,4 @@
-package inventory.mysql.models;
+package inventory.models;
 
 import java.util.List;
 import javax.transaction.Transactional;

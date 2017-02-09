@@ -1,4 +1,4 @@
-package inventory.mysql;
+package inventory;
 
 import java.util.Properties;
 import java.util.Arrays;
@@ -8,14 +8,29 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
+import inventory.config.MHConfig;
+import inventory.rest.RESTAdmin;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import inventory.mysql.rest.RESTAdmin;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
+@Component("MHConsumer")
 public class MHConsumer {
+
+    @Autowired
+    @Qualifier("ElasticSearch")
+    private ElasticSearch es;
+
+    @Autowired
+    @Qualifier("MHConfig")
+    MHConfig config;
 
     private KafkaConsumer<String, String> consumer;
     private String topic;
@@ -24,29 +39,23 @@ public class MHConsumer {
     private String password;
     private String rest_url;
     private String api_key;
-    private ElasticSearch es;
-    private Config config;
 
-    // Constructor
-    public MHConsumer() {
+    @PostConstruct
+    public void init() {
         // Get config object
-        config = new Config();
 
         // Assign topic and message
-        topic = config.mh_topic;
+        topic = config.getTopic();
         if (topic == null || topic.equals("")) {
             topic = "inventory";
         }
 
         // Assign username and password
-        username = config.mh_user;
-        password = config.mh_password;
-        servers = config.mh_kafka_brokers_sasl;
-        rest_url = config.mh_kafka_rest_url;
-        api_key = config.mh_api_key;
-
-        // Setup ElasticSearch class
-        es = new ElasticSearch();
+        username = config.getUser();
+        password = config.getPassword();
+        servers = config.getServers();
+        rest_url = config.getKafka_rest_url();
+        api_key = config.getApi_key();
 
         try {
 
@@ -108,6 +117,8 @@ public class MHConsumer {
             e.printStackTrace();
             System.exit(-1);
         }
+
+        subscribe();
     }
 
     // Subscribe to topic and start polling for messages
