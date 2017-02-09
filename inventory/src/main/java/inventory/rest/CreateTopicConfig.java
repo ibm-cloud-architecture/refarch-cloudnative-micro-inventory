@@ -1,4 +1,4 @@
-package inventory.mysql.rest;
+package inventory.rest;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

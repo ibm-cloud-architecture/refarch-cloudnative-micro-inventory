@@ -1,4 +1,4 @@
-package inventory.mysql.rest;
+package inventory.rest;
 
 /**
  * Copyright 2015-2016 IBM
