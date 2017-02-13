@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 /**
  * REST Controller to manage Inventory database
@@ -38,10 +37,8 @@ public class InventoryController {
 	/**
 	 * @return all items in inventory
 	 */
-	@HystrixCommand(fallbackMethod="failGood")
 	@RequestMapping(value = "/inventory", method = RequestMethod.GET)
 	@ResponseBody Iterable<Inventory> getInventory() {
 		return itemsRepo.findAll();
 	}
-
 }
