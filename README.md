@@ -8,6 +8,7 @@ https://github.com/ibm-solution-engineering/refarch-cloudnative*
 ##Table of Contents
 - [Introduction](#introduction)
   - [APIs](#apis)
+- [Deploy to Bluemix](#deploy-to-bluemix)
 - [Pre-requisites](#pre-requisites)
   - [Message Hub](#message-hub)
   - [MySQL](#mysql)
@@ -56,6 +57,11 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
 
 - Example curl command to get al items in localhost:
 `curl -X GET "http://localhost:8081/items/inventory"`
+
+##Deploy to BlueMix
+You can use the following button to deploy the Inventory and Catalog microservices to Bluemix, or you can follow the instructions manually below.
+
+[![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory.git)
 
 ##Pre-requisites:
 - You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/engine/installation/).
