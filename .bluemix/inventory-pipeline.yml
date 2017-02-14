@@ -94,38 +94,20 @@ stages:
   triggers:
   - type: stage
   properties:
-  - name: MIN_INSTANCES
-    value: '1'
-    type: text
-  - name: MAX_INSTANCES
-    value: '3'
-    type: text
   - name: DESIRED_INSTANCES
-    value: '2'
-    type: text
-  - name: MEMORY
-    value: '256'
-    type: text
-  - name: CONTAINER_SIZE
-    value: '256'
+    value: "2"
     type: text
   - name: EUREKA_REGISTRY_URL
-    value: https://us-netflix-eureka-cloudnative-integration.mybluemix.net/eureka/
+    value: "https://us-netflix-eureka-cloudnative-integration.mybluemix.net/eureka/"
     type: text
-  - name: NEW_RELIC_LICENSE_KEY
-    value: ''
+  - name: MAX_INSTANCES
+    value: "3"
     type: text
-  - name: IGNORE_MAPPING_ROUTE
-    value: 'true'
+  - name: MEMORY
+    value: "256"
     type: text
-  - name: JDBC_URL
-    value: jdbc:mysql://172.31.22.44:3306/inventorydb
-    type: text
-  - name: MYSQL_USERNAME
-    value: dbuser
-    type: text
-  - name: MYSQL_PASSWORD
-    value: Pass4dbus3r
+  - name: MIN_INSTANCES
+    value: "1"
     type: text
   jobs:
   - name: Deploy
@@ -153,18 +135,6 @@ stages:
       fi
 
       set -x
-      # get elasticsearch credentials
-      elasticsearch_svc=`cf services | grep compose-for-elasticsearch | sed -e 's/compose-for-elasticsearch.*$//g' -e 's/[ ]*$//g'`
-      elasticsearch_svc_key_name=`cf service-keys "${elasticsearch_svc}" | tail -1 | sed -e 's/[ ]*$//g'`
-      elasticsearch_svc_creds=`cf service-key "${elasticsearch_svc}" "${elasticsearch_svc_key_name}" | grep -v "Getting key "`
-
-      elasticsearch_uri=`echo ${elasticsearch_svc_creds} | ./jq '.uri' | sed -e 's/"//g'`
-
-      # parse the uri to get username/password
-      elasticsearch_username=`echo ${elasticsearch_uri} | sed -e 's/https:\/\///' | sed -e 's/@.*$//' | awk -F: '{print $1;}'`
-      elasticsearch_password=`echo ${elasticsearch_uri} | sed -e 's/https:\/\///' | sed -e 's/@.*$//' | awk -F: '{print $2;}'`
-      elasticsearch_url=`echo ${elasticsearch_uri} | sed -e 's/^.*@/https:\/\//'`
-
       # messagehub credentials
       messagehub_svc=`cf services | grep messagehub | sed -e 's/[ ][ ]messagehub.*$//' | sed -e 's/[ ]*$//g'`
       messagehub_cred_name=`cf service-keys "${messagehub_svc}" | tail -1 | sed -e 's/[ ]*$//g'`
@@ -205,16 +175,15 @@ stages:
 
       OPTIONAL_ARGS="${OPTIONAL_ARGS} \
             --hostname micro-inventory \
-            -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} \
             -e eureka.client.fetchRegistry=true \
             -e eureka.client.registerWithEureka=false \
             -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
             -e "spring.datasource.url=${JDBC_URL}" \
             -e "spring.datasource.username=${MYSQL_USERNAME}" \
             -e "spring.datasource.password=${MYSQL_PASSWORD}" \
-            -e "elasticsearch.user=${elasticsearch_username}" \
-            -e "elasticsearch.password=${elasticsearch_password}" \
-            -e "elasticsearch.url=${elasticsearch_url}" \
+            -e "elasticsearch.user=${ELASTICSEARCH_USER}" \
+            -e "elasticsearch.password=${ELASTICSEARCH_PASSWORD}" \
+            -e "elasticsearch.url=${ELASTICSEARCH_URL}" \
             -e "message_hub.topic=orders" \
             -e "message_hub.user=${kafka_username}" \
             -e "message_hub.password=${kafka_password}" \

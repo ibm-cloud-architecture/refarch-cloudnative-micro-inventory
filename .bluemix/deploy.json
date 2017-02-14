@@ -21,8 +21,8 @@
             "description": "Domain name. Example: mybluemix.net for runtimes in US-South",
             "type": "string"
         },
-        "mysql-database": {
-            "description": "Inventory database name",
+        "mysql-ip": {
+            "description": "MySQL IP address",
             "type": "string"
         },
         "mysql-port": {
@@ -34,23 +34,32 @@
             "type": "string"
         },
         "mysql-dbpass": {
-            "description": "Password for MySQL database user",
+            "description": "MySQL database user password",
             "type": "password"
         },
-        "mysql-root-pass": {
-            "description": "Password for MySQL admin user",
-            "type": "password"
-        },
-        "jdbc-url": {
-            "description": "JDBC URL",
+        "es-url": {
+            "description": "Elasticsearch URL http(s)://host_ip:port",
             "type": "string"
+        },
+        "es-user": {
+            "description": "Elasticsearch URL http(s)://host_ip:port",
+            "type": "string"
+        },
+        "es-password": {
+            "description": "Elasticsearch URL http(s)://host_ip:port",
+            "type": "password"
         }
     },
     "required": [
         "deploy-region",
         "deploy-org",
         "deploy-space",
-        "route-domain"
+        "route-domain",
+        "mysql-ip",
+        "mysql-port",
+        "mysql-dbuser",
+        "mysql-dbpass",
+        "es-url"
     ],
     "form": [
         {
@@ -66,8 +75,14 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "JDBC_URL",
-            "key": "jdbc-url"
+            "title": "Database IP",
+            "key": "mysql-ip"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Database Port",
+            "key": "mysql-port"
         },
         {
             "type": "text",
@@ -80,6 +95,24 @@
             "readonly": false,
             "title": "Database Password",
             "key": "mysql-dbpass"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Elasticsearch URL",
+            "key": "es-url"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Elasticsearch User",
+            "key": "es-user"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Elasticsearch Password",
+            "key": "es-password"
         },
         {
             "type": "table",
