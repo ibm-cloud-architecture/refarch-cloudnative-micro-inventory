@@ -20,5 +20,5 @@ elasticsearch:
   url: http://localhost:9200
   user:
   password:
-  index: api
+  index: micro
   doc_type: items
