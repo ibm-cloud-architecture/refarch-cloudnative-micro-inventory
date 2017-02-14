@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
+
 @Component("MHConsumer")
 public class MHConsumer {
 
@@ -42,7 +43,6 @@ public class MHConsumer {
 
     @PostConstruct
     public void init() {
-        // Get config object
 
         // Assign topic and message
         topic = config.getTopic();
@@ -117,8 +117,6 @@ public class MHConsumer {
             e.printStackTrace();
             System.exit(-1);
         }
-
-        subscribe();
     }
 
     // Subscribe to topic and start polling for messages

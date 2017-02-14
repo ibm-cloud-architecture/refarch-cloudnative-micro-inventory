@@ -41,7 +41,7 @@ public class ElasticSearch {
         // Optional
         index = config.getIndex();
         if (index == null || index.equals("")) {
-            index = "api";
+            index = "micro";
         }
 
         doc_type = config.getDoc_type();
