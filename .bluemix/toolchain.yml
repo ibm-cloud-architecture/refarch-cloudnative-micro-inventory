@@ -78,9 +78,9 @@ deploy:
   schema: deploy.json
   service-category: pipeline
   parameters:
-    deploy-region: "{{deploy-region}}"
-    deploy-org: "{{deploy-org}}"
-    deploy-space: "{{deploy-space}}"
+    deploy-region: "{{region}}"
+    deploy-org: "{{organization}}"
+    deploy-space: "{{space}}"
     route-domain: "mybluemix.net"
     mysql-ip: "{{mysql-ip}}"
     mysql-port: "3306"
