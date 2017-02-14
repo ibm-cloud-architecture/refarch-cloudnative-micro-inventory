@@ -95,20 +95,47 @@ stages:
   - type: stage
   properties:
   - name: DESIRED_INSTANCES
-    value: "2"
+    value: ${DESIRED_INSTANCES}
+    type: text
+  - name: ELASTICSEARCH_PASSWORD
+    value: ${ELASTICSEARCH_PASSWORD}
+    type: secure
+  - name: ELASTICSEARCH_URL
+    value: ${ELASTICSEARCH_URL}
+    type: text
+  - name: ELASTICSEARCH_USER
+    value: ${ELASTICSEARCH_USER}
     type: text
   - name: EUREKA_REGISTRY_URL
-    value: "https://us-netflix-eureka-cloudnative-integration.mybluemix.net/eureka/"
+    value: ${EUREKA_REGISTRY_URL}
+    type: text
+  - name: IMAGE_NAME
+    value: ${IMAGE_NAME}
+    type: text
+  - name: JDBC_URL
+    value: ${JDBC_URL}
     type: text
   - name: MAX_INSTANCES
-    value: "3"
+    value: ${MAX_INSTANCES}
     type: text
   - name: MEMORY
-    value: "256"
+    value: ${MEMORY}
     type: text
   - name: MIN_INSTANCES
-    value: "1"
+    value: ${MIN_INSTANCES}
     type: text
+  - name: MYSQL_PORT
+    value: ${MYSQL_PORT}
+    type: text
+  - name: MYSQL_DATABASE
+    value: ${MYSQL_DATABASE}
+    type: text
+  - name: MYSQL_USER
+    value: ${MYSQL_USER}
+    type: text
+  - name: MYSQL_PASSWORD
+    value: ${MYSQL_PASSWORD}
+    type: secure
   jobs:
   - name: Deploy
     type: deployer

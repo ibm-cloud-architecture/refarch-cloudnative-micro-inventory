@@ -99,7 +99,7 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "Elasticsearch URL",
+            "title": "Elasticsearch URL. i.e. http(s)://host:port",
             "key": "es-url"
         },
         {
