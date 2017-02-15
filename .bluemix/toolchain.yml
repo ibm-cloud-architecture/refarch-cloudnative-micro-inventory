@@ -87,7 +87,6 @@ deploy:
     mysql-dbuser: ""
     mysql-dbpass: ""
     mysql-database: "inventorydb"
-    jdbc-url: "jdbc:mysql://{{mysql-ip}}:{{mysql-port}}/{{mysql-database}}"
     es-url: ""
     es-user: ""
     es-password: ""

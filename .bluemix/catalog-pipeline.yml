@@ -4,7 +4,7 @@ stages:
   inputs:
   - url: https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory-fabio.git
     type: git
-    branch: catalog
+    branch: integration
     dir_name: null
   triggers:
   - type: commit
