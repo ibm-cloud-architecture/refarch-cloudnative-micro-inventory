@@ -63,48 +63,9 @@ stages:
   triggers:
   - type: stage
   properties:
-  - name: DESIRED_INSTANCES
-    value: ${DESIRED_INSTANCES}
-    type: text
-  - name: ELASTICSEARCH_PASSWORD
-    value: ${ELASTICSEARCH_PASSWORD}
-    type: secure
-  - name: ELASTICSEARCH_URL
-    value: ${ELASTICSEARCH_URL}
-    type: text
-  - name: ELASTICSEARCH_USER
-    value: ${ELASTICSEARCH_USER}
-    type: text
-  - name: EUREKA_REGISTRY_URL
-    value: ${EUREKA_REGISTRY_URL}
-    type: text
-  - name: IMAGE_NAME
-    value: ${IMAGE_NAME}
-    type: text
-  - name: JDBC_URL
-    value: ${JDBC_URL}
-    type: text
-  - name: MAX_INSTANCES
-    value: ${MAX_INSTANCES}
-    type: text
-  - name: MEMORY
-    value: ${MEMORY}
-    type: text
-  - name: MIN_INSTANCES
-    value: ${MIN_INSTANCES}
-    type: text
-  - name: MYSQL_PORT
-    value: ${MYSQL_PORT}
-    type: text
-  - name: MYSQL_DATABASE
-    value: ${MYSQL_DATABASE}
-    type: text
-  - name: MYSQL_USER
-    value: ${MYSQL_USER}
-    type: text
   - name: MYSQL_PASSWORD
     value: ${MYSQL_PASSWORD}
-    type: secure
+    type: text
   jobs:
   - name: Deploy
     type: deployer
@@ -115,30 +76,30 @@ stages:
       space: fabio-case
     COMMAND: "#!/bin/bash\n# The following are some example deployment scripts.  Use\
       \ these as is or fork them and include your updates here:\necho -e \"${label_color}Starting\
-      \ deployment script${no_color}\"\n\nset +e\n# download jq\nJQ_BIN=`which jq`\n\
+      \ deployment script${no_color}\"\nset +e\n# download jq\nJQ_BIN=`which jq`\n\
       if [ -z \"${JQ_BIN}\" ]; then\n  if [ ! -f \"./jq\" ]; then\n      wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64\n\
       \      mv jq-linux64 jq\n      chmod u+x jq\n      JQ_BIN=\"./jq\"\n  fi\nfi\n\
-      \nset -x\n# messagehub credentials\nmessagehub_svc=`cf services | grep messagehub\
+      set -x\n# messagehub credentials\nmessagehub_svc=`cf services | grep messagehub\
       \ | sed -e 's/[ ][ ]messagehub.*$//' | sed -e 's/[ ]*$//g'`\nmessagehub_cred_name=`cf\
       \ service-keys \"${messagehub_svc}\" | tail -1 | sed -e 's/[ ]*$//g'`\nmessagehub_creds=`cf\
       \ service-key \"${messagehub_svc}\" \"${messagehub_cred_name}\" | grep -v \"\
-      Getting key \"`\n\nkafka_username=`echo ${messagehub_creds} | ./jq '.user' |\
-      \ sed -e 's/\"//g'`\nkafka_password=`echo ${messagehub_creds} | ./jq '.password'\
+      Getting key \"`\nkafka_username=`echo ${messagehub_creds} | ./jq '.user' | sed\
+      \ -e 's/\"//g'`\nkafka_password=`echo ${messagehub_creds} | ./jq '.password'\
       \ | sed -e 's/\"//g'`\nkafka_brokerlist=`echo ${messagehub_creds} | ./jq '.kafka_brokers_sasl\
-      \ | join(\" \")' | sed -e 's/\"//g'`\n\nkafka_apikey=`echo ${messagehub_creds}\
+      \ | join(\" \")' | sed -e 's/\"//g'`\nkafka_apikey=`echo ${messagehub_creds}\
       \ | ./jq '.api_key' | sed -e 's/\"//g'`\nkafka_adminurl=`echo ${messagehub_creds}\
-      \ | ./jq '.kafka_admin_url' | sed -e 's/\"//g'`\n\n# To view/fork this script\
+      \ | ./jq '.kafka_admin_url' | sed -e 's/\"//g'`\n# To view/fork this script\
       \ goto: https://github.com/Osthanes/deployscripts\n# git_retry will retry git\
       \ calls to prevent pipeline failure on temporary github problems\n# the code\
       \ can be found in git_util.sh at https://github.com/Osthanes/container_deployer\n\
       git_retry clone https://github.com/Osthanes/deployscripts.git deployscripts\n\
-      \n\n# You can deploy your Image as either a single Container or as a Container\
-      \ \n# Group.  A Container Group deploys a number of containers to enhance\n\
-      # scalability or reliability.  By default we will deploy as a single \n# container.\
-      \  To switch to a group deploy, comment out the line below\n# containing deploycontainer.sh\
-      \ and uncomment the line for deploygroup.sh\n\n# Deploy with containers:\n#\
-      \ Optional environment properties (can be set directly in this script, or defined\
-      \ as environment properties):\n#      NAME              Value         Description\n\
+      # You can deploy your Image as either a single Container or as a Container \n\
+      # Group.  A Container Group deploys a number of containers to enhance\n# scalability\
+      \ or reliability.  By default we will deploy as a single \n# container.  To\
+      \ switch to a group deploy, comment out the line below\n# containing deploycontainer.sh\
+      \ and uncomment the line for deploygroup.sh\n# Deploy with containers:\n# Optional\
+      \ environment properties (can be set directly in this script, or defined as\
+      \ environment properties):\n#      NAME              Value         Description\n\
       #   =============      =========     ==============\n#   BIND_TO           \
       \  String       Specify a Bluemix application name that whose bound services\
       \ you wish to make available to the container.  By default this is not set.\n\
@@ -148,8 +109,8 @@ stages:
       \ 2x-large (16384).\n#                                    Default is micro (256).\n\
       #   CONCURRENT_VERSIONS Number       Number of versions of this container to\
       \ leave active.  \n#                                    Default is 1\n#\n#/bin/bash\
-      \ deployscripts/deploycontainer.sh\n\n\nOPTIONAL_ARGS=\"${OPTIONAL_ARGS} \\\n\
-      \      --hostname micro-inventory \\\n      -e eureka.client.fetchRegistry=true\
+      \ deployscripts/deploycontainer.sh\nOPTIONAL_ARGS=\"${OPTIONAL_ARGS} \\\n  \
+      \    --hostname micro-inventory \\\n      -e eureka.client.fetchRegistry=true\
       \ \\\n      -e eureka.client.registerWithEureka=false \\\n      -e \"eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}\"\
       \ \\\n      -e \"spring.datasource.url=${JDBC_URL}\" \\\n      -e \"spring.datasource.username=${MYSQL_USERNAME}\"\
       \ \\\n      -e \"spring.datasource.password=${MYSQL_PASSWORD}\" \\\n      -e\
@@ -157,13 +118,13 @@ stages:
       \ \\\n      -e \"elasticsearch.url=${ELASTICSEARCH_URL}\" \\\n      -e \"message_hub.topic=orders\"\
       \ \\\n      -e \"message_hub.user=${kafka_username}\" \\\n      -e \"message_hub.password=${kafka_password}\"\
       \ \\\n      -e \"message_hub.kafka_rest_url=${kafka_adminurl}\" \\\n      -e\
-      \ \"message_hub.api_key=${kafka_apikey}\"\"\n\n# add the kafka broker list\n\
-      count=0\nfor broker in ${kafka_brokerlist}; do\n    OPTIONAL_ARGS=\"${OPTIONAL_ARGS}\
+      \ \"message_hub.api_key=${kafka_apikey}\"\"\n# add the kafka broker list\ncount=0\n\
+      for broker in ${kafka_brokerlist}; do\n    OPTIONAL_ARGS=\"${OPTIONAL_ARGS}\
       \ -e \"message_hub.kafka_brokers_sasl[${count}]=${broker}\"\"\n    count=$((count+1))\n\
-      done\n\n# Deploy Container Group:\n# Optional environment properties (can be\
-      \ set directly in this script, or defined as environment properties):\n#   \
-      \   NAME              Value         Description\n#   =============      =========\
-      \     ==============\n#   ROUTE_HOSTNAME      String       Specify the Hostname\
+      done\n# Deploy Container Group:\n# Optional environment properties (can be set\
+      \ directly in this script, or defined as environment properties):\n#      NAME\
+      \              Value         Description\n#   =============      ========= \
+      \    ==============\n#   ROUTE_HOSTNAME      String       Specify the Hostname\
       \ for the Cloud Foundry Route you wish to assign to this container group.  By\
       \ default this is not set.\n#   ROUTE_DOMAIN        String       Specify domain\
       \ name for the Cloud Foundry Route you wish to assign to this container group.\
@@ -172,7 +133,7 @@ stages:
       \ to the container.  By default this is not set.\n#   DESIRED_INSTANCES:  Number\
       \       Specify the number of instances in the group.  Default value is 1.\n\
       #   AUTO_RECOVERY:      Boolean      Set auto-recovery to true/false.  Default\
-      \ value is false.\n\n#                                    Default is false.\n\
+      \ value is false.\n#                                    Default is false.\n\
       #   CONTAINER_SIZE      String       Specify container size: pico (64), nano\
       \ (128), micro (256), tiny (512), small (1024), medium (2048),\n#          \
       \                                                  large (4096), x-large (8192),\
@@ -181,20 +142,20 @@ stages:
       \ active.\n#                                    Default is 1\n# IF YOU WANT\
       \ CONTAINER GROUPS .. uncomment the next line, and comment out the previous\
       \ deployment line (/bin/bash deployscripts/deploygroup.sh)\n/bin/bash deployscripts/deploygroup.sh\n\
-      \nRESULT=$?\n\n# source the deploy property file\nif [ -f \"${DEPLOY_PROPERTY_FILE}\"\
-      \ ]; then\n  source \"$DEPLOY_PROPERTY_FILE\"\nfi\n\n#########################\n\
+      RESULT=$?\n# source the deploy property file\nif [ -f \"${DEPLOY_PROPERTY_FILE}\"\
+      \ ]; then\n  source \"$DEPLOY_PROPERTY_FILE\"\nfi\n#########################\n\
       # Environment DETAILS   #\n#########################\n# The environment has\
       \ been setup.\n# The Cloud Foundry CLI (cf), IBM Container Service CLI (ice),\
       \ Git client (git), IDS Inventory CLI (ids-inv) and Python 2.7.3 (python) have\
       \ been installed.\n# Based on the organization and space selected in the Job\
-      \ credentials are in place for both IBM Container Service and IBM Bluemix\n\n\
+      \ credentials are in place for both IBM Container Service and IBM Bluemix\n\
       # The following colors have been defined to help with presentation of logs:\
       \ green, red, label_color, no_color.\nif [ $RESULT -ne 0 ]; then\n    echo -e\
       \ \"${red}Executed failed or had warnings ${no_color}\"\n    ${EXT_DIR}/print_help.sh\n\
       \    exit $RESULT\nfi\necho -e \"${green}Execution complete${no_label}\""
     OPTIONAL_ARGS: -m ${MEMORY}
     PORT: '8080'
-    CONTAINER_NAME: us-micro-inventory-cloudnative-fabio
+    CONTAINER_NAME: us-micro-inventory-cloudnative-integration-fabio
     DEPLOY_TYPE: red_black
 hooks:
 - enabled: true
