@@ -6,46 +6,44 @@
 https://github.com/ibm-solution-engineering/refarch-cloudnative*
 
 ##Table of Contents
-- [Introduction](#introduction)
+- **[Introduction](#introduction)**
   - [APIs](#apis)
-- [Deploy to Bluemix](#deploy-to-bluemix)
-- [Pre-requisites](#pre-requisites)
+- **[Pre-requisites](#pre-requisites)**
   - [Message Hub](#message-hub)
-  - [MySQL](#mysql)
-    - [Deploy MySQL on local docker container](#deploy-mysql-on-local-docker-container)
-    - [Deploy Inventory Database on Bluemix container](#deploy-inventory-database-on-bluemix-container)
-    - [Deploy Inventory Database on Bluemix using Compose](#deploy-inventory-database-on-bluemix-using-compose)
-  - [Elasticsearch](#elasticsearch)
-    - [Deploy Elasticsearch on local docker container](#deploy-elasticsearch-on-local-docker-container)
-    - [Deploy Elasticsearch on Bluemix container](#deploy-elasticsearch-on-bluemix-container) 
-    - [Deploy Elasticsearch on Bluemix using Compose](#deploy-elasticsearch-on-bluemix-using-compose) 
-- [Inventory Microservice](#inventory-microservice)
+- **[Deploy Inventory and Catalog using DevOps Toolchain](#deploy-inventory-and-catalog-using-devops-toolchain)**
+- **[Deploy Inventory and Catalog Locally](#deploy-inventory-and-catalog-locally)**
+  - [Deploy MySQL on local docker container](#deploy-mysql-on-local-docker-container)
+  - [Deploy Elasticsearch on local docker container](#deploy-elasticsearch-on-local-docker-container)
   - [Run Inventory Service application on localhost](#run-inventory-service-application-on-localhost)
-  - [Run Inventory Service application on local docker container](#run-inventory-service-application-on-local-docker-container)
-  - [Deploy Inventory Service application on Bluemix container](#deploy-inventory-service-application-on-bluemix-container)
-- [Catalog Microservice](#catalog-microservice)
   - [Run Catalog Service application on localhost](#run-catalog-service-application-on-localhost)
+- **[Deploy Inventory and Catalog on local Docker Containers](#)**
+  - [Run Inventory Service application on local docker container](#run-inventory-service-application-on-local-docker-container)
   - [Run Catalog Service application on local docker container](#run-catalog-service-application-on-local-docker-container)
-  - [Deploy catalog Service application on Bluemix container](#deploy-catalog-service-application-on-bluemix-container)
+- **[Deploy Inventory and Catalog on Bluemix Containers](#)**
+  - [Deploy MySQL on Bluemix container](#deploy-mysql-on-bluemix-container)
+  - [Deploy Elasticsearch on Bluemix container](#deploy-elasticsearch-on-bluemix-container) 
+  - [Deploy Inventory Service application on Bluemix container](#deploy-inventory-service-application-on-bluemix-container)
+  - [Deploy Catalog Service application on Bluemix container](#deploy-catalog-service-application-on-bluemix-container)
+- **[Using Compose for Production Databases](#using-compose-for-production-databases)**
+  - [Deploy MySQL on Bluemix using Compose](#deploy-mysql-on-bluemix-using-compose)
+  - [Deploy Elasticsearch on Bluemix using Compose](#deploy-elasticsearch-on-bluemix-using-compose)
 
 ##Introduction
 
 This project is built to demonstrate how to build two `Spring Boot` applications that leverage `Spring Data JPA`. The first application (`Inventory`) uses MySQL database as its datasource. The second and publicly available application (`Catalog`) serves as a cache to `Inventory` by leveraging `Elasticsearch` as its datasource.
- - Leverage [`Spring Boot`](https://projects.spring.io/spring-boot/) framework to build a Microservices application.
- - Use [`Spring Data JPA`](http://projects.spring.io/spring-data-jpa/) to persist data to MySQL database and Elasticsearch.
- - Uses [`MessageHub`](https://console.ng.bluemix.net/catalog/message-hub/) to receive messages that act as triggers to synchronize Inventory database with [`Elasticsearch`](https://github.com/elastic/elasticsearch).
- - Integrate with [`Netflix Eureka`](https://github.com/Netflix/eureka) framework.
- - Deployment option for [`IBM Bluemix Container`](https://www.ibm.com/cloud-computing/bluemix/containers) runtime.
+
+Here is an overview of the project's features:
+- Leverage [`Spring Boot`](https://projects.spring.io/spring-boot/) framework to build a Microservices application.
+- Use [`Spring Data JPA`](http://projects.spring.io/spring-data-jpa/) to persist data to MySQL database and Elasticsearch.
+- Uses `MySQL` as the inventory database.
+- [`Elasticsearch`](https://github.com/elastic/elasticsearch) is used as the `Catalog` microservice's data source.
+- Uses [`MessageHub`](https://console.ng.bluemix.net/catalog/message-hub/) to receive messages that act as triggers to synchronize Inventory database with `Elasticsearch`.
+- Integrate with [`Netflix Eureka`](https://github.com/Netflix/eureka) framework.
+- Deployment option for [`IBM Bluemix Container`](https://www.ibm.com/cloud-computing/bluemix/containers) runtime.
+
+**Architecture Diagram**
 
 ![Inventory/Catalog Diagram](inventory-catalog.png)
-
-Clone git repository before getting started.
-
-  ```
-  git clone http://github.com/refarch-cloudnative-micro-inventory.git
-  cd refarch-cloudnative-micro-inventory
-  ```
-
 
 ###APIs
 You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the application.
@@ -58,17 +56,17 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
 - Example curl command to get al items in localhost:
 `curl -X GET "http://localhost:8081/items/inventory"`
 
-##Deploy to BlueMix
-You can use the following button to deploy the Inventory and Catalog microservices to Bluemix, or you can follow the instructions manually below.
-
-[![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory.git)
-
 ##Pre-requisites:
+- Clone git repository before getting started.
+
+  ```
+  git clone http://github.com/refarch-cloudnative-micro-inventory.git
+  cd refarch-cloudnative-micro-inventory
+  ```
 - You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/engine/installation/).
   - Make sure to allow at least 8GB of RAM for docker to prevent unexpected crashes.
 - You need to [Provision `MessageHub`](#message-hub) service instance.
-- You need to deploy a [MySQL](#mysql) container.
-- You need to deploy an [Elasticsearch](#elasticsearch) container.
+
 
 ###Message Hub
 1. [Provision](https://console.ng.bluemix.net/catalog/services/message-hub) and instance of Message Hub into your Bluemix space.
@@ -84,12 +82,31 @@ You can use the following button to deploy the Inventory and Catalog microservic
   - **user:** Message Hub user.
   - **password:** Message Hub password.
   - **kafka_brokers_sasl:** Message Hub kafka brokers, which are in charge of receiving and sending messages for specific topics.
-5. Keep those credential handy as they will be needed later when [provisioning Inventory Service](#inventory-microservice)
+5. Keep those credential handy as they will be needed throughout the rest of this document.
 
-###MySQL
-Elasticsearch is used as the `Catalog` microservice's data source.
+##Deploy Inventory and Catalog using DevOps Toolchain
+You can use the following button to deploy the Inventory and Catalog microservices to Bluemix, or you can follow the instructions in the following sections. If you decide on the toolchain button, you have to fulfill the following pre-requisites:
+- **[Provision](#message-hub) a Message Hub service instance in your Bluemix Space**.
+  - The toolchain will automatically pick up `Message Hub` credentials.
+- **Deploy MySQL in your Bluemix Space**.
+  - Options:
+    - [Deploy MySQL on Bluemix container](#deploy-mysql-on-bluemix-container)
+    - [Deploy MySQL on Bluemix using Compose](#deploy-mysql-on-bluemix-using-compose).
+  - The toolchain will ask you to enter the `username`, `password`, `ip`, and `port` for MySQL.
+- **Deploy Elasticsearch in your Bluemix Space**.
+  - Options:
+    - [Deploy Elasticsearch on Bluemix container](#deploy-elasticsearch-on-bluemix-container) 
+    - [Deploy Elasticsearch on Bluemix using Compose](#deploy-elasticsearch-on-bluemix-using-compose)
+  - The toolchain will ask you to enter the `username`, `password`, and `URL` for Elasticsearch.
 
-#### Deploy MySQL on local docker container
+
+[![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory.git)
+
+
+##Deploy Inventory and Catalog Locally
+In this section you will learn how to deploy the Inventory and Catalog apps in localhost.
+
+### Deploy MySQL on local docker container
 1. **Change to the mysql directory**.
     ```
     # cd mysql
@@ -127,10 +144,203 @@ Elasticsearch is used as the `Catalog` microservice's data source.
                     "IPAddress": "172.17.0.2",
     ```
 
+6. Use `jdbc:mysql://{mysql_ip}:3306/inventorydb` as your `spring.datasource.url` when deploying `Inventory on local Docker Container`.
 
 Inventory database is now setup in local container.
 
-####Deploy Inventory Database on Bluemix container
+###Deploy Elasticsearch on local docker container
+
+1. **Run docker container locally. This will download the elasticsearch image (if it does not exist already) and run it.**
+    ```
+    docker run --name elasticsearch -d -p 9200:9200 elasticsearch
+    ```
+
+2. **Validate**.
+  ```
+  # curl http://localhost:9200
+
+  {
+    "name" : "1-LsU37",
+    "cluster_name" : "elasticsearch",
+    "cluster_uuid" : "1fn3QtZpTOWOhEpEM01ZAw",
+    "version" : {
+      "number" : "5.2.0",
+      "build_hash" : "24e05b9",
+      "build_date" : "2017-01-24T19:52:35.800Z",
+      "build_snapshot" : false,
+      "lucene_version" : "6.4.0"
+    },
+    "tagline" : "You Know, for Search"
+  }
+  ```
+
+3. Use `http://localhost:9200` as your `elasticsearch.url` when running `Catalog` and `Inventory` **locally**.
+
+
+###Run Inventory Service application on localhost
+In this section you will deploy the Spring Boot application to run on your localhost.
+
+1. **Change to `inventory` directory**.
+    ```
+    cd inventory
+    ```
+
+2. **If not already done, [Deploy `MySQL` on local docker container](#deploy-mysql-on-local-docker-container)**.
+  - Open `src/main/resources/application.yml`, go to `datasource` section.
+  - Type `url` as `jdbc:mysql://127.0.0.1/inventorydb`, where `127.0.0.1` means `localhost`
+  - Make sure the `user`, `password`, and `port` match those of local container.
+
+3. **If not already done, [Deploy `Elasticsearch` on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
+  - Open `src/main/resources/application.yml`, go to `elasticsearch` section.
+  - Type `http://localhost:9200` on the `url` field.
+
+4. **If not already done, [Provision `Message Hub` service instance](#message-hub)**.
+  - After provisioning, go to instance `Service Credentials` tab on Bluemix, then press `View credentials`.
+  - Open `src/main/resources/application.yml`, go to `message_hub` section, then copy and paste required `message_hub` fields using credentials from above.
+
+5. **Build the application**.
+    ```
+    # ./gradlew build -x test
+    ```
+
+6. **Run the application on localhost**.
+    ```
+    # java -jar build/libs/micro-inventory-0.0.1.jar
+    ```
+
+7. **Validate. You should get a list of all inventory items**.
+    ```
+    # curl http://localhost:8080/micro/inventory
+    ```
+
+###Run Catalog Service application on localhost
+In this section you will deploy the Catalog Spring Boot application to run on your localhost.
+
+1. **Change to `catalog` directory**.
+    ```
+    cd catalog
+    ```
+
+2. **If not already done, [Deploy `Elasticsearch` on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
+  - Open `src/main/resources/application.yml`, go to `elasticsearch` section.
+  - Type `http://localhost:9200` on the `url` field.
+
+3. **Build the application**.
+    ```
+    # ./gradlew build -x test
+    ```
+
+4. **Run the application on localhost**.
+    ```
+    # java -jar build/libs/micro-catalog-0.0.1.jar
+    ```
+
+5. **Validate. You should get a list of all catalog items**.
+    ```
+    # curl http://localhost:8081/micro/items
+    ```
+
+##Deploy Inventory and Catalog on local Docker Containers
+In this section you will learn how to deploy the Inventory and Catalog apps in local Docker containers.
+
+###Run Inventory Service application on local docker container
+
+1. **Change to `inventory` directory**.
+    ```
+    cd inventory
+    ```
+
+2. **If not already done, [Deploy `MySQL` on local docker container](#deploy-mysql-on-local-docker-container)**.
+  - Obtain the MySQL `Container Private IP Address`, `database username`, and `database password` from link above and have them ready for deployment in `Step 6`.
+
+3. **If not already done, [Deploy `Elasticsearch` on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
+  - Obtain the Elasticsearch `Container Private IP Address` from link above and have it ready for deployment in `Step 6`.
+ 
+4. **If not already done, [Provision `Message Hub` service instance](#message-hub)**.
+  - After provisioning, go to instance `Service Credentials` tab on Bluemix, then press `View credentials`.
+  - Obtain the Message HUB `user`, `password`, `api_key`, `kafka_rest_url`, and `kafka_brokers_sasl` from link above and have them ready for deployment in `Step 6`.
+
+5. **Build container image**
+    ```
+    # ./gradlew build -x test
+    # ./gradlew docker
+    # cd docker
+    # docker build -t cloudnative/inventoryservice .
+    ```
+
+5. **Start the application in docker container**.
+  ```
+  # docker run -d -p 8080:8080 --name inventoryservice \
+    -e "spring.datasource.url=jdbc:mysql://{mysql_ip}:3306/inventorydb" \
+    -e "spring.datasource.username=${mysql_user}" \
+    -e "spring.datasource.password=${mysql_password}" \
+    -e "elasticsearch.url=${es_url}" \
+    -e "message_hub.user=${mh_user}" \
+    -e "message_hub.password=${mh_password}" \
+    -e "message_hub.api_key=${mh_api_key}" \
+    -e "message_hub.kafka_rest_url=${mh_kafka_rest_url}" \
+    -e "message_hub.kafka_brokers_sasl[0]=${mh_kafka_broker_0}" \
+    -e "message_hub.kafka_brokers_sasl[1]=${mh_kafka_broker_1}" \
+    -e "message_hub.kafka_brokers_sasl[2]=${mh_kafka_broker_2}" \
+    -e "message_hub.kafka_brokers_sasl[3]=${mh_kafka_broker_3}" \
+    -e "message_hub.kafka_brokers_sasl[4]=${mh_kafka_broker_4}" \
+    cloudnative/inventoryservice
+  ```
+
+  - Replace `{mysql_container_ip}` with the MySQL container instance IP address.
+  - Replace `{mysql_user}` with database username.
+  - Replace `{mysql_password}` with database user password.
+  - Replace `{es_url}` with the Bluemix container private ip address.
+  - Replace `{mh_user}` with Message Hub `user`.
+  - Replace `{mh_password}` with Message Hub `password`.
+  - Replace `{mh_api_key}` with Message Hub `api_key`.
+  - Replace `{mh_kafka_rest_url}` with Message Hub `kafka_rest_url`.
+  - Replace all the `{mh_kafka_broker[x]}` with all the URLs listed in Message Hub `kafka_brokers_sasl`.
+
+6. **Validate. You should get a list of all inventory items**.
+    ```
+    # curl http://localhost:8080/micro/inventory
+    ```
+
+###Run Catalog Service application on local docker container
+In this section you will deploy the Catalog Spring Boot application to run in a local docker container.
+
+1. **Change to `catalog` directory**.
+    ```
+    cd catalog
+    ```
+
+2. **If not already done, [Deploy Elasticsearch on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
+  - Obtain the Elasticsearch `Container Private IP Address` from link above and have it ready for deployment in `Step 4`.
+
+3. **Build container image**
+    ```
+    # ./gradlew build -x test
+    # ./gradlew docker
+    # cd docker
+    # docker build -t cloudnative/catalogservice .
+    ```
+
+4. **Start the application in docker container**.
+  ```
+  # docker run -d -p 8081:8081 --name catalogservice \
+  -e "eureka.client.fetchRegistry=false" \
+  -e "eureka.client.registerWithEureka=false" \
+  -e "elasticsearch.url=${es_url}" \
+  cloudnative/catalogservice"
+  ```
+
+  - Replace `{es_url}` with the Bluemix container private ip address.
+
+5. **Validate. You should get a list of all catalog items**.
+    ```
+    # curl http://localhost:8081/micro/items
+    ```
+
+##Deploy Inventory and Catalog on Bluemix Containers
+In this section you will learn how to deploy the Inventory and Catalog apps in Bluemix containers.
+
+###Deploy MySQL on Bluemix container
 
 1. **Log in to your Bluemix account**.
     ```
@@ -177,7 +387,12 @@ Inventory database is now setup in local container.
 
     _It is recommended to change the default passwords used here._
     ```
-    # cf ic run -m 512 --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=Pass4Admin123 -e MYSQL_USER=dbuser -e MYSQL_PASSWORD=Pass4dbUs3R -e MYSQL_DATABASE=inventorydb registry.ng.bluemix.net/$(cf ic namespace get)/mysql:cloudnative
+    # cf ic run -m 512 --name mysql -p 3306:3306 \
+    -e MYSQL_ROOT_PASSWORD=Pass4Admin123 \
+    -e MYSQL_USER=dbuser \
+    -e MYSQL_PASSWORD=Pass4dbUs3R \
+    -e MYSQL_DATABASE=inventorydb \
+    registry.ng.bluemix.net/$(cf ic namespace get)/mysql:cloudnative
     ```
 
 10. **Before loading sample data. Check that mysql container is running**.
@@ -209,65 +424,8 @@ Inventory database is now setup in local container.
 
 Inventory database is now setup in IBM Bluemix Container.
 
-####Deploy Inventory Database on Bluemix using Compose
-1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-mysql) and instance of MySQL into your Bluemix space.
-  - Select name for your instance.
-  - Click the `Create` button.
-2. Refresh the page until you see `Status: Ready`.
-3. Now obtain `MySQL` service credentials.
-  - Click on `Service Credentials` tab.
-  - Then click on the `View Credentials` dropdown next to the credentials.
-4. See the `uri` field, which has the format `mysql://user:password@host:port/compose`, and extract the following:
-  - **user:** MySQL user.
-  - **password:** MySQL password.
-  - **host**: MySQL host.
-  - **port:** MySQL port.
-5. Keep those credential handy as they will be needed them `below` and later when [provisioning Inventory Service](#inventory-microservice)
-6. **Create `items` table and load sample data. You should see message _Data loaded to inventorydb.items._**
-    ```
-    # cd mysql/scripts
-    # bash load-data-compose.sh {USER} {PASSWORD} {HOST} {PORT}
-    ```
- 
-  - Replace `{USER}` with MySQL user.
-  - Replace `{PASSWORD}` with MySQL password.
-  - Replace `{HOST}` with MySQL host.
-  - Replace `{PORT}` with MySQL port.
 
-Inventory database is now setup in Compose.
-
-###Elasticsearch
-Elasticsearch is used as the `Catalog` microservice's data source. Elasticsearch instance gets populated by the [inventory microservice](#inventory-microservice) when it is first deployed and when new orders get processed.
-
-####Deploy Elasticsearch on local docker container
-
-1. **Run docker container locally. This will download the elasticsearch image (if it does not exist already) and run it.**
-    ```
-    docker run --name elasticsearch -d -p 9200:9200 elasticsearch
-    ```
-
-2. **Validate**.
-  ```
-  # curl http://localhost:9200
-
-  {
-    "name" : "1-LsU37",
-    "cluster_name" : "elasticsearch",
-    "cluster_uuid" : "1fn3QtZpTOWOhEpEM01ZAw",
-    "version" : {
-      "number" : "5.2.0",
-      "build_hash" : "24e05b9",
-      "build_date" : "2017-01-24T19:52:35.800Z",
-      "build_snapshot" : false,
-      "lucene_version" : "6.4.0"
-    },
-    "tagline" : "You Know, for Search"
-  }
-  ```
-
-3. Use `http://localhost:9200` as your `elasticsearch.url` when deploying `Catalog` and `Inventory`.
-
-####Deploy Elasticsearch on Bluemix container
+###Deploy Elasticsearch on Bluemix container
 1. **Log in to your Bluemix account**.
     ```
     # cf login -a <bluemix-api-endpoint> -u <your-bluemix-user-id>
@@ -328,126 +486,7 @@ Elasticsearch is used as the `Catalog` microservice's data source. Elasticsearch
 
 13. **Use `http(s)://CONTAINER_IP_ADDRESS:9200` as your `elasticsearch.url` when deploying `Catalog` and `Inventory`**.
 
-####Deploy Elasticsearch on Bluemix using Compose
-1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-elasticsearch) and instance of Elasticsearch into your Bluemix space.
-  - Select name for your instance.
-  - Click the `Create` button.
-2. Refresh the page until you see `Status: Ready`.
-3. Now obtain `Elasticsearch` service credentials.
-  - Click on `Service Credentials` tab.
-  - Then click on the `View Credentials` dropdown next to the credentials.
-4. See the `uri` field, which has the format `https://user:password@host:port/`, and extract the following:
-  - **user:** Elasticsearch user.
-  - **password:** Elasticsearch password.
-  - **host**: Elasticsearch host.
-  - **port:** Elasticsearch port.
-5. Keep those credential handy as they will be needed them `below` and later when provisioning [Inventory](#inventory-microservice) and [Catalog](#catalog-microservice) services.
-
-Inventory database is now setup in Compose.
-
-##Inventory Microservice
-Inventory Microservice is in charge of serving and updating the MySQL Inventory database. Inventory Microservice is responsible for the following:
-- Loading the `Catalog`'s `Elasticsearch` cache with the items from MySQL database upon booting.
-- Listening to `Message Hub` messages from the `Order microservice`, which indicate a new order has been placed.
-- Updating both `MySQL` database and `Elasticsearch` to reflect changes from new orders.
-
-####Run Inventory Service application on localhost
-In this section you will deploy the Spring Boot application to run on your localhost.
-
-1. **Change to `inventory` directory**.
-    ```
-    cd inventory
-    ```
-
-2. **[Deploy `MySQL` on local docker container](#deploy-mysql-on-local-docker-container)**.
-  - Open `src/main/resources/application.yml`, go to `datasource` section.
-  - Type `url` as `jdbc:mysql://127.0.0.1/inventorydb`, where `127.0.0.1` means `localhost`
-  - Make sure the `user`, `password`, and `port` match those of local container.
-
-3. **[Deploy `Elasticsearch` on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
-  - Open `src/main/resources/application.yml`, go to `elasticsearch` section.
-  - Type `http://localhost:9200` on the `url` field.
-
-4. **[Provision `Message Hub` service instance](#message-hub)**.
-  - After provisioning, go to instance `Service Credentials` tab on Bluemix, then press `View credentials`.
-  - Open `src/main/resources/application.yml`, go to `message_hub` section, then copy and paste required `message_hub` fields using credentials from above.
-
-5. **Build the application**.
-    ```
-    # ./gradlew build -x test
-    ```
-
-6. **Run the application on localhost**.
-    ```
-    # java -jar build/libs/micro-inventory-0.0.1.jar
-    ```
-
-7. **Validate. You should get a list of all inventory items**.
-    ```
-    # curl http://localhost:8080/micro/inventory
-    ```
-
-####Run Inventory Service application on local docker container
-In this section you will deploy the Spring Boot application to run in a local docker container.
-
-1. **Change to `inventory` directory**.
-    ```
-    cd inventory
-    ```
-
-2. **If not already done, [Deploy `MySQL` on local docker container](#deploy-mysql-on-local-docker-container)**.
-  - Obtain the MySQL `Container Private IP Address`, `database username`, and `database password` from link above and have them ready for deployment in `Step 6`.
-
-3. **If not already done, [Deploy `Elasticsearch` on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
-  - Obtain the Elasticsearch `Container Private IP Address` from link above and have it ready for deployment in `Step 6`.
- 
-4. **If not already done, [Provision `Message Hub` service instance](#message-hub)**.
-  - After provisioning, go to instance `Service Credentials` tab on Bluemix, then press `View credentials`.
-  - Obtain the Message HUB `user`, `password`, `api_key`, `kafka_rest_url`, and `kafka_brokers_sasl` from link above and have them ready for deployment in `Step 6`.
-
-5. **Build container image**
-    ```
-    # ./gradlew build -x test
-    # ./gradlew docker
-    # cd docker
-    # docker build -t cloudnative/inventoryservice .
-    ```
-
-5. **Start the application in docker container**.
-  ```
-  # docker run -d -p 8080:8080 --name inventoryservice \
-    -e "spring.datasource.url=jdbc:mysql://{mysql_ip}:3306/inventorydb" \
-    -e "spring.datasource.username=${mysql_user}" \
-    -e "spring.datasource.password=${mysql_password}" \
-    -e "elasticsearch.url=${es_url}" \
-    -e "message_hub.user=${mh_user}" \
-    -e "message_hub.password=${mh_password}" \
-    -e "message_hub.api_key=${mh_api_key}" \
-    -e "message_hub.kafka_rest_url=${mh_kafka_rest_url}" \
-    -e "message_hub.kafka_brokers_sasl[0]=${mh_kafka_broker_0}" \
-    -e "message_hub.kafka_brokers_sasl[1]=${mh_kafka_broker_1}" \
-    -e "message_hub.kafka_brokers_sasl[2]=${mh_kafka_broker_2}" \
-    -e "message_hub.kafka_brokers_sasl[3]=${mh_kafka_broker_3}" \
-    -e "message_hub.kafka_brokers_sasl[4]=${mh_kafka_broker_4}" \
-    cloudnative/inventoryservice
-  ```
-
-  - Replace `{mysql_container_ip}` with the MySQL container instance IP address.
-  - Replace `{mysql_user}` with database username.
-  - Replace `{mysql_password}` with database user password.
-  - Replace `{es_url}` with the Bluemix container private ip address.
-  - Replace `{mh_user}` with Message Hub `user`.
-  - Replace `{mh_password}` with Message Hub `password`.
-  - Replace `{mh_api_key}` with Message Hub `api_key`.
-  - Replace `{mh_kafka_rest_url}` with Message Hub `kafka_rest_url`.
-  - Replace all the `{mh_kafka_broker[x]}` with all the URLs listed in Message Hub `kafka_brokers_sasl`.
-
-6. **Validate. You should get a list of all inventory items**.
-    ```
-    # curl http://localhost:8080/micro/inventory
-    ```
-
-####Deploy Inventory Service application on Bluemix container
+###Deploy Inventory Service application on Bluemix container
 In this section you will deploy both the database server and the Spring Boot application to run in IBM Bluemix containers.
 
 1. **Change to `inventory` directory**.
@@ -484,7 +523,7 @@ In this section you will deploy both the database server and the Spring Boot app
     # docker push registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
     ```
 
-7. **If not already done, [Deploy `Inventory Database` in IBM Bluemix container](#deploy-inventory-database-on-bluemix-container)**.
+7. **If not already done, [Deploy `MySQL` on IBM Bluemix container](#deploy-mysql-on-bluemix-container)**.
   - Obtain the MySQL `Container Private IP Address`, `database username`, and `database password` from link above and have them ready for deployment in `Step 10`.
 
 8. **If not already done, [Deploy `Elasticsearch` on Bluemix container](#deploy-elasticsearch-on-bluemix-container)**.
@@ -570,73 +609,8 @@ In this section you will deploy both the database server and the Spring Boot app
     ```
 
 
-##Catalog Microservice
-Catalog Microservice is in charge of serving the Catalog database, which is backed by `Elasticsearch`.
-
-####Run Catalog Service application on localhost
-In this section you will deploy the Catalog Spring Boot application to run on your localhost.
-
-1. **Change to `catalog` directory**.
-    ```
-    cd catalog
-    ```
-
-2. **If not already done, [Deploy `Elasticsearch` on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
-  - Open `src/main/resources/application.yml`, go to `elasticsearch` section.
-  - Type `http://localhost:9200` on the `url` field.
-
-3. **Build the application**.
-    ```
-    # ./gradlew build -x test
-    ```
-
-4. **Run the application on localhost**.
-    ```
-    # java -jar build/libs/micro-catalog-0.0.1.jar
-    ```
-
-5. **Validate. You should get a list of all catalog items**.
-    ```
-    # curl http://localhost:8081/micro/items
-    ```
-
-####Run Catalog Service application on local docker container
-In this section you will deploy the Catalog Spring Boot application to run in a local docker container.
-
-1. **Change to `catalog` directory**.
-    ```
-    cd catalog
-    ```
-
-2. **If not already done, [Deploy Elasticsearch on local docker container](#deploy-elasticsearch-on-local-docker-container)**.
-  - Obtain the Elasticsearch `Container Private IP Address` from link above and have it ready for deployment in `Step 4`.
-
-3. **Build container image**
-    ```
-    # ./gradlew build -x test
-    # ./gradlew docker
-    # cd docker
-    # docker build -t cloudnative/catalogservice .
-    ```
-
-4. **Start the application in docker container**.
-  ```
-  # docker run -d -p 8081:8081 --name catalogservice \
-  -e "eureka.client.fetchRegistry=false" \
-  -e "eureka.client.registerWithEureka=false" \
-  -e "elasticsearch.url=${es_url}" \
-  cloudnative/catalogservice"
-  ```
-
-  - Replace `{es_url}` with the Bluemix container private ip address.
-
-5. **Validate. You should get a list of all catalog items**.
-    ```
-    # curl http://localhost:8081/micro/items
-    ```
-
-####Deploy catalog Service application on Bluemix container
-In this section you will deploy both the `Elasticsearch` and the `Catalog` Spring Boot application to run in IBM Bluemix containers.
+###Deploy Catalog Service application on Bluemix container
+In this section you will deploy the `Catalog` Spring Boot application in IBM Bluemix containers.
 
 1. **Change to `catalog` directory**.
     ```
@@ -715,3 +689,50 @@ In this section you will deploy both the `Elasticsearch` and the `Catalog` Sprin
     ```
     # cf ic route unmap -n catalogservice -d mybluemix.net micro-catalog-group
     ```
+
+##Using Compose for Production Databases
+Compose is an IBM service that provides production ready Cloud Hosted Databases. In this section you will learn how to deploy both a MySQL and Elasticsearch databases using Compose from Bluemix Catalog.
+
+###Deploy MySQL on Bluemix using Compose
+1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-mysql) and instance of MySQL into your Bluemix space.
+  - Select name for your instance.
+  - Click the `Create` button.
+2. Refresh the page until you see `Status: Ready`.
+3. Now obtain `MySQL` service credentials.
+  - Click on `Service Credentials` tab.
+  - Then click on the `View Credentials` dropdown next to the credentials.
+4. See the `uri` field, which has the format `mysql://user:password@host:port/compose`, and extract the following:
+  - **user:** MySQL user.
+  - **password:** MySQL password.
+  - **host**: MySQL host.
+  - **port:** MySQL port.
+5. Keep those credential handy and feel free to use them when [deploying Inventory Service application on Bluemix container](#deploy-inventory-service-application-on-bluemix-container).
+6. **Create `items` table and load sample data. You should see message _Data loaded to inventorydb.items._**
+    ```
+    # cd mysql/scripts
+    # bash load-data-compose.sh {USER} {PASSWORD} {HOST} {PORT}
+    ```
+ 
+  - Replace `{USER}` with MySQL user.
+  - Replace `{PASSWORD}` with MySQL password.
+  - Replace `{HOST}` with MySQL host.
+  - Replace `{PORT}` with MySQL port.
+
+Inventory database is now setup in Compose.
+
+###Deploy Elasticsearch on Bluemix using Compose
+1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-elasticsearch) and instance of Elasticsearch into your Bluemix space.
+  - Select name for your instance.
+  - Click the `Create` button.
+2. Refresh the page until you see `Status: Ready`.
+3. Now obtain `Elasticsearch` service credentials.
+  - Click on `Service Credentials` tab.
+  - Then click on the `View Credentials` dropdown next to the credentials.
+4. See the `uri` field, which has the format `https://user:password@host:port/`, and extract the following:
+  - **user:** Elasticsearch user.
+  - **password:** Elasticsearch password.
+  - **host**: Elasticsearch host.
+  - **port:** Elasticsearch port.
+5. Keep those credential handy and feel free to use them when provisioning [Inventory](#deploy-inventory-service-application-on-bluemix-container) and [Catalog](#deploy-catalog-service-application-on-bluemix-container) services on Bluemix Containers.
+
+Inventory database is now setup in Compose.
