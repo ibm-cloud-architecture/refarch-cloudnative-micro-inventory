@@ -24,6 +24,10 @@ pipeline-micro-catalog:
       content: $file(catalog-pipeline.yml)
       env:
         DESIRED_INSTANCES: "2"
+        ORG: "{{deploy.parameters.deploy-org}}"
+        REGION: "{{deploy.parameters.deploy-region}}"
+        REPO: "git-micro-inventory"
+        SPACE: "{{deploy.parameters.deploy-space}}"
       execute: false
 
 deploy:
