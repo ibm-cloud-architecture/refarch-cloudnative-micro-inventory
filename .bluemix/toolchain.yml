@@ -24,7 +24,17 @@ pipeline-micro-catalog:
       content: $file(catalog-pipeline.yml)
       env:
         DESIRED_INSTANCES: "2"
+        DOMAIN: "{{deploy.parameters.route-domain}}"
+        ELASTICSEARCH_PASSWORD: "{{deploy.parameters.es-password}}"
+        ELASTICSEARCH_URL: "{{deploy.parameters.es-url}}"
+        ELASTICSEARCH_USER: "{{deploy.parameters.es-user}}"
+        EUREKA_REGISTRY_URL: "https://{{pipeline-netflix-eureka.parameters.name}}-{{deploy.parameters.deploy-space}}.{{deploy.parameters.route-domain}}/eureka/"
+        MAX_INSTANCES: "3"
+        MEMORY: "256"
+        MIN_INSTANCES: "1"
+        NAME: "{{pipeline-micro-catalog.parameters.name}}-{{deploy.parameters.deploy-space}}"
         ORG: "{{deploy.parameters.deploy-org}}"
+        PORT: "8081"
         REGION: "{{deploy.parameters.deploy-region}}"
         REPO: "git-micro-inventory"
         SPACE: "{{deploy.parameters.deploy-space}}"
