@@ -8,37 +8,6 @@ stages:
     dir_name: null
   triggers:
   - type: commit
-  properties:
-  - name: DESIRED_INSTANCES
-    value: ${DESIRED_INSTANCES}
-    type: text
-  - name: ELASTICSEARCH_PASSWORD
-    value: ${ELASTICSEARCH_PASSWORD}
-    type: secure
-  - name: ELASTICSEARCH_URL
-    value: ${ELASTICSEARCH_URL}
-    type: text
-  - name: ELASTICSEARCH_USER
-    value: ${ELASTICSEARCH_USER}
-    type: text
-  - name: EUREKA_REGISTRY_URL
-    value: ${EUREKA_REGISTRY_URL}
-    type: text
-  - name: IMAGE_NAME
-    value: ${IMAGE_NAME}
-    type: text
-  - name: JDBC_URL
-    value: ${JDBC_URL}
-    type: text
-  - name: MAX_INSTANCES
-    value: ${MAX_INSTANCES}
-    type: text
-  - name: MEMORY
-    value: ${MEMORY}
-    type: text
-  - name: MIN_INSTANCES
-    value: ${MIN_INSTANCES}
-    type: text
   jobs:
   - name: Build
     type: builder
@@ -93,6 +62,10 @@ stages:
     dir_name: null
   triggers:
   - type: stage
+  properties:
+  - name: DESIRED_INSTANCES
+    value: ${DESIRED_INSTANCES}
+    type: text
   jobs:
   - name: Deploy
     type: deployer
