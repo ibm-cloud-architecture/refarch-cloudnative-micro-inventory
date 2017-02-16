@@ -1,6 +1,6 @@
 ######refarch-cloudnative-micro-inventory
 
-###Spring Boot Netflix OSS app Integration with MySQL Database Server
+###Spring Boot Netflix OSS Microservice Apps Integration with ElasticSearch and MySQL Database Server
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
 https://github.com/ibm-solution-engineering/refarch-cloudnative*
@@ -10,7 +10,7 @@ https://github.com/ibm-solution-engineering/refarch-cloudnative*
   - [APIs](#apis)
 - **[Pre-requisites](#pre-requisites)**
   - [Message Hub](#message-hub)
-- **[Deploy Inventory and Catalog using DevOps Toolchain](#deploy-inventory-and-catalog-using-devops-toolchain)**
+- **[Deploy Inventory and Catalog Microservices using DevOps Toolchain](#deploy-inventory-and-catalog-microservices-using-devops-toolchain)**
 - **[Run Inventory and Catalog Locally](#run-inventory-and-catalog-locally)**
   - [Deploy MySQL on local docker container](#deploy-mysql-on-local-docker-container)
   - [Deploy Elasticsearch on local docker container](#deploy-elasticsearch-on-local-docker-container)
@@ -54,7 +54,7 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
 `http://<catalog_hostname>/micro/items/{id}`
 
 - Example curl command to get al items in localhost:
-`curl -X GET "http://localhost:8081/items/inventory"`
+`curl -X GET "http://localhost:8081/micro/items"`
 
 ##Pre-requisites:
 - Clone git repository before getting started.
@@ -63,8 +63,7 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
   git clone http://github.com/refarch-cloudnative-micro-inventory.git
   cd refarch-cloudnative-micro-inventory
   ```
-- You need a docker machine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/engine/installation/).
-  - Make sure to allow at least 8GB of RAM for docker to prevent unexpected crashes.
+- You need a docker engine running on localhost to host container(s). [Click for instructions](https://docs.docker.com/engine/installation/).
 - You need to [Provision `MessageHub`](#message-hub) service instance.
 
 
@@ -84,7 +83,7 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
   - **kafka_brokers_sasl:** Message Hub kafka brokers, which are in charge of receiving and sending messages for specific topics.
 5. Keep those credential handy as they will be needed throughout the rest of this document.
 
-##Deploy Inventory and Catalog using DevOps Toolchain
+##Deploy Inventory and Catalog Microservices using DevOps Toolchain
 You can use the following button to deploy the Inventory and Catalog microservices to Bluemix, or you can follow the manual instructions in the following sections. If you decide on the toolchain button, you have to fulfill the following pre-requisites:
 - **[Provision](#message-hub) a Message Hub service instance in your Bluemix Space**.
   - The toolchain will automatically pick up `Message Hub` credentials.
