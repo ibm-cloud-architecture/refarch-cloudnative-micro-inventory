@@ -11,7 +11,7 @@ https://github.com/ibm-solution-engineering/refarch-cloudnative*
 - **[Pre-requisites](#pre-requisites)**
   - [Message Hub](#message-hub)
 - **[Deploy Inventory and Catalog using DevOps Toolchain](#deploy-inventory-and-catalog-using-devops-toolchain)**
-- **[Deploy Inventory and Catalog Locally](#deploy-inventory-and-catalog-locally)**
+- **[Run Inventory and Catalog Locally](#run-inventory-and-catalog-locally)**
   - [Deploy MySQL on local docker container](#deploy-mysql-on-local-docker-container)
   - [Deploy Elasticsearch on local docker container](#deploy-elasticsearch-on-local-docker-container)
   - [Run Inventory Service application on localhost](#run-inventory-service-application-on-localhost)
@@ -69,7 +69,7 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
 
 
 ###Message Hub
-1. [Provision](https://console.ng.bluemix.net/catalog/services/message-hub) and instance of Message Hub into your Bluemix space.
+1. [Provision](https://console.ng.bluemix.net/catalog/services/message-hub) an instance of Message Hub into your Bluemix space.
   - Select name for your instance.
   - Click the `Create` button.
 2. Refresh the page until you see `Status: Ready`.
@@ -85,7 +85,7 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
 5. Keep those credential handy as they will be needed throughout the rest of this document.
 
 ##Deploy Inventory and Catalog using DevOps Toolchain
-You can use the following button to deploy the Inventory and Catalog microservices to Bluemix, or you can follow the instructions in the following sections. If you decide on the toolchain button, you have to fulfill the following pre-requisites:
+You can use the following button to deploy the Inventory and Catalog microservices to Bluemix, or you can follow the manual instructions in the following sections. If you decide on the toolchain button, you have to fulfill the following pre-requisites:
 - **[Provision](#message-hub) a Message Hub service instance in your Bluemix Space**.
   - The toolchain will automatically pick up `Message Hub` credentials.
 - **Deploy MySQL in your Bluemix Space**.
@@ -103,8 +103,8 @@ You can use the following button to deploy the Inventory and Catalog microservic
 [![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory.git)
 
 
-##Deploy Inventory and Catalog Locally
-In this section you will learn how to deploy the Inventory and Catalog apps in localhost.
+##Run Inventory and Catalog Locally
+In this section you will learn how to build and run the Inventory and Catalog apps locally.
 
 ### Deploy MySQL on local docker container
 1. **Change to the mysql directory**.
@@ -178,7 +178,7 @@ Inventory database is now setup in local container.
 
 
 ###Run Inventory Service application on localhost
-In this section you will deploy the Spring Boot application to run on your localhost.
+In this section you will run the Spring Boot application to run on your localhost.
 
 1. **Change to `inventory` directory**.
     ```
@@ -214,7 +214,7 @@ In this section you will deploy the Spring Boot application to run on your local
     ```
 
 ###Run Catalog Service application on localhost
-In this section you will deploy the Catalog Spring Boot application to run on your localhost.
+In this section you will run the Catalog Spring Boot application to run on your localhost.
 
 1. **Change to `catalog` directory**.
     ```
@@ -241,7 +241,7 @@ In this section you will deploy the Catalog Spring Boot application to run on yo
     ```
 
 ##Deploy Inventory and Catalog on local Docker Containers
-In this section you will learn how to deploy the Inventory and Catalog apps in local Docker containers.
+In this section you will learn how to package the Inventory and Catalog apps as docker images and deploy in local Docker environment.
 
 ###Run Inventory Service application on local docker container
 
