@@ -2,43 +2,10 @@
 stages:
 - name: Build
   inputs:
-  - url: https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory-fabio.git
+  - url: https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git
     type: git
     branch: integration
     dir_name: null
-  triggers:
-  - type: commit
-  properties:
-  - name: DESIRED_INSTANCES
-    value: ${DESIRED_INSTANCES}
-    type: text
-  - name: ELASTICSEARCH_PASSWORD
-    value: ${ELASTICSEARCH_PASSWORD}
-    type: secure
-  - name: ELASTICSEARCH_URL
-    value: ${ELASTICSEARCH_URL}
-    type: text
-  - name: ELASTICSEARCH_USER
-    value: ${ELASTICSEARCH_USER}
-    type: text
-  - name: EUREKA_REGISTRY_URL
-    value: ${EUREKA_REGISTRY_URL}
-    type: text
-  - name: IMAGE_NAME
-    value: ${IMAGE_NAME}
-    type: text
-  - name: JDBC_URL
-    value: ${JDBC_URL}
-    type: text
-  - name: MAX_INSTANCES
-    value: ${MAX_INSTANCES}
-    type: text
-  - name: MEMORY
-    value: ${MEMORY}
-    type: text
-  - name: MIN_INSTANCES
-    value: ${MIN_INSTANCES}
-    type: text
   jobs:
   - name: Build
     type: builder
@@ -46,7 +13,7 @@ stages:
     target:
       region_id: ibm:yp:us-south
       organization: cent@us.ibm.com
-      space: fabio-case
+      space: cloudnative-integration
     COMMAND: "#!/bin/bash\n# The following colors have been defined to help with presentation\
       \ of logs: green, red, label_color, no_color.  \nlog_and_echo \"$LABEL\" \"\
       Starting build script\"\n\nexport JAVA_HOME=~/java8\n\ncd catalog; ./gradlew\
@@ -83,7 +50,7 @@ stages:
       # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE\
       \    #\n######################################################################################\n\
       echo \"IMAGE_NAME=${FULL_REPOSITORY_NAME}\" >> $ARCHIVE_DIR/build.properties"
-    IMAGE_NAME: us-micro-catalog-cloudnative-integration-fabio
+    IMAGE_NAME: us-micro-catalog-cloudnative-integration
     USE_CACHED_LAYERS: 'true'
 - name: Deploy
   inputs:
@@ -93,6 +60,37 @@ stages:
     dir_name: null
   triggers:
   - type: stage
+  properties:
+  - name: DESIRED_INSTANCES
+    value: ${DESIRED_INSTANCES}
+    type: text
+  - name: ELASTICSEARCH_PASSWORD
+    value: ${ELASTICSEARCH_PASSWORD}
+    type: secure
+  - name: ELASTICSEARCH_URL
+    value: ${ELASTICSEARCH_URL}
+    type: text
+  - name: ELASTICSEARCH_USER
+    value: ${ELASTICSEARCH_USER}
+    type: text
+  - name: EUREKA_REGISTRY_URL
+    value: ${EUREKA_REGISTRY_URL}
+    type: text
+  - name: IMAGE_NAME
+    value: ${IMAGE_NAME}
+    type: text
+  - name: JDBC_URL
+    value: ${JDBC_URL}
+    type: text
+  - name: MAX_INSTANCES
+    value: ${MAX_INSTANCES}
+    type: text
+  - name: MEMORY
+    value: ${MEMORY}
+    type: text
+  - name: MIN_INSTANCES
+    value: ${MIN_INSTANCES}
+    type: text
   jobs:
   - name: Deploy
     type: deployer
@@ -100,7 +98,7 @@ stages:
     target:
       region_id: ibm:yp:us-south
       organization: cent@us.ibm.com
-      space: fabio-case
+      space: cloudnative-integration
     COMMAND: |-
       #!/bin/sh
 
@@ -116,6 +114,18 @@ stages:
           fi
       fi
 
+      # get elasticsearch credentials
+      elasticsearch_svc=`cf services | grep compose-for-elasticsearch | sed -e 's/compose-for-elasticsearch.*$//g' -e 's/[ ]*$//g'`
+      elasticsearch_svc_key_name=`cf service-keys "${elasticsearch_svc}" | tail -1 | sed -e 's/[ ]*$//g'`
+      elasticsearch_svc_creds=`cf service-key "${elasticsearch_svc}" "${elasticsearch_svc_key_name}" | grep -v "Getting key "`
+
+      elasticsearch_uri=`echo ${elasticsearch_svc_creds} | ./jq '.uri' | sed -e 's/"//g'`
+
+      # parse the uri to get username/password
+      elasticsearch_username=`echo ${elasticsearch_uri} | sed -e 's/https:\/\///' | sed -e 's/@.*$//' | awk -F: '{print $1;}'`
+      elasticsearch_password=`echo ${elasticsearch_uri} | sed -e 's/https:\/\///' | sed -e 's/@.*$//' | awk -F: '{print $2;}'`
+      elasticsearch_url=`echo ${elasticsearch_uri} | sed -e 's/^.*@/https:\/\//'`
+
       # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
       echo -e "${label_color}Starting deployment script${no_color}"
 
@@ -125,12 +135,23 @@ stages:
       git_retry clone https://github.com/ssibm/deployscripts.git deployscripts
 
       OPTIONAL_ARGS="${OPTIONAL_ARGS} \
+            -e NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} \
+            -e server.port=${PORT} \
             -e eureka.client.fetchRegistry=true \
             -e eureka.client.registerWithEureka=true \
+            -e "spring.application.name=${APP_NAME}" \
+            -e "server.context-path=/micro" \
             -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
-            -e "elasticsearch.user=${ELASTICSEARCH_USER}" \
-            -e "elasticsearch.password=${ELASTICSEARCH_PASSWORD}" \
-            -e "elasticsearch.url=${ELASTICSEARCH_URL}""
+            -e "elasticsearch.user=${elasticsearch_username}" \
+            -e "elasticsearch.password=${elasticsearch_password}" \
+            -e "elasticsearch.url=${elasticsearch_url}""
+
+      # add the kafka broker list
+      count=0
+      for broker in ${kafka_brokerlist}; do
+          OPTIONAL_ARGS="${OPTIONAL_ARGS} -e \"message_hub.kafka_brokers_sasl[${count}]=${broker}\""
+          count=$((count+1))
+      done
 
       log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
 
@@ -176,7 +197,7 @@ stages:
       echo -e "${green}Execution complete${no_label}"
     OPTIONAL_ARGS: -m "${MEMORY}"
     PORT: '8081'
-    CONTAINER_NAME: us-micro-catalog-cloudnative-integration-fabio
+    CONTAINER_NAME: us-micro-catalog-cloudnative-integration
     DEPLOY_TYPE: red_black
 hooks:
 - enabled: true
