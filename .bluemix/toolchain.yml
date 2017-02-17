@@ -23,6 +23,7 @@ pipeline-micro-inventory:
     configuration:
       content: $file(inventory-pipeline.yml)
       env:
+        BRANCH: "{{deploy.parameters.branch}}"
         DESIRED_INSTANCES: "2"
         DOMAIN: "{{deploy.parameters.route-domain}}"
         ELASTICSEARCH_PASSWORD: "{{deploy.parameters.es-password}}"
@@ -55,6 +56,7 @@ pipeline-micro-catalog:
     configuration:
       content: $file(catalog-pipeline.yml)
       env:
+        BRANCH: "{{deploy.parameters.branch}}"
         DESIRED_INSTANCES: "2"
         DOMAIN: "{{deploy.parameters.route-domain}}"
         ELASTICSEARCH_PASSWORD: "{{deploy.parameters.es-password}}"
@@ -76,6 +78,7 @@ deploy:
   schema: deploy.json
   service-category: pipeline
   parameters:
+    branch: "master"
     deploy-region: "{{region}}"
     deploy-org: "{{organization}}"
     deploy-space: "{{space}}"
