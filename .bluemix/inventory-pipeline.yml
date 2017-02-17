@@ -139,6 +139,9 @@ stages:
   - name: MYSQL_PORT
     value: ${MYSQL_PORT}
     type: text
+  - name: ROUTE_HOSTNAME
+    value: ${NAME}
+    type: text
   jobs:
   - name: Deploy
     type: deployer

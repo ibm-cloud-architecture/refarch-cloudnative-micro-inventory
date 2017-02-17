@@ -124,6 +124,9 @@ stages:
   - name: MIN_INSTANCES
     value: ${MIN_INSTANCES}
     type: text
+  - name: ROUTE_HOSTNAME
+    value: ${NAME}
+    type: text
   jobs:
   - name: Deploy
     type: deployer
