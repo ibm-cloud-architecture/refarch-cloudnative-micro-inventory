@@ -29,6 +29,10 @@
             "description": "MySQL server port",
             "type": "string"
         },
+        "mysql-database": {
+            "description": "MySQL database ",
+            "type": "string"
+        },
         "mysql-dbuser": {
             "description": "MySQL database user",
             "type": "string"
@@ -75,6 +79,12 @@
             "readonly": false,
             "title": "Domain name for all routes",
             "key": "route-domain"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Database Name",
+            "key": "mysql-database"
         },
         {
             "type": "text",

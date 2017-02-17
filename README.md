@@ -91,7 +91,7 @@ You can use the following button to deploy the Inventory and Catalog microservic
   - Options:
     - [Deploy MySQL on Bluemix container](#deploy-mysql-on-bluemix-container)
     - [Deploy MySQL on Bluemix using Compose](#deploy-mysql-on-bluemix-using-compose).
-  - The toolchain will ask you to enter the `username`, `password`, `ip`, and `port` for MySQL.
+  - The toolchain will ask you to enter the `username`, `password`, `ip`, `port`, and `database` for MySQL.
 - **Deploy Elasticsearch in your Bluemix Space**.
   - Options:
     - [Deploy Elasticsearch on Bluemix container](#deploy-elasticsearch-on-bluemix-container) 
@@ -700,11 +700,12 @@ Compose is an IBM service that provides production ready Cloud Hosted Databases.
 3. Now obtain `MySQL` service credentials.
   - Click on `Service Credentials` tab.
   - Then click on the `View Credentials` dropdown next to the credentials.
-4. See the `uri` field, which has the format `mysql://user:password@host:port/compose`, and extract the following:
+4. See the `uri` field, which has the format `mysql://user:password@host:port/database`, and extract the following:
   - **user:** MySQL user.
   - **password:** MySQL password.
   - **host**: MySQL host.
   - **port:** MySQL port.
+  - **database:** MySQL database.
 5. Keep those credential handy and feel free to use them when [deploying Inventory Service application on Bluemix container](#deploy-inventory-service-application-on-bluemix-container).
 6. **Create `items` table and load sample data. You should see message _Data loaded to inventorydb.items._**
     ```
