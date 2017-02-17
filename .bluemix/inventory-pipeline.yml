@@ -127,6 +127,9 @@ stages:
   - name: MYSQL_DATABASE
     value: ${MYSQL_DATABASE}
     type: text
+  - name: MYSQL_IP
+    value: ${MYSQL_IP}
+    type: text
   - name: MYSQL_USER
     value: ${MYSQL_USER}
     type: text
@@ -196,10 +199,10 @@ stages:
       #/bin/bash deployscripts/deploycontainer.sh
       OPTIONAL_ARGS="${OPTIONAL_ARGS} \
             --hostname micro-inventory \
-            -e eureka.client.fetchRegistry=true \
+            -e eureka.client.fetchRegistry=false \
             -e eureka.client.registerWithEureka=false \
             -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
-            -e "spring.datasource.url=${JDBC_URL}" \
+            -e "spring.datasource.url=jdbc:mysql://${MYSQL_IP}:${MYSQL_PORT}/${MYSQL_DATABASE}" \
             -e "spring.datasource.username=${MYSQL_USER}" \
             -e "spring.datasource.password=${MYSQL_PASSWORD}" \
             -e "elasticsearch.user=${ELASTICSEARCH_USER}" \
