@@ -95,4 +95,4 @@ deploy:
     es-user: ""
     es-password: ""
     eureka-url: "http(s)://eureka_host:port/eureka"
-    repo-branch: "{{branch}}"
+    repo-branch: "integration"
