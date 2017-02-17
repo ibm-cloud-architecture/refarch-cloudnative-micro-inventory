@@ -30,7 +30,7 @@
             "type": "string"
         },
         "mysql-database": {
-            "description": "MySQL database ",
+            "description": "MySQL database name",
             "type": "string"
         },
         "mysql-dbuser": {
