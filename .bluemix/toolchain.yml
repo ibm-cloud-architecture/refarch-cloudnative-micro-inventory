@@ -23,16 +23,16 @@ pipeline-micro-inventory:
     configuration:
       content: $file(inventory-pipeline.yml)
       env:
-        BRANCH: "{{deploy.parameters.branch}}"
-        DESIRED_INSTANCES: "2"
+        BRANCH: "{{deploy.parameters.repo-branch}}"
+        DESIRED_INSTANCES: "{{deploy.parameters.desired-instances}}"
         DOMAIN: "{{deploy.parameters.route-domain}}"
         ELASTICSEARCH_PASSWORD: "{{deploy.parameters.es-password}}"
         ELASTICSEARCH_URL: "{{deploy.parameters.es-url}}"
         ELASTICSEARCH_USER: "{{deploy.parameters.es-user}}"
         EUREKA_REGISTRY_URL: "{{deploy.parameters.eureka-url}}"
-        MAX_INSTANCES: "3"
-        MEMORY: "256"
-        MIN_INSTANCES: "1"
+        MAX_INSTANCES: "{{deploy.parameters.max-instances}}"
+        MEMORY: "{{deploy.parameters.memory}}"
+        MIN_INSTANCES: "{{deploy.parameters.min-instances}}"
         MYSQL_DATABASE: "{{deploy.parameters.mysql-database}}"
         MYSQL_IP: "{{deploy.parameters.mysql-ip}}"
         MYSQL_USER: "{{deploy.parameters.mysql-dbuser}}"
@@ -56,16 +56,16 @@ pipeline-micro-catalog:
     configuration:
       content: $file(catalog-pipeline.yml)
       env:
-        BRANCH: "{{deploy.parameters.branch}}"
-        DESIRED_INSTANCES: "2"
+        BRANCH: "{{deploy.parameters.repo-branch}}"
+        DESIRED_INSTANCES: "{{deploy.parameters.desired-instances}}"
         DOMAIN: "{{deploy.parameters.route-domain}}"
         ELASTICSEARCH_PASSWORD: "{{deploy.parameters.es-password}}"
         ELASTICSEARCH_URL: "{{deploy.parameters.es-url}}"
         ELASTICSEARCH_USER: "{{deploy.parameters.es-user}}"
         EUREKA_REGISTRY_URL: "{{deploy.parameters.eureka-url}}"
-        MAX_INSTANCES: "3"
-        MEMORY: "256"
-        MIN_INSTANCES: "1"
+        MAX_INSTANCES: "{{deploy.parameters.max-instances}}"
+        MEMORY: "{{deploy.parameters.memory}}"
+        MIN_INSTANCES: "{{deploy.parameters.min-instances}}"
         NAME: "{{pipeline-micro-catalog.parameters.name}}-{{deploy.parameters.deploy-space}}"
         ORG: "{{deploy.parameters.deploy-org}}"
         PORT: "8081"
@@ -78,11 +78,14 @@ deploy:
   schema: deploy.json
   service-category: pipeline
   parameters:
-    branch: "master"
     deploy-region: "{{region}}"
     deploy-org: "{{organization}}"
     deploy-space: "{{space}}"
+    desired-instances: "2"
     route-domain: "mybluemix.net"
+    max-instances: "3"
+    memory: "256"
+    min-instances: "1"
     mysql-ip: "mysql_host"
     mysql-port: "3306"
     mysql-dbuser: ""
@@ -92,3 +95,4 @@ deploy:
     es-user: ""
     es-password: ""
     eureka-url: "http(s)://eureka_host:port/eureka"
+    repo-branch: "{{branch}}"

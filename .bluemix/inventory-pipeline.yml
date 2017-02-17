@@ -112,9 +112,6 @@ stages:
   - name: EUREKA_REGISTRY_URL
     value: ${EUREKA_REGISTRY_URL}
     type: text
-  - name: JDBC_URL
-    value: ${JDBC_URL}
-    type: text
   - name: MAX_INSTANCES
     value: ${MAX_INSTANCES}
     type: text
