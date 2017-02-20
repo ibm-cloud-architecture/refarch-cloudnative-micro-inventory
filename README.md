@@ -30,7 +30,7 @@ https://github.com/ibm-solution-engineering/refarch-cloudnative*
 
 ##Introduction
 
-This project is built to demonstrate how to build two `Spring Boot` applications that leverage `Spring Data JPA`. The first application (`Inventory`) uses MySQL database as its datasource. The second and publicly available application (`Catalog`) serves as a cache to `Inventory` by leveraging `Elasticsearch` as its datasource.
+This project is built to demonstrate how to build two Microservices applications using Spring Boot and Docker container.. The first application (`Inventory`) uses MySQL database as its datasource. The second and publicly available application (`Catalog`) serves as a cache to `Inventory` by leveraging `Elasticsearch` as its datasource.
 
 Here is an overview of the project's features:
 - Leverage [`Spring Boot`](https://projects.spring.io/spring-boot/) framework to build a Microservices application.
