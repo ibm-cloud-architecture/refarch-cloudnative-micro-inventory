@@ -21,12 +21,16 @@
             "description": "Domain name. Example: mybluemix.net for runtimes in US-South",
             "type": "string"
         },
-        "mysql-database": {
-            "description": "Inventory database name",
+        "mysql-ip": {
+            "description": "MySQL IP address",
             "type": "string"
         },
         "mysql-port": {
             "description": "MySQL server port",
+            "type": "string"
+        },
+        "mysql-database": {
+            "description": "MySQL database name",
             "type": "string"
         },
         "mysql-dbuser": {
@@ -34,31 +38,23 @@
             "type": "string"
         },
         "mysql-dbpass": {
-            "description": "Password for MySQL database user",
+            "description": "MySQL database user password",
             "type": "password"
         },
-        "mysql-root-pass": {
-            "description": "Password for MySQL admin user",
+        "es-url": {
+            "description": "Elasticsearch URL http(s)://host_ip:port",
+            "type": "string"
+        },
+        "es-user": {
+            "description": "Elasticsearch URL http(s)://host_ip:port",
+            "type": "string"
+        },
+        "es-password": {
+            "description": "Elasticsearch URL http(s)://host_ip:port",
             "type": "password"
         },
-        "new-relic-lic-key": {
-            "description": "New Relic License Key",
-            "type": "string"
-        },
-        "customer-gateway-ip": {
-            "description": "Customer VPN Gateway Endpoint",
-            "type": "string"
-        },
-        "customer-subnet": {
-            "description": "Customer Subnet",
-            "type": "string"
-        },
-        "customer-psk": {
-            "description": "Customer VPN Gateway Pre-shared Key",
-            "type": "string"
-        },
-        "jdbc-url": {
-            "description": "JDBC URL",
+        "eureka-url": {
+            "description": "Eureka http(s)://host_ip:port/eureka",
             "type": "string"
         }
     },
@@ -66,7 +62,12 @@
         "deploy-region",
         "deploy-org",
         "deploy-space",
-        "route-domain"
+        "route-domain",
+        "mysql-ip",
+        "mysql-port",
+        "mysql-dbuser",
+        "mysql-dbpass",
+        "es-url"
     ],
     "form": [
         {
@@ -82,26 +83,20 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "Customer VPN Gateway IP",
-            "key": "customer-gateway-ip"
+            "title": "Database Name",
+            "key": "mysql-database"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "Customer Subnet",
-            "key": "customer-subnet"
+            "title": "Database IP",
+            "key": "mysql-ip"
         },
         {
             "type": "text",
             "readonly": false,
-            "title": "Customer VPN Pre-shared Key",
-            "key": "customer-psk"
-        },
-        {
-            "type": "text",
-            "readonly": false,
-            "title": "JDBC_URL",
-            "key": "jdbc-url"
+            "title": "Database Port",
+            "key": "mysql-port"
         },
         {
             "type": "text",
@@ -118,8 +113,26 @@
         {
             "type": "text",
             "readonly": false,
-            "title": "New Relic License Key",
-            "key": "new-relic-lic-key"
+            "title": "Elasticsearch URL. i.e. http(s)://host:port",
+            "key": "es-url"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Elasticsearch User",
+            "key": "es-user"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Elasticsearch Password",
+            "key": "es-password"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Eureka URL. i.e. http(s)://host:port/eureka",
+            "key": "eureka-url"
         },
         {
             "type": "table",
