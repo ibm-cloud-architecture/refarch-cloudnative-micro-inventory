@@ -3,7 +3,7 @@
 ###Spring Boot Netflix OSS Microservice Apps Integration with ElasticSearch and MySQL Database Server
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
-https://github.com/ibm-solution-engineering/refarch-cloudnative*
+https://github.com/ibm-cloud-architecture/refarch-cloudnative*
 
 ##Table of Contents
 - **[Introduction](#introduction)**
@@ -99,7 +99,7 @@ You can use the following button to deploy the Inventory and Catalog microservic
   - The toolchain will ask you to enter the `username`, `password`, and `URL` for Elasticsearch.
 
 
-[![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory.git)
+[![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git)
 
 
 ##Run Inventory and Catalog Locally
