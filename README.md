@@ -113,15 +113,16 @@ In this section you will learn how to build and run the Inventory and Catalog ap
 
 2. **Create MySQL container with database `inventorydb`. This database can be connected at `<docker-host-ipaddr/hostname>:3306` as `dbuser` using `password`**.
     ```
-    Linux/macOS:
-    # docker run --name mysql -v $PWD/scripts:/home/scripts -p 3306:3306 -e MYSQL_ROOT_PASSWORD=admin123 -e MYSQL_USER=dbuser -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=inventorydb -w /home/scripts -d mysql:latest
-    ```
-    ```
-    Windows:
-    # docker run --name mysql -v %CD%\scripts:/home/scripts -p 3306:3306 -e MYSQL_ROOT_PASSWORD=admin123 -e MYSQL_USER=dbuser -e MYSQL_PASSWORD=password -e MYSQL_DATABASE=inventorydb -w /home/scripts -d mysql:latest
+    # docker build -t cloudnative/mysql .
+    # docker run --name mysql -d -p 3306:3306 \
+      -e MYSQL_ROOT_PASSWORD=admin123 \
+      -e MYSQL_USER=dbuser \
+      -e MYSQL_PASSWORD=password \
+      -e MYSQL_DATABASE=inventorydb \
+      cloudnative/mysql
     ```
 
-3. **Create `items` table and load sample data**.
+3. **Create `items` table and load sample data. You should see _Data loaded to inventorydb.items_**.
     ```
     # docker exec -it mysql bash load-data.sh
     ```
@@ -271,18 +272,18 @@ In this section you will learn how to package the Inventory and Catalog apps as 
   ```
   # docker run -d -p 8080:8080 --name inventoryservice \
     -e "spring.datasource.url=jdbc:mysql://{mysql_ip}:3306/inventorydb" \
-    -e "spring.datasource.username=${mysql_user}" \
-    -e "spring.datasource.password=${mysql_password}" \
-    -e "elasticsearch.url=${es_url}" \
-    -e "message_hub.user=${mh_user}" \
-    -e "message_hub.password=${mh_password}" \
-    -e "message_hub.api_key=${mh_api_key}" \
-    -e "message_hub.kafka_rest_url=${mh_kafka_rest_url}" \
-    -e "message_hub.kafka_brokers_sasl[0]=${mh_kafka_broker_0}" \
-    -e "message_hub.kafka_brokers_sasl[1]=${mh_kafka_broker_1}" \
-    -e "message_hub.kafka_brokers_sasl[2]=${mh_kafka_broker_2}" \
-    -e "message_hub.kafka_brokers_sasl[3]=${mh_kafka_broker_3}" \
-    -e "message_hub.kafka_brokers_sasl[4]=${mh_kafka_broker_4}" \
+    -e "spring.datasource.username={mysql_user}" \
+    -e "spring.datasource.password={mysql_password}" \
+    -e "elasticsearch.url={es_url}" \
+    -e "message_hub.user={mh_user}" \
+    -e "message_hub.password={mh_password}" \
+    -e "message_hub.api_key={mh_api_key}" \
+    -e "message_hub.kafka_rest_url={mh_kafka_rest_url}" \
+    -e "message_hub.kafka_brokers_sasl[0]={mh_kafka_broker_0}" \
+    -e "message_hub.kafka_brokers_sasl[1]={mh_kafka_broker_1}" \
+    -e "message_hub.kafka_brokers_sasl[2]={mh_kafka_broker_2}" \
+    -e "message_hub.kafka_brokers_sasl[3]={mh_kafka_broker_3}" \
+    -e "message_hub.kafka_brokers_sasl[4]={mh_kafka_broker_4}" \
     cloudnative/inventoryservice
   ```
 
@@ -325,7 +326,7 @@ In this section you will deploy the Catalog Spring Boot application to run in a 
   # docker run -d -p 8081:8081 --name catalogservice \
   -e "eureka.client.fetchRegistry=false" \
   -e "eureka.client.registerWithEureka=false" \
-  -e "elasticsearch.url=${es_url}" \
+  -e "elasticsearch.url={es_url}" \
   cloudnative/catalogservice"
   ```
 
@@ -536,18 +537,18 @@ In this section you will deploy both the database server and the Spring Boot app
   ```
   # cf ic group create -p 8080 -m 1024 --min 1 --auto --name micro-inventory-group \
     -e "spring.datasource.url=jdbc:mysql://{mysql_ip}:3306/inventorydb" \
-    -e "spring.datasource.username=${mysql_user}" \
-    -e "spring.datasource.password=${mysql_password}" \
-    -e "elasticsearch.url=${es_url}" \
-    -e "message_hub.user=${mh_user}" \
-    -e "message_hub.password=${mh_password}" \
-    -e "message_hub.api_key=${mh_api_key}" \
-    -e "message_hub.kafka_rest_url=${mh_kafka_rest_url}" \
-    -e "message_hub.kafka_brokers_sasl[0]=${mh_kafka_broker_0}" \
-    -e "message_hub.kafka_brokers_sasl[1]=${mh_kafka_broker_1}" \
-    -e "message_hub.kafka_brokers_sasl[2]=${mh_kafka_broker_2}" \
-    -e "message_hub.kafka_brokers_sasl[3]=${mh_kafka_broker_3}" \
-    -e "message_hub.kafka_brokers_sasl[4]=${mh_kafka_broker_4}" \
+    -e "spring.datasource.username={mysql_user}" \
+    -e "spring.datasource.password={mysql_password}" \
+    -e "elasticsearch.url={es_url}" \
+    -e "message_hub.user={mh_user}" \
+    -e "message_hub.password={mh_password}" \
+    -e "message_hub.api_key={mh_api_key}" \
+    -e "message_hub.kafka_rest_url={mh_kafka_rest_url}" \
+    -e "message_hub.kafka_brokers_sasl[0]={mh_kafka_broker_0}" \
+    -e "message_hub.kafka_brokers_sasl[1]={mh_kafka_broker_1}" \
+    -e "message_hub.kafka_brokers_sasl[2]={mh_kafka_broker_2}" \
+    -e "message_hub.kafka_brokers_sasl[3]={mh_kafka_broker_3}" \
+    -e "message_hub.kafka_brokers_sasl[4]={mh_kafka_broker_4}" \
     -n inventoryservice \
     -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
   ```
@@ -566,20 +567,20 @@ In this section you will deploy both the database server and the Spring Boot app
   ```
   # cf ic group create -p 8080 -m 1024 --min 1 --auto --name micro-inventory-group \
     -e "spring.datasource.url=jdbc:mysql://{mysql_ip}:{msql_port}/inventorydb" \
-    -e "spring.datasource.username=${mysql_user}" \
-    -e "spring.datasource.password=${mysql_password}" \
-    -e "elasticsearch.url=${es_url}" \
-    -e "elasticsearch.user=${es_user}" \
-    -e "elasticsearch.password=${es_password}" \
-    -e "message_hub.user=${mh_user}" \
-    -e "message_hub.password=${mh_password}" \
-    -e "message_hub.api_key=${mh_api_key}" \
-    -e "message_hub.kafka_rest_url=${mh_kafka_rest_url}" \
-    -e "message_hub.kafka_brokers_sasl[0]=${mh_kafka_broker_0}" \
-    -e "message_hub.kafka_brokers_sasl[1]=${mh_kafka_broker_1}" \
-    -e "message_hub.kafka_brokers_sasl[2]=${mh_kafka_broker_2}" \
-    -e "message_hub.kafka_brokers_sasl[3]=${mh_kafka_broker_3}" \
-    -e "message_hub.kafka_brokers_sasl[4]=${mh_kafka_broker_4}" \
+    -e "spring.datasource.username={mysql_user}" \
+    -e "spring.datasource.password={mysql_password}" \
+    -e "elasticsearch.url={es_url}" \
+    -e "elasticsearch.user={es_user}" \
+    -e "elasticsearch.password={es_password}" \
+    -e "message_hub.user={mh_user}" \
+    -e "message_hub.password={mh_password}" \
+    -e "message_hub.api_key={mh_api_key}" \
+    -e "message_hub.kafka_rest_url={mh_kafka_rest_url}" \
+    -e "message_hub.kafka_brokers_sasl[0]={mh_kafka_broker_0}" \
+    -e "message_hub.kafka_brokers_sasl[1]={mh_kafka_broker_1}" \
+    -e "message_hub.kafka_brokers_sasl[2]={mh_kafka_broker_2}" \
+    -e "message_hub.kafka_brokers_sasl[3]={mh_kafka_broker_3}" \
+    -e "message_hub.kafka_brokers_sasl[4]={mh_kafka_broker_4}" \
     -n inventoryservice \
     -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/inventoryservice:cloudnative
   ```
@@ -655,7 +656,7 @@ In this section you will deploy the `Catalog` Spring Boot application in IBM Blu
     -e "eureka.client.fetchRegistry=true" \
     -e "eureka.client.registerWithEureka=true" \
     -e "eureka.client.serviceUrl.defaultZone=http://netflix-eureka-$(cf ic namespace get).mybluemix.net/eureka/" \
-    -e "elasticsearch.url=${es_url}" \
+    -e "elasticsearch.url={es_url}" \
     -n catalogservice \
     -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/catalogservice:cloudnative
   ```
@@ -668,9 +669,9 @@ In this section you will deploy the `Catalog` Spring Boot application in IBM Blu
     -e "eureka.client.fetchRegistry=true" \
     -e "eureka.client.registerWithEureka=true" \
     -e "eureka.client.serviceUrl.defaultZone=http://netflix-eureka-$(cf ic namespace get).mybluemix.net/eureka/" \
-    -e "elasticsearch.url=${es_url}" \
-    -e "elasticsearch.user=${es_user}" \
-    -e "elasticsearch.password=${es_password}" \
+    -e "elasticsearch.url={es_url}" \
+    -e "elasticsearch.user={es_user}" \
+    -e "elasticsearch.password={es_password}" \
     -n catalogservice \
     -d mybluemix.net registry.ng.bluemix.net/$(cf ic namespace get)/catalogservice:cloudnative
   ```
