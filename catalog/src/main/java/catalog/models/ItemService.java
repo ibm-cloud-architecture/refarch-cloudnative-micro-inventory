@@ -41,7 +41,7 @@ public class ItemService {
     // Get all rows from database
     public List<Item> findAll() {
         List<Item> list;
-        String req_url = url + "/" + index + "/" + doc_type + "/_search";
+        String req_url = url + "/" + index + "/" + doc_type + "/_search?size=1000&pretty=1";
         Response response = perform_request(req_url);
 
         try {
