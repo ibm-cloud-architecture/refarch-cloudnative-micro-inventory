@@ -145,6 +145,9 @@ stages:
   - name: BLUEMIX_SPACE
     value: ${SPACE}
     type: text
+  - name: IMAGE_NAME
+    value: ${IMAGE_NAME}
+    type: text
   jobs:
   - name: Deploy
     type: deployer
