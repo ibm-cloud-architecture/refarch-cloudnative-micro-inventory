@@ -56,6 +56,22 @@
         "eureka-url": {
             "description": "Eureka http(s)://host_ip:port/eureka",
             "type": "string"
+        },
+        "cluster-name": {
+            "description": "The name of your Container Service cluster",
+            "type": "string"
+        },
+        "bluemix-user": {
+            "description": "Your Bluemix user ID",
+            "type": "string"
+        },
+        "bluemix-password": {
+            "description": "Your Bluemix password",
+            "type": "password"
+        },
+        "bluemix-account": {
+            "description": "The ID of the Bluemix account where you created the cluster. Retrieve it with 'bx iam accounts'",
+            "type": "string"
         }
     },
     "required": [
@@ -67,7 +83,11 @@
         "mysql-port",
         "mysql-dbuser",
         "mysql-dbpass",
-        "es-url"
+        "es-url",
+        "cluster-name",
+        "bluemix-user",
+        "bluemix-password",
+        "bluemix-account"
     ],
     "form": [
         {
@@ -133,6 +153,30 @@
             "readonly": false,
             "title": "Eureka URL. i.e. http(s)://host:port/eureka",
             "key": "eureka-url"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Kubernetes Cluster Name",
+            "key": "cluster-name"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Bluemix User Id",
+            "key": "bluemix-user"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Bluemix Password",
+            "key": "bluemix-password"
+        },
+        {
+            "type": "text",
+            "readonly": false,
+            "title": "Bluemix Account. Retrieve it with 'bx iam accounts'",
+            "key": "bluemix-account"
         },
         {
             "type": "table",

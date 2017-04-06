@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: catalog-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: catalog
+    spec:
+      containers:
+      - name: catalog
+        image: registry.ng.bluemix.net/chrisking/catalog:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        env:
+        - name: elastic
+          valueFrom:
+            secretKeyRef:
+              name: binding-compose-for-elasticsearch
+              key: binding

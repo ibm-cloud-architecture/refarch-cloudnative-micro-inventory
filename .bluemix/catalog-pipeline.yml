@@ -48,8 +48,8 @@ stages:
       # Build Container via Dockerfile     #
       ######################################
             
-      # REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
-      # FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}
+      REGISTRY_URL=${CCS_REGISTRY_HOST}/${NAMESPACE}
+      FULL_REPOSITORY_NAME=${REGISTRY_URL}/${IMAGE_NAME}:${APPLICATION_VERSION}
       # If you wish to receive slack notifications, set SLACK_WEBHOOK_PATH as a property on the stage.
 
       if [ -f Dockerfile ]; then 
@@ -124,6 +124,24 @@ stages:
   - name: ROUTE_HOSTNAME
     value: ${NAME}
     type: text
+  - name: CLUSTER_NAME
+    value: ${CLUSTER_NAME}
+    type: text
+  - name: BLUEMIX_USER
+    value: ${BLUEMIX_USER}
+    type: text
+  - name: BLUEMIX_PASSWORD
+    value: ${BLUEMIX_PASSWORD}
+    type: secure
+  - name: BLUEMIX_ACCOUNT
+    value: ${BLUEMIX_ACCOUNT}
+    type: text
+  - name: BLUEMIX_ORG
+    value: ${ORG}
+    type: text
+  - name: BLUEMIX_SPACE
+    value: ${SPACE}
+    type: text
   jobs:
   - name: Deploy
     type: deployer
@@ -137,70 +155,20 @@ stages:
     CONTAINER_NAME: ${NAME}
     DEPLOY_TYPE: red_black
     COMMAND: |-
-      #!/bin/sh
+      #!/bin/bash
 
       set +e
-      # download jq
-      JQ_BIN=`which jq`
-      if [ -z "${JQ_BIN}" ]; then
-          if [ ! -f "./jq" ]; then
-              wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-              mv jq-linux64 jq
-              chmod u+x jq
-              JQ_BIN="./jq"
-          fi
-      fi
 
-      # The following are some example deployment scripts.  Use these as is or fork them and include your updates here:
-      echo -e "${label_color}Starting deployment script${no_color}"
+      # Install Bluemix CLI
+      . ./scripts/install_bx.sh
 
-      # To view/fork this script goto: https://github.com/Osthanes/deployscripts
-      # git_retry will retry git calls to prevent pipeline failure on temporary github problems
-      # the code can be found in git_util.sh at https://github.com/Osthanes/container_deployer
-      git_retry clone https://github.com/ssibm/deployscripts.git deployscripts
-
-      OPTIONAL_ARGS="${OPTIONAL_ARGS} \
-            -e eureka.client.fetchRegistry=true \
-            -e eureka.client.registerWithEureka=true \
-            -e "eureka.client.serviceUrl.defaultZone=${EUREKA_REGISTRY_URL}" \
-            -e "elasticsearch.user=${ELASTICSEARCH_USER}" \
-            -e "elasticsearch.password=${ELASTICSEARCH_PASSWORD}" \
-            -e "elasticsearch.url=${ELASTICSEARCH_URL}""
-
-      log_and_echo "Optional Args: ${OPTIONAL_ARGS}"
-
-      # Deploy Container Group:
-      # Optional environment properties (can be set directly in this script, or defined as environment properties):
-      #      NAME              Value         Description
-      #   =============      =========     ==============
-      #   ROUTE_HOSTNAME      String       Specify the Hostname for the Cloud Foundry Route you wish to assign to this container group.  By default this is not set.
-      #   ROUTE_DOMAIN        String       Specify domain name for the Cloud Foundry Route you wish to assign to this container group.  By default this is not set.
-      #   BIND_TO             String       Specify a Bluemix application name that whose bound services you wish to make available to the container.  By default this is not set.
-      #   DESIRED_INSTANCES:  Number       Specify the number of instances in the group.  Default value is 1.
-      #   AUTO_RECOVERY:      Boolean      Set auto-recovery to true/false.  Default value is false.
-
-      #                                    Default is false.
-      #   CONTAINER_SIZE      String       Specify container size: pico (64), nano (128), micro (256), tiny (512), small (1024), medium (2048),
-      #                                                            large (4096), x-large (8192), 2x-large (16384).
-      #                                    Default is micro (256).
-      #   CONCURRENT_VERSIONS Number       Number of versions of this group to leave active.
-      #                                    Default is 1
-      # IF YOU WANT CONTAINER GROUPS .. uncomment the next line, and comment out the previous deployment line (/bin/bash deployscripts/deploygroup.sh)
-      /bin/bash deployscripts/deploygroup.sh
+      # Login into Bluemix CLI
+      ./scripts/bx_login.sh
+      
+      # Deploy catalog into Kubernetes
+      ./catalog/deploy.sh
 
       RESULT=$?
-
-      # source the deploy property file
-      if [ -f "${DEPLOY_PROPERTY_FILE}" ]; then
-        source "$DEPLOY_PROPERTY_FILE"
-      fi
-
-      #########################
-      # Environment DETAILS   #
-      #########################
-      # The environment has been setup.
-      # The Cloud Foundry CLI (cf), IBM Container Service CLI (ice), Git client (git), IDS Inventory CLI (ids-inv) and Python 2.7.3 (python) have been installed.
-      # Based on the organization and space selected in the Job credentials are in place for both IBM Container Service and IBM Bluemix
 
       # The following colors have been defined to help with presentation of logs: green, red, label_color, no_color.
       if [ $RESULT -ne 0 ]; then

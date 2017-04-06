@@ -72,6 +72,10 @@ pipeline-micro-catalog:
         REGION: "{{deploy.parameters.deploy-region}}"
         REPO: "git-micro-inventory"
         SPACE: "{{deploy.parameters.deploy-space}}"
+        CLUSTER_NAME: "{{deploy.parameters.cluster-name}}"
+        BLUEMIX_USER: "{{deploy.parameters.bluemix-user}}"
+        BLUEMIX_PASSWORD: "{{deploy.parameters.bluemix-password}}"
+        BLUEMIX_ACCOUNT: "{{deploy.parameters.bluemix-account}}"
       execute: false
 
 deploy:
@@ -95,4 +99,8 @@ deploy:
     es-user: ""
     es-password: ""
     eureka-url: "http(s)://eureka_host:port/eureka"
-    repo-branch: "integration"
+    repo-branch: "kubernetes"
+    cluster-name: "Kubernetes cluster name"
+    bluemix-user: ""
+    bluemix-password: ""
+    bluemix-account: "Get with 'bx iam accounts'"
