@@ -88,6 +88,9 @@ stages:
       # Copy any artifacts that will be needed for deployment and testing to $WORKSPACE    #
       ######################################################################################
       echo "IMAGE_NAME=${FULL_REPOSITORY_NAME}" >> $ARCHIVE_DIR/build.properties
+      echo "image = $IMAGE_NAME"
+      log_and_echo "image = $IMAGE_NAME"
+      log_and_echo "repository = $FULL_REPOSITORY_NAME"
 
 - name: Deploy
   inputs:
@@ -157,7 +160,13 @@ stages:
     COMMAND: |-
       #!/bin/bash
 
-      set +e
+      set -x
+      echo -e ${FULL_REPOSITORY_NAME}
+      echo -e "image repo = ${FULL_REPOSITORY_NAME}"
+      echo -e "Stuff 1"
+      log_and_echo $(cat $ARCHIVE_DIR/build.properties)
+      log_and_echo "Stuff 2"
+      echo $(cat $ARCHIVE_DIR/build.properties)
 
       # Install Bluemix CLI
       . ./scripts/install_bx.sh

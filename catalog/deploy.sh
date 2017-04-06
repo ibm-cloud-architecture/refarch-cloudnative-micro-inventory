@@ -4,7 +4,7 @@ function get_elastic_secret {
 	echo $(kubectl get secrets | grep "compose-for-elasticsearch" | awk '{print $1}')
 }
 
-echo "Create Guestbook"
+echo "Checking cluster"
 IP_ADDR=$(bx cs workers $CLUSTER_NAME | grep deployed | awk '{ print $2 }')
 if [ -z $IP_ADDR ]; then
   echo "$CLUSTER_NAME not created or workers not ready"
@@ -50,7 +50,7 @@ fi
 cat catalog/deployment.yml
 # Enter secret and image name into yaml
 sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g catalog/deployment.yml
-sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%${IMAGE_NAME}%g catalog/deployment.yml
+sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%${FULL_REPOSITORY_NAME}%g catalog/deployment.yml
 cat catalog/deployment.yml
 
 # Delete previous service
