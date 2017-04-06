@@ -151,11 +151,11 @@ stages:
   jobs:
   - name: Deploy
     type: deployer
-    extension_id: ibm.devops.services.pipeline.docker.deploy.ice
     target:
       region_id: ${REGION}
       organization: ${ORG}
       space: ${SPACE}
+      application: Pipeline
     OPTIONAL_ARGS: -m "${MEMORY}"
     PORT: ${PORT}
     CONTAINER_NAME: ${NAME}
