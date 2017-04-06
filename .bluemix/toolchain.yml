@@ -9,7 +9,7 @@ git-micro-inventory:
   service_id: githubpublic
   parameters:
     repo_name: "refarch-cloudnative-micro-inventory-{{name}}"
-    repo_url: "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory"
+    repo_url: "https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory"
     type: clone
     has_issues: true
 
