@@ -1,0 +1,46 @@
+podTemplate(label: 'mypod',
+    volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
+    containers: [
+        containerTemplate(
+            name: 'gradle',
+            image: 'fabiogomezdiaz/bc-jenkins-slave:v1',
+            ttyEnabled: true,
+            command: 'cat',
+            envVars: [
+                containerEnvVar(key: 'CF_EMAIL', value: '${env.CF_EMAIL}'),
+                containerEnvVar(key: 'CF_PASSWORD', value: '${env.CF_PASSWORD}'),
+                containerEnvVar(key: 'CF_ORG', value: '${env.CF_ORG}'),
+                containerEnvVar(key: 'CF_SPACE', value: '${env.CF_SPACE}'),
+                containerEnvVar(key: 'CF_ACCOUNT', value: '${env.CF_ACCOUNT}'),
+                containerEnvVar(key: 'CLUSTER_NAME', value: '${env.CLUSTER_NAME}')
+            ])
+    ]) {
+
+    node ('mypod') {
+        stage 'Build and push Docker Image'
+        git 'https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory'
+        container('gradle') {
+            stage 'Build gradle project'
+            sh """
+            cd catalog
+            ./gradlew build -x test
+            cd ..
+            """
+
+            stage 'Build docker image'
+            sh """
+            cd catalog
+            ./gradlew docker
+            cd docker
+            docker build -t cloudnative/catalog-fabio-jenkins .
+            cd ..
+            """
+
+            stage 'Push docker image'
+            sh """
+            docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/$(cf ic namespace get)/${CATALOG_ROUTE_NAME}:v1
+            docker push registry.ng.bluemix.net/$(cf ic namespace get)/${CATALOG_ROUTE_NAME}:v1
+            """
+        }
+    }
+}
