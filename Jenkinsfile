@@ -19,26 +19,20 @@ podTemplate(label: 'mypod',
     node ('mypod') {
         container('gradle') {
             stage ('Build') {
-                steps {
-                    checkout scm
-                    sh 'printenv'
-                    sh 'docker info'
-                    sh 'cd catalog'
-                    sh './gradlew build -x test'
-                }
+                checkout scm
+                sh 'printenv'
+                sh 'docker info'
+                sh 'cd catalog'
+                sh './gradlew build -x test'
             }
             stage ('Build Docker Image') {
-                steps {
-                    sh './gradlew docker'
-                    sh 'cd docker'
-                    sh 'docker build -t cloudnative/catalog-fabio-jenkins .'
-                }
+                sh './gradlew docker'
+                sh 'cd docker'
+                sh 'docker build -t cloudnative/catalog-fabio-jenkins .'
             }
             stage ('Push Docker Image to Registry') {
-                steps {
-                    sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
-                    sh 'docker push registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
-                }
+                sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
+                sh 'docker push registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
             }
         }
 
