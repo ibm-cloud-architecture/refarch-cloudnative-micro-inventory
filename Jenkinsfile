@@ -7,12 +7,12 @@ podTemplate(label: 'mypod',
             ttyEnabled: true,
             command: 'cat',
             envVars: [
-                containerEnvVar(key: 'CF_EMAIL', value: ${env.CF_EMAIL}),
-                containerEnvVar(key: 'CF_PASSWORD', value: ${env.CF_PASSWORD}),
-                containerEnvVar(key: 'CF_ORG', value: ${env.CF_ORG}),
-                containerEnvVar(key: 'CF_SPACE', value: ${env.CF_SPACE}),
-                containerEnvVar(key: 'CF_ACCOUNT', value: ${env.CF_ACCOUNT}),
-                containerEnvVar(key: 'CLUSTER_NAME', value: ${env.CLUSTER_NAME})
+                containerEnvVar(key: 'CF_EMAIL', value: '${env.CF_EMAIL}'),
+                containerEnvVar(key: 'CF_PASSWORD', value: '${env.CF_PASSWORD}'),
+                containerEnvVar(key: 'CF_ORG', value: '${env.CF_ORG}'),
+                containerEnvVar(key: 'CF_SPACE', value: '${env.CF_SPACE}'),
+                containerEnvVar(key: 'CF_ACCOUNT', value: '${env.CF_ACCOUNT}'),
+                containerEnvVar(key: 'CLUSTER_NAME', value: '${env.CLUSTER_NAME}')
             ])
     ]) {
 
