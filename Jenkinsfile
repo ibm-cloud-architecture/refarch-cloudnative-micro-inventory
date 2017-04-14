@@ -17,7 +17,33 @@ podTemplate(label: 'mypod',
     ]) {
 
     node ('mypod') {
-        stage 'Build and push Docker Image'
+        container('gradle') {
+            stage ('Build') {
+                steps {
+                    checkout scm
+                    sh 'printenv'
+                    sh 'docker info'
+                    sh 'cd catalog'
+                    sh './gradlew build -x test'
+                }
+            }
+            stage ('Build Docker Image') {
+                steps {
+                    sh './gradlew docker'
+                    sh 'cd docker'
+                    sh 'docker build -t cloudnative/catalog-fabio-jenkins .'
+                }
+            }
+            stage ('Push Docker Image to Registry') {
+                steps {
+                    sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
+                    sh 'docker push registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
+                }
+            }
+        }
+
+
+        /*stage 'Build and push Docker Image'
         git 'https://github.com/fabiogomezdiaz/refarch-cloudnative-micro-inventory'
         container('gradle') {
             stage 'Build gradle project'
@@ -41,6 +67,6 @@ podTemplate(label: 'mypod',
             docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/\$(cf ic namespace get)/:v1
             docker push registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}
             """
-        }
+        }*/
     }
 }
