@@ -7,12 +7,12 @@ podTemplate(label: 'mypod',
             ttyEnabled: true,
             command: 'cat',
             envVars: [
-                containerEnvVar(key: 'CF_EMAIL', value: '${env.CF_EMAIL}'),
-                containerEnvVar(key: 'CF_PASSWORD', value: '${env.CF_PASSWORD}'),
-                containerEnvVar(key: 'CF_ORG', value: '${env.CF_ORG}'),
-                containerEnvVar(key: 'CF_SPACE', value: '${env.CF_SPACE}'),
-                containerEnvVar(key: 'CF_ACCOUNT', value: '${env.CF_ACCOUNT}'),
-                containerEnvVar(key: 'CLUSTER_NAME', value: '${env.CLUSTER_NAME}')
+                containerEnvVar(key: 'CF_EMAIL', value: ${env.CF_EMAIL}),
+                containerEnvVar(key: 'CF_PASSWORD', value: ${env.CF_PASSWORD}),
+                containerEnvVar(key: 'CF_ORG', value: ${env.CF_ORG}),
+                containerEnvVar(key: 'CF_SPACE', value: ${env.CF_SPACE}),
+                containerEnvVar(key: 'CF_ACCOUNT', value: ${env.CF_ACCOUNT}),
+                containerEnvVar(key: 'CLUSTER_NAME', value: ${env.CLUSTER_NAME})
             ])
     ]) {
 
@@ -22,13 +22,10 @@ podTemplate(label: 'mypod',
                 checkout scm
                 sh 'printenv'
                 sh 'docker info'
-                sh 'cd catalog'
-                sh './gradlew build -x test'
+                sh 'cd catalog && ./gradlew build -x test'
             }
             stage ('Build Docker Image') {
-                sh './gradlew docker'
-                sh 'cd docker'
-                sh 'docker build -t cloudnative/catalog-fabio-jenkins .'
+                sh 'cd catalog && ./gradlew docker && cd docker && docker build -t cloudnative/catalog-fabio-jenkins .'
             }
             stage ('Push Docker Image to Registry') {
                 sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/\$(cf ic namespace get)/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
