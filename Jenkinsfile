@@ -16,6 +16,7 @@ podTemplate(label: 'mypod',
                 checkout scm
                 sh '''
                 set -x
+                whoami
                 bx
                 printenv
                 export KUBE_API_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
