@@ -21,7 +21,7 @@ podTemplate(label: 'mypod',
             stage ('Build') {
                 checkout scm
                 sh 'printenv'
-                sh 'docker info'
+                //sh 'docker info'
                 sh 'cd catalog && ./gradlew build -x test'
             }
             stage ('Build Docker Image') {
