@@ -1,10 +1,10 @@
 podTemplate(label: 'mypod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-              secretVolume(secretName: 'slavesecret', mountPath: '/tmp/slavesecret')],
+              secretVolume(secretName: 'slavesecret', mountPath: '/etc/slavesecret')],
     containers: [
         containerTemplate(
             name: 'gradle',
-            image: 'fabiogomezdiaz/bc-jenkins-slave:v3',
+            image: 'fabiogomezdiaz/bc-jenkins-slave:v4',
             ttyEnabled: true,
             command: 'cat'
     )]) {
@@ -14,7 +14,6 @@ podTemplate(label: 'mypod',
             stage ('Build') {
                 checkout scm
                 sh 'printenv'
-                sh 'ls /tmp/slavesecret'
                 //sh 'docker info'
                 sh 'cd catalog && ./gradlew build -x test'
             }
