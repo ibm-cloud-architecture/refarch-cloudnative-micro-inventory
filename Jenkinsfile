@@ -27,15 +27,14 @@ podTemplate(label: 'mypod',
                 bx plugin install container-service -r Bluemix
                 bx plugin install container-registry -r Bluemix
 
-                # Extract secret 
-                CF_EMAIL=`cat /var/run/secrets/bx-auth-secret/CF_EMAIL`
-                CF_PASSWORD=`cat /var/run/secrets/bx-auth-secret/CF_PASSWORD`
-                CF_ACCOUNT=`cat /var/run/secrets/bx-auth-secret/CF_ACCOUNT`
-                CF_ORG=`cat /var/run/secrets/bx-auth-secret/CF_ORG`
-                CF_SPACE=`cat /var/run/secrets/bx-auth-secret/CF_SPACE`
-
                 # Login to Bluemix and init plugins
-                bx login -a api.ng.bluemix.net -u ${CF_EMAIL} -p ${CF_PASSWORD} -c ${CF_ACCOUNT} -o ${CF_ORG} -s ${CF_SPACE}
+                bx login -a api.ng.bluemix.net \
+                -u `cat /var/run/secrets/bx-auth-secret/CF_EMAIL` \
+                -p `cat /var/run/secrets/bx-auth-secret/CF_PASSWORD` \
+                -c `cat /var/run/secrets/bx-auth-secret/CF_ACCOUNT` \
+                -o `cat /var/run/secrets/bx-auth-secret/CF_ORG` \
+                -s `cat /var/run/secrets/bx-auth-secret/CF_SPACE`
+
                 bx cs init
                 bx cr login
 
@@ -48,11 +47,10 @@ podTemplate(label: 'mypod',
             stage ('Deploy to Kubernetes') {
                 sh """
                 #!/bin/bash
-                KUBE_API_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
                 cd catalog
                 yaml w -i deployment.yml spec.template.spec.containers[0].image registry.ng.bluemix.net/chrisking/catalog-fabio-jenkins:${env.BUILD_NUMBER}
-                kubectl --token=${KUBE_API_TOKEN} create -f deployment.yml
-                kubectl --token=${KUBE_API_TOKEN} create -f service.yml
+                kubectl --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` create -f deployment.yml
+                kubectl --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` create -f service.yml
                 """
                 //sh 'export KUBE_API_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`'
                 //sh "cd catalog && yaml w -i deployment.yml spec.template.spec.containers[0].image registry.ng.bluemix.net/chrisking/catalog-fabio-jenkins:${env.BUILD_NUMBER}"
