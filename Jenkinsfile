@@ -28,11 +28,11 @@ podTemplate(label: 'mypod',
                 bx plugin install container-registry -r Bluemix
 
                 # Extract secret 
-                CF_EMAIL=$(cat /var/run/secrets/bx-auth-secret/CF_EMAIL)
-                CF_PASSWORD=$(cat /var/run/secrets/bx-auth-secret/CF_PASSWORD)
-                CF_ACCOUNT=$(cat /var/run/secrets/bx-auth-secret/CF_ACCOUNT)
-                CF_ORG=$(cat /var/run/secrets/bx-auth-secret/CF_ORG)
-                CF_SPACE=$(cat /var/run/secrets/bx-auth-secret/CF_SPACE)
+                CF_EMAIL=`cat /var/run/secrets/bx-auth-secret/CF_EMAIL`
+                CF_PASSWORD=`cat /var/run/secrets/bx-auth-secret/CF_PASSWORD`
+                CF_ACCOUNT=`cat /var/run/secrets/bx-auth-secret/CF_ACCOUNT`
+                CF_ORG=`cat /var/run/secrets/bx-auth-secret/CF_ORG`
+                CF_SPACE=`cat /var/run/secrets/bx-auth-secret/CF_SPACE`
 
                 # Login to Bluemix and init plugins
                 bx login -a api.ng.bluemix.net -u ${CF_EMAIL} -p ${CF_PASSWORD} -c ${CF_ACCOUNT} -o ${CF_ORG} -s ${CF_SPACE}
