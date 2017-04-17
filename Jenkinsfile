@@ -5,7 +5,7 @@ podTemplate(label: 'mypod',
     containers: [
         containerTemplate(
             name: 'gradle',
-            image: 'fabiogomezdiaz/bc-jenkins-slave:v9',
+            image: 'fabiogomezdiaz/bc-jenkins-slave:v10',
             alwaysPullImage: true,
             ttyEnabled: true,
             command: 'cat'
