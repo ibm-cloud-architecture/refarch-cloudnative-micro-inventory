@@ -48,6 +48,7 @@ podTemplate(label: 'mypod',
                 sh """
                 #!/bin/bash
                 cd catalog
+                chmod a+x /usr/local/bin/yaml
                 yaml w -i deployment.yml spec.template.spec.containers[0].image registry.ng.bluemix.net/chrisking/catalog-fabio-jenkins:${env.BUILD_NUMBER}
                 kubectl --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` create -f deployment.yml
                 kubectl --token=`cat /var/run/secrets/kubernetes.io/serviceaccount/token` create -f service.yml
