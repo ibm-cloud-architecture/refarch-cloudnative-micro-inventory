@@ -14,13 +14,15 @@ podTemplate(label: 'mypod',
         container('gradle') {
             stage ('Build') {
                 checkout scm
-                sh 'printenv'
-                sh 'export KUBE_API_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)'
-                sh 'echo $KUBE_API_TOKEN'
-                sh 'export REGISTRY_NAMESPACE=$(bx cr namespace-list | egrep -v \'(^Listing namespaces...$|^OK$|^Namespace   $)\' | tr -d \'[:space:]\')'
-                sh 'printenv'
-                //sh 'docker info'
-                sh 'cd catalog && ./gradlew build -x test'
+                sh """
+                set -x
+                printenv
+                export KUBE_API_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                echo $KUBE_API_TOKEN
+                export REGISTRY_NAMESPACE=$(bx cr namespace-list | egrep -v '(^Listing namespaces...$|^OK$|^Namespace   $)' | tr -d '[:space:]')
+                printenv
+                cd catalog && ./gradlew build -x test
+                """
             }
             stage ('Build Docker Image') {
                 sh 'cd catalog && ./gradlew docker && cd docker && docker build -t cloudnative/catalog-fabio-jenkins .'
