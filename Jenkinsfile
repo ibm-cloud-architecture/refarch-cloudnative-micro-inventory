@@ -17,7 +17,7 @@ podTemplate(label: 'mypod',
                 sh 'printenv'
                 sh 'export KUBE_API_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)'
                 sh 'echo $KUBE_API_TOKEN'
-                sh 'export REGISTRY_NAMESPACE=$(bx cr namespace-list | egrep -v \'Listing namespaces...\' | egrep -v \'^OK$\' | sed -e \'/^Namespace   $/d\' | sed -e \'/^\s*$/d\' | tr -d \'[:space:]\')'
+                sh 'export REGISTRY_NAMESPACE=$(bx cr namespace-list | egrep -v \'(^Listing namespaces...$|^OK$|^Namespace   $)\' | tr -d \'[:space:]\')'
                 sh 'printenv'
                 //sh 'docker info'
                 sh 'cd catalog && ./gradlew build -x test'
