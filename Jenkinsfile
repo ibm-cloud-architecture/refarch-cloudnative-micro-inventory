@@ -19,7 +19,7 @@ podTemplate(label: 'mypod',
                 printenv
                 export KUBE_API_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
                 echo ${KUBE_API_TOKEN}
-                export REGISTRY_NAMESPACE=`bx cr namespace-list | egrep -v '(^Listing namespaces...$|^OK$|^Namespace   $)' | tr -d '[:space:]'`
+                export REGISTRY_NAMESPACE=`bx cr namespace-list | egrep -v \'(^Listing namespaces...$|^OK$|^Namespace   $)\' | tr -d \'[:space:]\'`
                 printenv
                 cd catalog && ./gradlew build -x test
                 '''
