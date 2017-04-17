@@ -4,7 +4,7 @@ podTemplate(label: 'mypod',
     containers: [
         containerTemplate(
             name: 'gradle',
-            image: 'fabiogomezdiaz/bc-jenkins-slave:v6',
+            image: 'fabiogomezdiaz/bc-jenkins-slave:v7',
             alwaysPullImage: true,
             ttyEnabled: true,
             command: 'cat'
@@ -14,7 +14,6 @@ podTemplate(label: 'mypod',
         container('gradle') {
             stage ('Build') {
                 checkout scm
-                sh 'whoami'
                 sh '''
                 set -x
                 bx
