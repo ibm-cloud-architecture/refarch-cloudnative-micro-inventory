@@ -1,13 +1,13 @@
 podTemplate(label: 'mypod',
-    volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')],
+    volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+              secretVolume(secretName: 'slavesecret', mountPath: '/tmp/slavesecret')],
     containers: [
         containerTemplate(
             name: 'gradle',
             image: 'fabiogomezdiaz/bc-jenkins-slave:v3',
             ttyEnabled: true,
             command: 'cat'
-    )],
-    volumes: [secretVolume(secretName: 'slavesecret', mountPath: '/tmp/slavesecret')]) {
+    )]) {
 
     node ('mypod') {
         container('gradle') {
