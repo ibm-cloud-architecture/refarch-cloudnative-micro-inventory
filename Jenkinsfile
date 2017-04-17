@@ -15,6 +15,9 @@ podTemplate(label: 'mypod',
             stage ('Build') {
                 checkout scm
                 sh 'printenv'
+                sh 'export KUBE_API_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)'
+                sh "export REGISTRY_NAMESPACE=$(bx cr namespace-list | egrep -v 'Listing namespaces...' | egrep -v '^OK$' | sed -e '/^Namespace   $/d' | sed -e '/^\s*$/d' | tr -d '[:space:]')"
+                sh 'printenv'
                 //sh 'docker info'
                 sh 'cd catalog && ./gradlew build -x test'
             }
@@ -22,9 +25,8 @@ podTemplate(label: 'mypod',
                 sh 'cd catalog && ./gradlew docker && cd docker && docker build -t cloudnative/catalog-fabio-jenkins .'
             }
             stage ('Push Docker Image to Registry') {
-                sh 'bx ic namespace get'
-                sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/`bx ic namespace get`/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
-                sh 'docker push registry.ng.bluemix.net/`bx ic namespace get`/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
+                sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/${REGISTRY_NAMESPACE}/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
+                sh 'docker push registry.ng.bluemix.net/${REGISTRY_NAMESPACE}/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
             }
         }
 
