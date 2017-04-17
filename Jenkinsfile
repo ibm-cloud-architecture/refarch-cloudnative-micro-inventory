@@ -22,6 +22,7 @@ podTemplate(label: 'mypod',
             }
             stage ('Push Docker Image to Registry') {
                 sh """
+                #!/bin/bash
                 # Install plugins
                 bx plugin install container-service -r Bluemix
                 bx plugin install container-registry -r Bluemix
@@ -46,6 +47,7 @@ podTemplate(label: 'mypod',
             }
             stage ('Deploy to Kubernetes') {
                 sh """
+                #!/bin/bash
                 KUBE_API_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`
                 cd catalog
                 yaml w -i deployment.yml spec.template.spec.containers[0].image registry.ng.bluemix.net/chrisking/catalog-fabio-jenkins:${env.BUILD_NUMBER}
