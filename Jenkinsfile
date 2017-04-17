@@ -1,10 +1,11 @@
 podTemplate(label: 'mypod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-              secretVolume(secretName: 'slavesecret', mountPath: '/etc/slavesecret')],
+              secretVolume(secretName: 'bx-auth-secret', mountPath: '/var/run/secrets/bx-auth-secret')],
     containers: [
         containerTemplate(
             name: 'gradle',
-            image: 'fabiogomezdiaz/bc-jenkins-slave:v4',
+            image: 'fabiogomezdiaz/bc-jenkins-slave:v5',
+            alwaysPullImage: true,
             ttyEnabled: true,
             command: 'cat'
     )]) {
