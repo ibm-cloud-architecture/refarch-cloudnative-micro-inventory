@@ -28,6 +28,7 @@ podTemplate(label: 'mypod',
                 sh 'cd catalog && ./gradlew docker && cd docker && docker build -t cloudnative/catalog-fabio-jenkins .'
             }
             stage ('Push Docker Image to Registry') {
+                sh 'cf ic namespace get'
                 sh 'docker tag cloudnative/catalog-fabio-jenkins registry.ng.bluemix.net/`cf ic namespace get`/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
                 sh 'docker push registry.ng.bluemix.net/`cf ic namespace get`/catalog-fabio-jenkins:${env.BUILD_NUMBER}'
             }
