@@ -8,6 +8,7 @@ set -x
 
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
+build_number=$1
 
 # Check if elasticsearch secret exists
 elastic_secret=$(get_elastic_secret)
@@ -37,12 +38,10 @@ if [[ -z "${elastic_secret// }" ]]; then
 	fi
 fi
 
-echo ${env.BUILD_NUMBER}
-printenv
 cat deployment.yml
 # Enter secret and image name into yaml
 sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g deployment.yml
-sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${BUILD_NUMBER}%g deployment.yml
+sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${build_number}%g deployment.yml
 cat deployment.yml
 
 # Delete previous service
