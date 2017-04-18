@@ -38,9 +38,10 @@ if [[ -z "${elastic_secret// }" ]]; then
 fi
 
 cat deployment.yml
+echo ${env.BUILD_NUMBER}
 # Enter secret and image name into yaml
 sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g deployment.yml
-sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${env.BUILD_NUMBER}%g deployment.yml
+sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${BUILD_NUMBER}%g deployment.yml
 cat deployment.yml
 
 # Delete previous service
