@@ -83,7 +83,7 @@ fi
 # Load agent support if required
 source ./agents/newrelic.sh
 
-echo "Starting with Java Options ${JAVA_OPTS}"
+echo "Starting Java application"
 
 # Start the application
 exec java ${JAVA_OPTS} -jar /app.jar
