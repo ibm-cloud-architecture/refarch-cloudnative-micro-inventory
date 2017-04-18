@@ -38,25 +38,25 @@ if [[ -z "${elastic_secret// }" ]]; then
 	fi
 fi
 
-cat deployment.yml
+cd ../kube
+cat service.yml
 # Enter secret and image name into yaml
-sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g deployment.yml
-sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${build_number}%g deployment.yml
-cat deployment.yml
+sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g service.yml
+sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${build_number}%g service.yml
+cat service.yml
 
 # Delete previous service
 # Do rolling update here
 echo -e "Deleting previous version of catalog if it exists"
 kubectl --token=${token} delete --ignore-not-found=true -f service.yml
-kubectl --token=${token} delete --ignore-not-found=true -f deployment.yml
 
 # Deploy service
 echo -e "Creating pods"
-kubectl --token=${token} create -f deployment.yml
 kubectl --token=${token} create -f service.yml
 
 PORT=$(kubectl --token=${token} get services | grep frontend | sed 's/.*://g' | sed 's/\/.*//g')
 
 echo "View the guestbook at http://$IP_ADDR:$PORT"
 
+cd ../scripts
 set +x

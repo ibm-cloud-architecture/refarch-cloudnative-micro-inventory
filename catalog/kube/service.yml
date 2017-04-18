@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: catalog-deployment
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -21,3 +21,18 @@ spec:
             secretKeyRef:
               name: binding-compose-for-elasticsearch
               key: binding
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-service
+spec: 
+  # label keys and values that must match in order to receive traffic for this service
+  selector: 
+    app: catalog
+  ports:
+  # the port that this service should serve on
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: LoadBalancer
