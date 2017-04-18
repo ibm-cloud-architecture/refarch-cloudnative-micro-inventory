@@ -6,9 +6,10 @@ function get_elastic_secret {
 
 set -x
 
+build_number=$1
+image_name="registry.ng.bluemix.net/chrisking/catalog:${build_number}"
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
-build_number=$1
 
 # Check if elasticsearch secret exists
 elastic_secret=$(get_elastic_secret)
@@ -40,21 +41,34 @@ fi
 
 cd ../kube
 
-# Enter secret and image name into yaml
-sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g service.yml
-sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${build_number}%g service.yml
-
 # Delete previous service
 # Do rolling update here
-echo -e "Deleting previous version of catalog if it exists"
-kubectl --token=${token} delete --ignore-not-found=true -f service.yml
+catalog_service=$(kubectl get services | grep catalog | head -1 | awk '{print $1}')
 
-# Deploy service
-echo -e "Creating pods"
-kubectl --token=${token} create -f service.yml
+# Check if service does not exist
+if [[ -z "${catalog_service// }" ]]; then
+	# Deploy service
+	echo -e "Deploying Catalog for the first time"
 
-IP_ADDR=$(kubectl --token=${token} get service catalog | grep catalog | awk '{print $3}')
-PORT=$(kubectl --token=${token} get services catalog | grep catalog | awk '{print $4}' | sed 's/:.*//')
+	# Enter secret and image name into yaml
+	sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g service.yml
+	sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%${image_name}%g service.yml
+
+	# Do the deployment
+	kubectl --token=${token} create -f service.yml
+
+else
+	# Do rolling update
+	echo -e "Doing a rolling update on Catalog Deployment"
+	kubectl set image deployment/catalog-deployment catalog=${image_name}
+
+	# Watch the rollout update
+	kubectl rollout status deployment/catalog-deployment
+fi
+
+
+IP_ADDR=$(kubectl --token=${token} get services | grep catalog | head -1 | awk '{print $3}')
+PORT=$(kubectl --token=${token} get services | grep catalog | head -1 | awk '{print $4}' | sed 's/:.*//')
 
 echo "View the catalog at http://$IP_ADDR:$PORT/micro/items"
 

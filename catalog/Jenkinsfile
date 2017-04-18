@@ -1,18 +1,18 @@
-podTemplate(label: 'mypod',
+podTemplate(label: 'pod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
               secretVolume(secretName: 'bx-auth-secret', mountPath: '/var/run/secrets/bx-auth-secret'),
               secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret')],
     containers: [
         containerTemplate(
-            name: 'gradle',
+            name: 'slave-container',
             image: 'fabiogomezdiaz/bc-jenkins-slave:v10',
             alwaysPullImage: true,
             ttyEnabled: true,
             command: 'cat'
     )]) {
 
-    node ('mypod') {
-        container('gradle') {
+    node ('pod') {
+        container('slave-container') {
             stage ('Build') {
                 checkout scm
                 sh """
