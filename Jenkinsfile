@@ -56,6 +56,7 @@ podTemplate(label: 'mypod',
                 sh """
                 #!/bin/bash
                 cd catalog
+                echo ${env.BUILD_NUMBER}
                 ./deploy.sh ${env.BUILD_NUMBER}
                 """
                 //sh 'export KUBE_API_TOKEN=`cat /var/run/secrets/kubernetes.io/serviceaccount/token`'
