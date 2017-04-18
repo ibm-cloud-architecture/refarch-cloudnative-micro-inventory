@@ -4,6 +4,8 @@ function get_elastic_secret {
 	echo $(kubectl --token=${token} get secrets | grep "compose-for-elasticsearch" | awk '{print $1}')
 }
 
+set -x
+
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
 
@@ -55,3 +57,5 @@ kubectl --token=${token} create -f service.yml
 PORT=$(kubectl --token=${token} get services | grep frontend | sed 's/.*://g' | sed 's/\/.*//g')
 
 echo "View the guestbook at http://$IP_ADDR:$PORT"
+
+set +x
