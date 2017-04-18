@@ -62,11 +62,12 @@ export JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
 
 # Checks for elastic "variable" set by Kubernetes secret
 if [ -z ${elastic+x} ]; then 
-	echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes"; 
+	echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
 else 
 	echo "Running in Kubernetes";
+    el_uri=$(echo $elastic | jq .uri | sed s%\"%%g)
 
-	# Do the parsing
+	# Do the URL parsing
 	uri_parser $el_uri
 
 	# Construct elasticsearch url
@@ -74,11 +75,10 @@ else
 	el_user=${uri_user}
 	el_password=${uri_password}
 
-	JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.url=${el_url} \
-	-Delasticsearch.user=${el_user} \
-	-Delasticsearch.password=${el_password}"
+    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.url=${el_url} \
+    -Delasticsearch.user=${el_user} \
+    -Delasticsearch.password=${el_password}"
 fi
-
 
 # Load agent support if required
 source ./agents/newrelic.sh
