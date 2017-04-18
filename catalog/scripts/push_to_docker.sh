@@ -14,7 +14,7 @@ bx plugin install container-service -r Bluemix
 bx plugin install container-registry -r Bluemix
 
 # Login to Bluemix and init plugins
-bx login -a api.ng.bluemix.net -u cf_email -p cf_password -c cf_account -o cf_org -s cf_space
+bx login -a api.ng.bluemix.net -u $cf_email -p $cf_password -c $cf_account -o $cf_org -s $cf_space
 bx cs init
 bx cr login
 
