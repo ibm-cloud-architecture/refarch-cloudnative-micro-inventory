@@ -35,22 +35,22 @@ if [[ -z "${elastic_secret// }" ]]; then
 	fi
 fi
 
-cat catalog/deployment.yml
+cat deployment.yml
 # Enter secret and image name into yaml
-sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g catalog/deployment.yml
-sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${env.BUILD_NUMBER}%g catalog/deployment.yml
-cat catalog/deployment.yml
+sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g deployment.yml
+sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%registry.ng.bluemix.net/chrisking/catalog:${env.BUILD_NUMBER}%g deployment.yml
+cat deployment.yml
 
 # Delete previous service
 # Do rolling update here
 echo -e "Deleting previous version of catalog if it exists"
-kubectl --token=${token} delete --ignore-not-found=true -f catalog/service.yml
-kubectl --token=${token} delete --ignore-not-found=true -f catalog/deployment.yml
+kubectl --token=${token} delete --ignore-not-found=true -f service.yml
+kubectl --token=${token} delete --ignore-not-found=true -f deployment.yml
 
 # Deploy service
 echo -e "Creating pods"
-kubectl --token=${token} create -f catalog/deployment.yml
-kubectl --token=${token} create -f catalog/service.yml
+kubectl --token=${token} create -f deployment.yml
+kubectl --token=${token} create -f service.yml
 
 PORT=$(kubectl --token=${token} get services | grep frontend | sed 's/.*://g' | sed 's/\/.*//g')
 
