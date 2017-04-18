@@ -17,12 +17,14 @@ podTemplate(label: 'mypod',
                 checkout scm
                 sh """
                 #!/bin/bash
+                cd catalog
                 ./gradlew build -x test
                 """
             }
             stage ('Build Docker Image') {
                 sh """
                 #!/bin/bash
+                cd catalog
                 ./gradlew docker
                 cd docker
                 docker build -t cloudnative/catalog-jenkins .
@@ -31,14 +33,14 @@ podTemplate(label: 'mypod',
             stage ('Push Docker Image to Registry') {
                 sh """
                 #!/bin/bash
-                cd scripts
+                cd catalog/scripts
                 ./push_to_docker.sh ${env.BUILD_NUMBER}
                 """
             }
             stage ('Deploy to Kubernetes') {
                 sh """
                 #!/bin/bash
-                cd scripts
+                cd catalog/scripts
                 ./deploy.sh ${env.BUILD_NUMBER}
                 """
             }
