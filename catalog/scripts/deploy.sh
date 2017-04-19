@@ -16,15 +16,15 @@ elastic_secret=$(get_elastic_secret)
 
 if [[ -z "${elastic_secret// }" ]]; then
 	echo "elasticsearch secret does not exist. Creating"
-	elastic_service="\"$(bx service list | grep "compose-for-elasticsearch" | head -1 | sed -e 's/compose-for-elasticsearch.*//' | sed 's/[[:blank:]]*$//')\""
+	elastic_service=$(bx service list | grep "compose-for-elasticsearch" | head -1 | sed -e 's/compose-for-elasticsearch.*//' | sed 's/[[:blank:]]*$//')
 
-	if [[ -z "${elastic_secret// }" ]]; then
+	if [[ -z "${elastic_service// }" ]]; then
 		echo "Cannot create secret. No service instance exists for compose-for-elasticsearch."
 		exit 1
 	fi
 
 	echo "Creating secret from ${elastic_service}"
-	bx cs cluster-service-bind $cluster_name default $elastic_service
+	bx cs cluster-service-bind $cluster_name default "${elastic_service}"
 
 	if [ $? -ne 0 ]; then
 	  echo "Could not create secret for ${elastic_service} service."
