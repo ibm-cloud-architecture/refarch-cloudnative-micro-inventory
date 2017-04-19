@@ -63,7 +63,7 @@ else
 	kubectl set image deployment/catalog-deployment catalog=${image_name}
 
 	# Watch the rollout update
-	kubectl rollout status deployment/catalog-deployment
+	kubectl --token=${token} rollout status deployment/catalog-deployment
 fi
 
 
