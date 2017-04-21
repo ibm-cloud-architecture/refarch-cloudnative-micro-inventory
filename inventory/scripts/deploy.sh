@@ -2,9 +2,9 @@
 
 # GLOBAL VARIABLES
 # Constants
-kube_service_name="inventory"
+pipeline_name="inventory"
 build_number=$1
-image_name="registry.ng.bluemix.net/chrisking/inventory:${build_number}"
+image_name="registry.ng.bluemix.net/chrisking/${pipeline_name}:${build_number}"
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
 
@@ -25,8 +25,12 @@ function get_kube_secret {
 	echo $(kubectl --token=${token} get secrets | grep "$1" | awk '{print $1}')
 }
 
-function get_kube_service {
+function get_kube_service_name {
 	echo $(kubectl --token=${token} get services | grep "$1" | awk '{print $1}')
+}
+
+function get_kube_service_info {
+	echo $(kubectl --token=${token} get services $1 | grep $1 | head -1)
 }
 
 function get_instance_for_bluemix_service {
@@ -55,6 +59,7 @@ function get_instance_for_bluemix_service {
 	    fi
     fi
 
+    # Set global variables
 	if [ "$service_name" == "$bx_offering_name_elasticsearch" ]; then
 		echo "Found service instance for elasticsearch"
 	    bx_service_instance_elasticsearch=$service
@@ -124,14 +129,12 @@ put_secret_in_deployment $kube_secret_messagehub 2
 # Put new image in deployment.yml
 put_new_image_in_deployment ${image_name}
 
-# Check that inventory does not already exist
-inventory_service=$(get_kube_service $kube_service_name)
+# Check that kubernetes service does not already exist
+kube_service=$(get_kube_service_name $pipeline_name)
 
-cat deployment.yml
-
-if [[ -z "${inventory_service// }" ]]; then
+if [[ -z "${kube_service// }" ]]; then
 	# Deploy service
-	echo -e "Deploying Catalog for the first time"
+	echo -e "Deploying pipeline_name for the first time"
 
 	# Do the deployment
 	kubectl --token=${token} create -f deployment.yml
@@ -139,7 +142,7 @@ if [[ -z "${inventory_service// }" ]]; then
 
 else
 	# Do rolling update
-	echo -e "Doing a rolling update on Catalog Deployment"
+	echo -e "Doing a rolling update on pipeline_name deployment"
 	deployment=$(yaml read deployment.yml metadata.name)
 	container=$(yaml read deployment.yml spec.template.spec.containers[0].name)
 
@@ -149,15 +152,14 @@ else
 	kubectl --token=${token} rollout status deployment/${deployment}
 fi
 
-
-IP_ADDR=$(kubectl --token=${token} get services ${inventory_service} | grep ${inventory_service} | head -1 | awk '{print $3}')
+IP_ADDR=$(get_kube_service_info $kube_service | awk '{print $3}')
 if [[ "$IP_ADDR" == "<none>" || -z "${IP_ADDR// }" ]]; then
-	IP_ADDR=$(kubectl --token=${token} get services ${inventory_service} | grep ${inventory_service} | head -1 | awk '{print $2}')
+	IP_ADDR=$(get_kube_service_info $kube_service | awk '{print $2}')
 fi
 
-PORT=$(kubectl --token=${token} get services | grep inventory | head -1 | awk '{print $4}' | sed 's/:.*//' | sed 's/\/.*//')
+PORT=$(get_kube_service_info $kube_service | awk '{print $4}' | sed 's/:.*//' | sed 's/\/.*//')
 
-echo "View the inventory at http://$IP_ADDR:$PORT/micro/items"
+echo "View the ${kube_service} at http://$IP_ADDR:$PORT/micro/items"
 
 cd ../scripts
 set +x
