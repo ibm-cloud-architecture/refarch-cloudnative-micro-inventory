@@ -159,7 +159,7 @@ fi
 
 PORT=$(get_kube_service_info $kube_service | awk '{print $4}' | sed 's/:.*//' | sed 's/\/.*//')
 
-echo "View the ${kube_service} at http://$IP_ADDR:$PORT/micro/items"
+echo "View the ${kube_service} at http://$IP_ADDR:$PORT/micro/inventory"
 
 cd ../scripts
 set +x
