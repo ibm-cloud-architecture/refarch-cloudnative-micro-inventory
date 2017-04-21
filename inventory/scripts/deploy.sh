@@ -127,6 +127,8 @@ put_new_image_in_deployment ${image_name}
 # Check that inventory does not already exist
 inventory_service=$(get_kube_service $kube_service_name)
 
+cat deployment.yml
+
 if [[ -z "${inventory_service// }" ]]; then
 	# Deploy service
 	echo -e "Deploying Catalog for the first time"
