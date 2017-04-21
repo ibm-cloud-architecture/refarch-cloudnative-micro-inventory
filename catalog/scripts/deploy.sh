@@ -1,76 +1,137 @@
 #!/bin/bash
 
-function get_elastic_secret {
-	echo $(kubectl --token=${token} get secrets | grep "compose-for-elasticsearch" | awk '{print $1}')
-}
-
-set -x
-
+# GLOBAL VARIABLES
+# Constants
+pipeline_name="catalog"
 build_number=$1
-image_name="registry.ng.bluemix.net/chrisking/catalog:${build_number}"
+image_name="registry.ng.bluemix.net/chrisking/${pipeline_name}:${build_number}"
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
 
-# Check if elasticsearch secret exists
-elastic_secret=$(get_elastic_secret)
+bx_offering_name_elasticsearch="compose-for-elasticsearch"
 
-if [[ -z "${elastic_secret// }" ]]; then
-	echo "elasticsearch secret does not exist. Creating"
-	elastic_service=$(bx service list | grep "compose-for-elasticsearch" | head -1 | sed -e 's/compose-for-elasticsearch.*//' | sed 's/[[:blank:]]*$//')
+# To be filled and used for new deployment
+bx_service_instance_elasticsearch=""
 
-	if [[ -z "${elastic_service// }" ]]; then
-		echo "Cannot create secret. No service instance exists for compose-for-elasticsearch."
+kube_secret_elasticsearch=""
+
+function get_kube_secret {
+	echo $(kubectl --token=${token} get secrets | grep "$1" | awk '{print $1}')
+}
+
+function get_kube_service_name {
+	echo $(kubectl --token=${token} get services | grep "$1" | awk '{print $1}')
+}
+
+function get_kube_service_info {
+	echo $(kubectl --token=${token} get services $1 | grep $1 | head -1)
+}
+
+function get_instance_for_bluemix_service {
+	local service_name=$1
+
+	echo "Getting service instance for ${service_name}"
+	local service=$(bx service list | grep "${service_name}" | head -1 | awk '{print $1}')
+	
+	# Check if queried a valid service
+	echo "Checking if ${service} is valid"
+	bx service show "$service"
+
+	local status=$?
+    if [ $status -ne 0 ]; then
+    	# Checking if instance name has spaces in it's name
+		echo "Trying again... Getting service instance for ${service_name}"
+    	service=$(bx service list | grep "${service_name}" | head -1 | sed -e 's/${service_name}.*//' | sed 's/[[:blank:]]*$//')
+
+    	# Check if queried a valid service
+		echo "Checking if ${service} is valid"
+		bx service show "$service"
+		status=$?
+	    if [ $status -ne 0 ]; then
+	    	echo "Could not find valid service instance for ${}... Exiting"
+	    	exit 1
+	    fi
+    fi
+
+    # Set global variables
+	if [ "$service_name" == "$bx_offering_name_elasticsearch" ]; then
+		echo "Found service instance for elasticsearch"
+	    bx_service_instance_elasticsearch=$service
+	fi
+}
+
+function bind_bx_service_instance_to_kubernetes {
+	local instance=$1
+	# Binding the service
+	# If already bound, it should still succeed
+	echo "Binding service instance ${instance}"
+	bx cs cluster-service-bind $cluster_name default $instance
+
+	local status=$?
+
+	if [ $status -ne 0 ]; then
+		echo "Something went wrong binding ${instance}... Exiting"
 		exit 1
 	fi
+}
 
-	echo "Creating secret from ${elastic_service}"
-	bx cs cluster-service-bind $cluster_name default "${elastic_service}"
+function put_secret_in_deployment {
+	local secret=$1
+	local index=$2
+	local string_to_replace=$(yaml read deployment.yml spec.template.spec.containers[0].env[${index}].valueFrom.secretKeyRef.name)
+	sed -i.bak s%${string_to_replace}%${secret}%g deployment.yml
+}
 
-	if [ $? -ne 0 ]; then
-	  echo "Could not create secret for ${elastic_service} service."
-	  exit 1
-	fi
+function put_new_image_in_deployment {
+	local image=$1
+	local string_to_replace=$(yaml read deployment.yml spec.template.spec.containers[0].image)
+	sed -i.bak s%${string_to_replace}%${image}%g deployment.yml
+}
 
-	elastic_secret=$(get_elastic_secret)
+cd ../kubernetes
 
-	if [[ -z "${elastic_secret// }" ]]; then
-		echo "Cannot retrieve secret for ${elastic_service} service."
-		exit 1
-	fi
-fi
+set -x
 
-cd ../kube
+# Create elasticsearch secret
+get_instance_for_bluemix_service $bx_offering_name_elasticsearch
+bind_bx_service_instance_to_kubernetes $bx_service_instance_elasticsearch
+kube_secret_elasticsearch=$(get_kube_secret "elasticsearch")
+put_secret_in_deployment $kube_secret_elasticsearch 0
 
-# Delete previous service
-# Do rolling update here
-catalog_service=$(kubectl get services | grep catalog | head -1 | awk '{print $1}')
+# Put new image in deployment.yml
+put_new_image_in_deployment ${image_name}
 
-# Check if service does not exist
-if [[ -z "${catalog_service// }" ]]; then
+# Check that kubernetes service does not already exist
+kube_service=$(get_kube_service_name $pipeline_name)
+
+if [[ -z "${kube_service// }" ]]; then
 	# Deploy service
-	echo -e "Deploying Catalog for the first time"
-
-	# Enter secret and image name into yaml
-	sed -i.bak s%binding-compose-for-elasticsearch%${elastic_secret}%g service.yml
-	sed -i.bak s%registry.ng.bluemix.net/chrisking/catalog:v1%${image_name}%g service.yml
+	echo -e "Deploying pipeline_name for the first time"
 
 	# Do the deployment
+	kubectl --token=${token} create -f deployment.yml
 	kubectl --token=${token} create -f service.yml
 
 else
 	# Do rolling update
-	echo -e "Doing a rolling update on Catalog Deployment"
-	kubectl set image deployment/catalog-deployment catalog=${image_name}
+	echo -e "Doing a rolling update on pipeline_name deployment"
+	deployment=$(yaml read deployment.yml metadata.name)
+	container=$(yaml read deployment.yml spec.template.spec.containers[0].name)
+
+	kubectl set image deployment/${deployment} ${container}=${image_name}
 
 	# Watch the rollout update
-	kubectl --token=${token} rollout status deployment/catalog-deployment
+	kubectl --token=${token} rollout status deployment/${deployment}
 fi
 
+IP_ADDR=$(get_kube_service_info $kube_service | awk '{print $3}')
+if [[ "$IP_ADDR" == "<none>" || -z "${IP_ADDR// }" ]]; then
+	IP_ADDR=$(get_kube_service_info $kube_service | awk '{print $2}')
+fi
 
-IP_ADDR=$(kubectl --token=${token} get services | grep catalog | head -1 | awk '{print $3}')
-PORT=$(kubectl --token=${token} get services | grep catalog | head -1 | awk '{print $4}' | sed 's/:.*//')
+PORT=$(get_kube_service_info $kube_service | awk '{print $4}' | sed 's/:.*//' | sed 's/\/.*//')
 
-echo "View the catalog at http://$IP_ADDR:$PORT/micro/items"
+echo "View the ${kube_service} at http://$IP_ADDR:$PORT/micro/items"
 
 cd ../scripts
 set +x

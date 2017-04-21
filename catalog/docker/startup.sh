@@ -75,10 +75,13 @@ else
 	el_user=${uri_user}
 	el_password=${uri_password}
 
-    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.url=${el_url} \
-    -Delasticsearch.user=${el_user} \
-    -Delasticsearch.password=${el_password}"
+    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.url=${el_url}"
+    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.user=${el_user}"
+    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.password=${el_password}"
 fi
+
+# disable eureka
+JAVA_OPTS="${JAVA_OPTS} -Deureka.client.enabled=false -Deureka.client.registerWithEureka=false -Deureka.fetchRegistry=false"
 
 # Load agent support if required
 source ./agents/newrelic.sh
