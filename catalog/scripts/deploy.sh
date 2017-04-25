@@ -118,7 +118,7 @@ else
 	deployment=$(yaml read deployment.yml metadata.name)
 	container=$(yaml read deployment.yml spec.template.spec.containers[0].name)
 
-	kubectl set image deployment/${deployment} ${container}=${image_name}
+	kubectl --token=${token} set image deployment/${deployment} ${container}=${image_name}
 
 	# Watch the rollout update
 	kubectl --token=${token} rollout status deployment/${deployment}
