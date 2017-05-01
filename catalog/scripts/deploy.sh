@@ -7,6 +7,7 @@ build_number=$1
 image_name="registry.ng.bluemix.net/chrisking/${pipeline_name}:${build_number}"
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
+chart_repo=$(cat /var/run/configs/github/chart.repo)
 values_file="values.yaml"
 bx_offering_name_elasticsearch="compose-for-elasticsearch"
 
@@ -107,7 +108,7 @@ cd ..
 helm package ${pipeline_name}
 
 # Clone devops repo and put new chart there
-git clone git@github.com:${chart-repo}
+git clone git@github.com:${chart_repo}
 mv -f *.tgz refarch-cloudnative-devops/docs/edge/
 cd refarch-cloudnative-devops/docs
 
