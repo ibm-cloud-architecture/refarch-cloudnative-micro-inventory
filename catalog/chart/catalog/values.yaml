@@ -1,0 +1,11 @@
+replicaCount: 3
+
+registry:
+  name: ibmcase
+
+image:
+  pullPolicy: IfNotPresent
+  tag: 12
+
+secrets:
+  elasticsearch: binding-refarch-compose-for-elasticsearch

@@ -2,24 +2,26 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: catalog-deployment
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
-  replicas: 3
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app: bluecompute
+        app: "{{ .Chart.Name }}"
         tier: backend
         micro: catalog
     spec:
       containers:
       - name: catalog
-        image: registry.ng.bluemix.net/chrisking/catalog:1
-        imagePullPolicy: Always
+        image: "{{ .Values.registry.name }}/catalog:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
         - containerPort: 8081
         env:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: binding-refarch-compose-for-elasticsearch
+              name: "{{ .Values.secrets.elasticsearch }}"
               key: binding

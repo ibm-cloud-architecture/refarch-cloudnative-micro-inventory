@@ -7,7 +7,7 @@ build_number=$1
 image_name="registry.ng.bluemix.net/chrisking/${pipeline_name}:${build_number}"
 token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 cluster_name=$(cat /var/run/secrets/bx-auth-secret/CLUSTER_NAME)
-values_file="values.yaml"
+
 bx_offering_name_elasticsearch="compose-for-elasticsearch"
 
 # To be filled and used for new deployment
@@ -75,20 +75,20 @@ function bind_bx_service_instance_to_kubernetes {
 	fi
 }
 
-function put_secret_in_values {
+function put_secret_in_deployment {
 	local secret=$1
 	local index=$2
-	local string_to_replace=$(yaml read ${values_file} secrets.elasticsearch)
-	sed -i.bak s%${string_to_replace}%${secret}%g ${values_file}
+	local string_to_replace=$(yaml read deployment.yml spec.template.spec.containers[0].env[${index}].valueFrom.secretKeyRef.name)
+	sed -i.bak s%${string_to_replace}%${secret}%g deployment.yml
 }
 
-function put_new_image_in_values {
+function put_new_image_in_deployment {
 	local image=$1
-	local string_to_replace=$(yaml read ${values_file} image.tag)
-	sed -i.bak s%${string_to_replace}%${image}%g ${values_file}
+	local string_to_replace=$(yaml read deployment.yml spec.template.spec.containers[0].image)
+	sed -i.bak s%${string_to_replace}%${image}%g deployment.yml
 }
 
-cd ../chart/${pipeline_name}
+cd ../kubernetes
 
 set -x
 
@@ -96,27 +96,42 @@ set -x
 get_instance_for_bluemix_service $bx_offering_name_elasticsearch
 bind_bx_service_instance_to_kubernetes $bx_service_instance_elasticsearch
 kube_secret_elasticsearch=$(get_kube_secret "elasticsearch")
-put_secret_in_values $kube_secret_elasticsearch 0
+put_secret_in_deployment $kube_secret_elasticsearch 0
 
-# Put new image in ${values_file}
-put_new_image_in_values ${image_name}
+# Put new image in deployment.yml
+put_new_image_in_deployment ${image_name}
 
-cd ..
+# Check that kubernetes service does not already exist
+kube_service=$(get_kube_service_name $pipeline_name)
 
-# Package new chart
-helm package ${pipeline_name}
+if [[ -z "${kube_service// }" ]]; then
+	# Deploy service
+	echo -e "Deploying pipeline_name for the first time"
 
-# Clone devops repo and put new chart there
-git clone git@github.com:${chart-repo}
-mv -f *.tgz refarch-cloudnative-devops/docs/edge/
-cd refarch-cloudnative-devops/docs
+	# Do the deployment
+	kubectl --token=${token} create -f deployment.yml
+	kubectl --token=${token} create -f service.yml
 
-# Reindex repo with new chart information
-helm repo index edge
+else
+	# Do rolling update
+	echo -e "Doing a rolling update on pipeline_name deployment"
+	deployment=$(yaml read deployment.yml metadata.name)
+	container=$(yaml read deployment.yml spec.template.spec.containers[0].name)
 
-# Publish/commit new changes to chart repo
-git add -A && git commit -m "Created new \"${pipeline_name}\" chart from build ${build_number}"
+	kubectl --token=${token} set image deployment/${deployment} ${container}=${image_name}
 
-# In here we will trigger the bluecompute deploy pipeline
+	# Watch the rollout update
+	kubectl --token=${token} rollout status deployment/${deployment}
+fi
 
+IP_ADDR=$(get_kube_service_info $kube_service | awk '{print $3}')
+if [[ "$IP_ADDR" == "<none>" || -z "${IP_ADDR// }" ]]; then
+	IP_ADDR=$(get_kube_service_info $kube_service | awk '{print $2}')
+fi
+
+PORT=$(get_kube_service_info $kube_service | awk '{print $4}' | sed 's/:.*//' | sed 's/\/.*//')
+
+echo "View the ${kube_service} at http://$IP_ADDR:$PORT/micro/items"
+
+cd ../scripts
 set +x
