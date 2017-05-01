@@ -1,8 +1,7 @@
 podTemplate(label: 'pod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
               secretVolume(secretName: 'bx-auth-secret', mountPath: '/var/run/secrets/bx-auth-secret'),
-              secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret')],
-              configMapVolume(configMapName: 'github', mountPath: '/var/run/config-maps/github'),
+              secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret')]
     containers: [
         containerTemplate(
             name: 'slave-container',
