@@ -8,7 +8,8 @@ podTemplate(label: 'pod',
             name: 'slave-container',
             image: 'ibmcase/jenkins-slave:11',
             alwaysPullImage: true,
-            ttyEnabled: true
+            ttyEnabled: true,
+            command: 'cat'
     )]) {
 
     node ('pod') {
