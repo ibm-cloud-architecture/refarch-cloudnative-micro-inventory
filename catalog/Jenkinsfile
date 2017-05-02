@@ -37,9 +37,10 @@ podTemplate(label: 'pod',
                     """
                 }
                 stage ('Push Docker Image to Registry') {
+                    //sh 'catalog/scripts/push_to_docker.sh ${env.BUILD_NUMBER}'
                     sh """
-                    cd catalog/scripts
-                    ./push_to_docker.sh ${env.BUILD_NUMBER}
+                    #!/bin/bash
+                    /bin/bash catalog/scripts/push_to_docker.sh ${env.BUILD_NUMBER}
                     """
                 }
             }
