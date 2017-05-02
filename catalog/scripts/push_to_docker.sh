@@ -17,7 +17,7 @@ bx cs init
 bx cr login
 
 set +x
-docker login -u ${DOCKER_PASS} -p ${DOCKER_PASS}
+docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
 set -x
 docker tag cloudnative/catalog-jenkins ibmcase/catalog:${build_number}
 docker push ibmcase/catalog:${build_number}
