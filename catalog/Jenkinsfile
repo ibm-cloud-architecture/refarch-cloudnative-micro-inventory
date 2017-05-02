@@ -40,7 +40,7 @@ podTemplate(label: 'pod',
                     //sh 'catalog/scripts/push_to_docker.sh ${env.BUILD_NUMBER}'
                     sh """
                     #!/bin/bash
-                    /bin/bash catalog/scripts/push_to_docker.sh ${env.BUILD_NUMBER}
+                    ./catalog/scripts/push_to_docker.sh ${env.BUILD_NUMBER}
                     """
                 }
             }
