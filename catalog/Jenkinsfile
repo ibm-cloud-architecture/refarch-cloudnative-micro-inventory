@@ -16,8 +16,7 @@ podTemplate(label: 'pod',
                 stage ('Deploy chart') {
                     sh """
                     #!/bin/bash
-                    #kubectl get services
-                    helm init
+                    git status
                     """
                 }
             }
