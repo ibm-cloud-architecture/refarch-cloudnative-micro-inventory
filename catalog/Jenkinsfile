@@ -6,7 +6,7 @@ podTemplate(label: 'pod',
     containers: [
         containerTemplate(
             name: 'slave-container',
-            image: 'ibmcase/jenkins-slave:10',
+            image: 'ibmcase/jenkins-slave:12',
             alwaysPullImage: true,
             ttyEnabled: true,
             command: 'cat'
