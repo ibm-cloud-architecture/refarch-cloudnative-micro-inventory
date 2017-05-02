@@ -40,18 +40,8 @@ podTemplate(label: 'pod',
                     sh """
                     #!/bin/bash
 
-                    export BLUEMIX_API_KEY=`cat /var/run/secrets/bx-auth-secret/BLUEMIX_API_KEY`
                     DOCKER_USER=`cat /var/run/secrets/bx-auth-secret/DOCKER_USER`
                     DOCKER_PASS=`cat /var/run/secrets/bx-auth-secret/DOCKER_PASS`
-
-                    # Install plugins
-                    bx plugin install container-service -r Bluemix
-                    bx plugin install container-registry -r Bluemix
-
-                    # Login to Bluemix and init plugins
-                    bx login
-                    bx cs init
-                    bx cr login
 
                     docker login -u \${DOCKER_USER} -p \${DOCKER_PASS}
                     docker push ibmcase/catalog:${env.BUILD_NUMBER}
