@@ -21,6 +21,7 @@ podTemplate(label: 'pod',
                     #!/bin/bash
                     cd catalog
                     ./gradlew build -x test
+                    ./gradlew docker
                     """
                 }
             }
@@ -31,9 +32,7 @@ podTemplate(label: 'pod',
                 stage ('Build Docker Image') {
                     sh """
                     #!/bin/bash
-                    cd catalog
-                    ./gradlew docker
-                    cd docker
+                    cd catalog/docker
                     docker build -t cloudnative/catalog-jenkins .
                     """
                 }
