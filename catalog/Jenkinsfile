@@ -34,12 +34,9 @@ podTemplate(label: 'pod',
                     #!/bin/bash
                     cd catalog/docker
                     docker build -t cloudnative/catalog-jenkins .
+                    cd ../scripts
+                    ./push_to_docker.sh ${env.BUILD_NUMBER}
                     """
-                }
-                stage ('Push Docker Image to Registry') {
-                    dir ('catalog/scripts') {
-                        sh "push_to_docker.sh ${env.BUILD_NUMBER}"
-                    }
                 }
             }
         }
