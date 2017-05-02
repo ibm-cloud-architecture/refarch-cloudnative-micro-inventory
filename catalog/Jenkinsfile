@@ -1,6 +1,6 @@
 podTemplate(label: 'pod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-              secretVolume(secretName: 'bx-auth-secret', mountPath: '/var/run/secrets/bx-auth-secret'),
+              secretVolume(secretName: 'bx-auth-secret-new', mountPath: '/var/run/secrets/bx-auth-secret'),
               secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret'),
               configMapVolume(configMapName: 'github-config', mountPath: '/var/run/configs/github')],
     containers: [
