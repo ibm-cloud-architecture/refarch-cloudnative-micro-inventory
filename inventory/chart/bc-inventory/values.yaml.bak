@@ -6,7 +6,7 @@ registry:
 image:
   name: bc-inventory
   pullPolicy: IfNotPresent
-  tag: 1
+  tag: 40
 
 elasticsearch:
   serviceName: refarch-compose-for-elasticsearch
