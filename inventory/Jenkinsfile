@@ -64,9 +64,10 @@ podTemplate(label: 'pod',
 
                     if [[ -z \"${release// }\" ]]; then
                         helm install bc-inventory
-                    else
-                        helm upgrade \${release} bc-inventory
+                        release=`helm list | grep inventory | awk '{print \$1}' | head -1`
                     fi
+                    
+                    helm upgrade \${release} bc-inventory
 
                     # Delete all helm jobs for this chart
                     cd bc-inventory
