@@ -42,7 +42,6 @@ podTemplate(label: 'pod',
 
                     docker login -u \${DOCKER_USER} -p \${DOCKER_PASS}
                     docker push ibmcase/catalog:${env.BUILD_NUMBER}
-                    kubectl get nodes
                     """
                 }
             }
@@ -54,13 +53,15 @@ podTemplate(label: 'pod',
                     sh """
                     #!/bin/bash
 
-                    # Setup Git
+                    # Setup Git & helm
                     GITHUB_NAME=`cat /var/run/secrets/bx-auth-secret/GITHUB_NAME`
                     GITHUB_USER=`cat /var/run/secrets/bx-auth-secret/GITHUB_USER`
                     GITHUB_TOKEN=`cat /var/run/secrets/bx-auth-secret/GITHUB_TOKEN`
 
                     git config --global user.name \"\${GITHUB_NAME}\"
                     git config --global user.email \${GITHUB_USER}
+
+                    helm init
 
                     # Edit chart values using yaml (NEED TO INSTALL YAML) - Call image chart deployer
                     cd chart/catalog
