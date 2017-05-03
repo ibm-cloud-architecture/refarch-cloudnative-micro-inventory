@@ -27,15 +27,13 @@ podTemplate(label: 'pod',
         stage('Docker') {
             container('docker') {
                 stage ('Build Docker Image') {
-                    sh """
-                    #!/bin/bash
+                    sh """#!/bin/bash
                     cd inventory/docker
                     docker build -t registry.ng.bluemix.net/kyanite-int/bc-inventory:\${env.BUILD_NUMBER} .
                     """
                 }
                 stage ('Push Docker Image to Registry') {
-                    sh """
-                    #!/bin/bash
+                    sh """#!/bin/bash
                     export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
                     export BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
                     export BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/api-key`
@@ -50,8 +48,7 @@ podTemplate(label: 'pod',
         stage('Chart') {
             container('chart') {
                 stage ('Install Chart') {
-                    sh """
-                    #!/bin/bash
+                    sh """#!/bin/bash
                     helm init
 
                     # Edit chart values using yaml (NEED TO INSTALL YAML) - Call image chart deployer
@@ -67,7 +64,6 @@ podTemplate(label: 'pod',
 
                     if [[ -z \"${release// }\" ]]; then
                         helm install bc-inventory
-
                     else
                         helm upgrade \${release} bc-inventory
                     fi
