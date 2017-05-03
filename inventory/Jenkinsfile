@@ -29,7 +29,7 @@ podTemplate(label: 'pod',
                 stage ('Build Docker Image') {
                     sh """#!/bin/bash
                     cd inventory/docker
-                    docker build -t registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER} .
+                    docker build -t registry.ng.bluemix.net/chrisking/bc-inventory:${env.BUILD_NUMBER} .
                     """
                 }
                 stage ('Push Docker Image to Registry') {
@@ -46,7 +46,7 @@ podTemplate(label: 'pod',
                     #bx plugin install container-registry -r Bluemix
                     bx cr login
 
-                    docker push registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER}
+                    docker push registry.ng.bluemix.net/chrisking/bc-inventory:${env.BUILD_NUMBER}
                     """
                 }
             }

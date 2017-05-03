@@ -1,6 +1,7 @@
 #!/bin/bash
-build_number=$1
+set -x
 
+build_number=$1
 helm init
 
 # Edit chart values using yaml (NEED TO INSTALL YAML) - Call image chart deployer
