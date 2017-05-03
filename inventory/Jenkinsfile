@@ -66,12 +66,12 @@ podTemplate(label: 'pod',
 
                     if [[ -z \"\${release// }\" ]]; then
                         # Install Chart
-                        echo -e \"Installing inventory chart for the first time\"
+                        echo -e 'Installing inventory chart for the first time'
                         helm install bc-inventory
 
                     else
                         # Upgrade Chart Release
-                        echo -e \"Upgrading inventory chart release\"
+                        echo -e 'Upgrading inventory chart release'
                         helm upgrade \${release} bc-inventory
                     fi
 
