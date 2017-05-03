@@ -66,11 +66,11 @@ podTemplate(label: 'pod',
                     release=`helm list | grep inventory | awk '{print \$1}' | head -1`
 
                     if [[ -z \"${release// }\" ]]; then
-                        echo -e \"Installing inventory chart for the first time\"
+                        echo -e "Installing inventory chart for the first time"
                         helm install bc-inventory
 
                     else
-                        echo -e \"Upgrading inventory chart release\"
+                        echo -e "Upgrading inventory chart release"
                         helm upgrade \${release} bc-inventory
                     fi
 
