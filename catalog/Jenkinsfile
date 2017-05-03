@@ -64,7 +64,7 @@ podTemplate(label: 'pod',
                     helm init
 
                     # Edit chart values using yaml (NEED TO INSTALL YAML) - Call image chart deployer
-                    cd chart/catalog
+                    cd catalog/chart
                     string_to_replace=`yaml read values.yaml image.tag`
                     sed -i.bak s%\${string_to_replace}%${env.BUILD_NUMBER}%g values.yaml
 
