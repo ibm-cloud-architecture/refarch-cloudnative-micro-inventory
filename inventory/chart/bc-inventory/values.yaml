@@ -1,7 +1,7 @@
 replicaCount: 3
 
 registry:
-  name: registry.ng.bluemix.net/kyanite-int
+  name: registry.ng.bluemix.net/kyanite_int
 
 image:
   name: bc-inventory

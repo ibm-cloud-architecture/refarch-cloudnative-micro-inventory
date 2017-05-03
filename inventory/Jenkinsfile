@@ -40,6 +40,8 @@ podTemplate(label: 'pod',
                     export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
                     BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-space`
                     BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
+                    BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
+                    BX_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-namespace`
 
                     # Bluemix Login
                     # source /login.sh
@@ -49,7 +51,7 @@ podTemplate(label: 'pod',
                     #bx plugin install container-registry -r Bluemix
                     bx cr login
 
-                    docker push registry.ng.bluemix.net/chrisking/bc-inventory:${env.BUILD_NUMBER}
+                    docker push \${BX_REGISTRY}/\${BX_NAMESPACE}/bc-inventory:${env.BUILD_NUMBER}
                     """
                 }
             }
