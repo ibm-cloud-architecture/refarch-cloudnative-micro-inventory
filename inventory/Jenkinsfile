@@ -35,11 +35,16 @@ podTemplate(label: 'pod',
                 stage ('Push Docker Image to Registry') {
                     sh """#!/bin/bash
                     export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
-                    export BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-space`
-                    export BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
+                    BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-space`
+                    BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
 
-                    # Run login script from bluemix-image-deploy image
-                    source /login.sh
+                    # Bluemix Login
+                    # source /login.sh
+                    bx login -a \${BX_API_ENDPOINT} -s \${BX_SPACE}
+
+                    # initialize docker using container registry secret
+                    bx plugin install container-registry -r Bluemix
+                    bx cr login
 
                     docker push registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER}
                     """
