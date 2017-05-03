@@ -5,7 +5,7 @@ podTemplate(label: 'pod',
     containers: [
         containerTemplate(name: 'java', image: 'openjdk:8-jdk-alpine', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker', image: 'ibmcase/bluemix-image-deploy:latest', alwaysPullImage: true, ttyEnabled: true),
-        containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.3.1', alwaysPullImage: true, ttyEnabled: true, command: 'cat')
+        containerTemplate(name: 'helm', image: 'ibmcase/helm:latest', alwaysPullImage: true, ttyEnabled: true, command: 'cat')
     ]) {
 
     node ('pod') {
