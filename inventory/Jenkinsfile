@@ -4,13 +4,13 @@ podTemplate(label: 'pod',
               configMapVolume(configMapName: 'bluemix-target', mountPath: '/var/run/configs/bluemix-target')],
     containers: [
         containerTemplate(name: 'java', image: 'openjdk:8-jdk-alpine', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'docker', image: 'ibmcase/bluemix-image-deploy:latest', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'docker', image: 'ibmcase/bluemix-image-deploy:latest', alwaysPullImage: true, ttyEnabled: true),
         containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.3.1', alwaysPullImage: true, ttyEnabled: true, command: 'cat')
     ]) {
 
     node ('pod') {
 
-        stage('Build') {
+        /*stage('Build') {
             checkout scm
             container('java') {
                 stage('Build Gradle Project') {
@@ -22,22 +22,22 @@ podTemplate(label: 'pod',
                     """
                 }
             }
-        }
+        }*/
 
         stage('Docker') {
             container('docker') {
-                stage ('Build Docker Image') {
+                /*stage ('Build Docker Image') {
                     sh """#!/bin/bash
                     cd inventory/docker
                     docker build -t registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER} .
                     """
-                }
+                }*/
                 stage ('Push Docker Image to Registry') {
                     sh """#!/bin/bash
                     export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
                     export BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
                     export BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/api-key`
-                    source /login.sh
+                    /login.sh
 
                     docker push registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER}
                     """
