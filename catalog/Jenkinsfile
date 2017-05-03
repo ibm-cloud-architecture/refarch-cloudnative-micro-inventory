@@ -55,11 +55,12 @@ podTemplate(label: 'pod',
 
                     # Setup Git & helm
                     GITHUB_NAME=`cat /var/run/secrets/bx-auth-secret/GITHUB_NAME`
+                    GITHUB_EMAIL=`cat /var/run/secrets/bx-auth-secret/GITHUB_EMAIL`
                     GITHUB_USER=`cat /var/run/secrets/bx-auth-secret/GITHUB_USER`
                     GITHUB_TOKEN=`cat /var/run/secrets/bx-auth-secret/GITHUB_TOKEN`
 
                     git config --global user.name \"\${GITHUB_NAME}\"
-                    git config --global user.email \${GITHUB_USER}
+                    git config --global user.email \${GITHUB_EMAIL}
 
                     helm init
 
@@ -76,13 +77,14 @@ podTemplate(label: 'pod',
                     git clone https://github.com/fabiogomezdiaz/refarch-cloudnative-devops.git
 
                     # Move package chart
-                    mv -f *.tgz refarch-cloudnative-devops/docs/edge/
+                    mv -f *.tgz refarch-cloudnative-devops/docs/edge
                     cd refarch-cloudnative-devops/docs
 
                     # Reindex repo with new chart information
                     helm repo index edge
 
                     # git add & commit new change
+                    git remote set-url origin https://\${GITHUB_USER}:\${GITHUB_TOKEN}@github.com/fabiogomezdiaz/refarch-cloudnative-devops.git
                     git add -A && git commit -m \"Created new catalog chart from build ${env.BUILD_NUMBER}\"
 
                     # push to github using https
