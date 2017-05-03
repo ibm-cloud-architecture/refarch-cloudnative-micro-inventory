@@ -1,11 +1,12 @@
 replicaCount: 3
 
 registry:
-  name: ibmcase
+  name: registry.ng.bluemix.net/kyanite-int
 
 image:
+  name: bc-inventory
   pullPolicy: IfNotPresent
-  tag: 5
+  tag: 9
 
 elasticsearch:
   serviceName: refarch-compose-for-elasticsearch

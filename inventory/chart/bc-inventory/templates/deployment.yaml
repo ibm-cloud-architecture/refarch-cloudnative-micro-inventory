@@ -3,19 +3,23 @@ kind: Deployment
 metadata:
   name: inventory-deployment
   labels:
+    app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    tier: backend
+    micro: inventory
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app: "{{ .Chart.Name }}"
+        app: bluecompute
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         tier: backend
         micro: inventory
     spec:
       containers:
       - name: inventory
-        image: "{{ .Values.registry.name }}/inventory:{{ .Values.image.tag }}"
+        image: "{{ .Values.registry.name }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
         - containerPort: 8080

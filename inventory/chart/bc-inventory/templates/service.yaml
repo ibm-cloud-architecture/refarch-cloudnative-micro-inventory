@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: inventory-service
   labels:
-    app: "{{ .Chart.Name }}"
+    app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
     micro: inventory
@@ -13,6 +13,7 @@ spec:
       port: 8080
       targetPort: 8080
   selector: 
-    app: "{{ .Chart.Name }}"
+    app: bluecompute
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
     micro: inventory

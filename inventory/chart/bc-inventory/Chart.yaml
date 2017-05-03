@@ -1,4 +1,4 @@
 apiVersion: v1
 description: A Helm chart for Inventory Microservice
-name: inventory
+name: bc-inventory
 version: 0.1.1

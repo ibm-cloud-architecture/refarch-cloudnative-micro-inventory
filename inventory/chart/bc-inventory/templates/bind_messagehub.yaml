@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{.Release.Name}}-bind-elasticsearch"
+  name: "{{.Release.Name}}-bind-messagehub"
   labels:
     heritage: {{.Release.Service | quote }}
     release: {{.Release.Name | quote }}
@@ -14,7 +14,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: "{{.Release.Name}}-bind-elasticsearch"
+      name: "{{.Release.Name}}-bind-messagehub"
       labels:
         heritage: {{.Release.Service | quote }}
         release: {{.Release.Name | quote }}
@@ -22,10 +22,10 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: bind-elasticsearch
+      - name: bind-messagehub
         image: jkwong/bluemix-cluster-deployer
         command: [ "/bin/bash", "-c" ]
-        args: ["source /scripts/bx_login.sh; bx cs init; bx cs cluster-service-bind ${KUBE_CLUSTER_NAME} default {{ .Values.elasticsearch.serviceName }}"]
+        args: ["source /scripts/bx_login.sh; bx cs init; bx cs cluster-service-bind ${KUBE_CLUSTER_NAME} default {{ .Values.messagehub.serviceName }}"]
         imagePullPolicy: Always
         env:
         - name: BX_SPACE
