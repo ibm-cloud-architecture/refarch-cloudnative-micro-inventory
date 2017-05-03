@@ -10,17 +10,6 @@ podTemplate(label: 'pod',
 
     node ('pod') {
 
-        stage('init') {
-            container('helm') {
-                stage ('Deploy chart') {
-                    sh """
-                    #!/bin/bash
-                    git status
-                    """
-                }
-            }
-        }
-
         stage('Build') {
             checkout scm
             container('java') {
