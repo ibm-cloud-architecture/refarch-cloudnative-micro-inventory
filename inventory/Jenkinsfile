@@ -10,7 +10,7 @@ podTemplate(label: 'pod',
 
     node ('pod') {
 
-        /*stage('Build') {
+        stage('Build') {
             checkout scm
             container('java') {
                 stage('Build Gradle Project') {
@@ -22,16 +22,16 @@ podTemplate(label: 'pod',
                     """
                 }
             }
-        }*/
+        }
 
         stage('Docker') {
             container('docker') {
-                /*stage ('Build Docker Image') {
+                stage ('Build Docker Image') {
                     sh """#!/bin/bash
                     cd inventory/docker
                     docker build -t registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER} .
                     """
-                }*/
+                }
                 stage ('Push Docker Image to Registry') {
                     sh """#!/bin/bash
                     export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
