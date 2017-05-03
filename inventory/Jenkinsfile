@@ -63,7 +63,7 @@ podTemplate(label: 'pod',
                     # Install Chart
                     cd ..
 
-                    release=`helm list | grep inventory | awk '{print $1}' | head -1`
+                    release=`helm list | grep inventory | awk '{print \$1}' | head -1`
 
                     if [[ -z \"${release// }\" ]]; then
                         # Install Chart
