@@ -30,7 +30,7 @@ podTemplate(label: 'pod',
                     sh """
                     #!/bin/bash
                     cd inventory/docker
-                    docker build -t registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER} .
+                    docker build -t registry.ng.bluemix.net/kyanite-int/bc-inventory:\${env.BUILD_NUMBER} .
                     """
                 }
                 stage ('Push Docker Image to Registry') {
@@ -41,7 +41,7 @@ podTemplate(label: 'pod',
                     export BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/api-key`
                     source /login.sh
 
-                    docker push registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER}
+                    docker push registry.ng.bluemix.net/kyanite-int/bc-inventory:\${env.BUILD_NUMBER}
                     """
                 }
             }
@@ -57,7 +57,7 @@ podTemplate(label: 'pod',
                     # Edit chart values using yaml (NEED TO INSTALL YAML) - Call image chart deployer
                     cd inventory/chart/bc-inventory
                     string_to_replace=`yaml read values.yaml image.tag`
-                    sed -i.bak s%\${string_to_replace}%${env.BUILD_NUMBER}%g values.yaml
+                    sed -i.bak s%\${string_to_replace}%\${env.BUILD_NUMBER}%g values.yaml
 
                     # Install Chart
                     cd ..
