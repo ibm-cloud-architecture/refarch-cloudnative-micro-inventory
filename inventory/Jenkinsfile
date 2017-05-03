@@ -1,48 +1,99 @@
 podTemplate(label: 'pod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-              secretVolume(secretName: 'bx-auth-secret', mountPath: '/var/run/secrets/bx-auth-secret'),
-              secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret')],
+              secretVolume(secretName: 'bx-auth-secret-new', mountPath: '/var/run/secrets/bx-auth-secret'),
+              secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret'),
+              configMapVolume(configMapName: 'bluemix-target', mountPath: '/var/run/configs/bluemix-target')],
     containers: [
-        containerTemplate(
-            name: 'slave-container',
-            image: 'fabiogomezdiaz/bc-jenkins-slave:v10',
-            alwaysPullImage: true,
-            ttyEnabled: true,
-            command: 'cat'
-    )]) {
+        containerTemplate(name: 'java', image: 'openjdk:8-jdk-alpine', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'docker', image: 'docker:17.03', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'helm', image: 'ibmcase/helm-git:2', alwaysPullImage: true, ttyEnabled: true, command: 'cat')
+    ]) {
 
     node ('pod') {
-        container('slave-container') {
-            stage ('Build') {
-                checkout scm
-                sh """
-                #!/bin/bash
-                cd inventory
-                ./gradlew build -x test
-                """
+
+        stage('Build') {
+            checkout scm
+            container('java') {
+                stage('Build Gradle Project') {
+                    sh """
+                    #!/bin/bash
+                    cd inventory
+                    ./gradlew build -x test
+                    ./gradlew docker
+                    """
+                }
             }
-            stage ('Build Docker Image') {
-                sh """
-                #!/bin/bash
-                cd inventory
-                ./gradlew docker
-                cd docker
-                docker build -t cloudnative/inventory-jenkins .
-                """
+        }
+
+        stage('Docker') {
+            container('docker') {
+                stage ('Build Docker Image') {
+                    sh """
+                    #!/bin/bash
+                    cd inventory/docker
+                    docker build -t ibmcase/inventory:${env.BUILD_NUMBER} .
+                    """
+                }
+                stage ('Push Docker Image to Registry') {
+                    sh """
+                    #!/bin/bash
+
+                    DOCKER_USER=`cat /var/run/secrets/bx-auth-secret/DOCKER_USER`
+                    DOCKER_PASS=`cat /var/run/secrets/bx-auth-secret/DOCKER_PASS`
+
+                    docker login -u \${DOCKER_USER} -p \${DOCKER_PASS}
+                    docker push ibmcase/inventory:${env.BUILD_NUMBER}
+                    """
+                }
             }
-            stage ('Push Docker Image to Registry') {
-                sh """
-                #!/bin/bash
-                cd inventory/scripts
-                ./push_to_docker.sh ${env.BUILD_NUMBER}
-                """
-            }
-            stage ('Deploy to Kubernetes') {
-                sh """
-                #!/bin/bash
-                cd inventory/scripts
-                ./deploy.sh ${env.BUILD_NUMBER}
-                """
+        }
+
+        stage('Package and Deploy Chart') {
+            container('helm') {
+                stage ('Package and Deploy Chart') {
+                    sh """
+                    #!/bin/bash
+
+                    # Setup Git & helm
+                    DEVOPS_REPO=`cat /var/run/configs/bluemix-target/devops-repo`
+                    GITHUB_NAME=`cat /var/run/secrets/bx-auth-secret/GITHUB_NAME`
+                    GITHUB_EMAIL=`cat /var/run/secrets/bx-auth-secret/GITHUB_EMAIL`
+                    GITHUB_USER=`cat /var/run/secrets/bx-auth-secret/GITHUB_USER`
+                    GITHUB_TOKEN=`cat /var/run/secrets/bx-auth-secret/GITHUB_TOKEN`
+
+                    git config --global user.name \"\${GITHUB_NAME}\"
+                    git config --global user.email \${GITHUB_EMAIL}
+
+                    helm init
+
+                    # Edit chart values using yaml (NEED TO INSTALL YAML) - Call image chart deployer
+                    cd inventory/chart/inventory
+                    string_to_replace=`yaml read values.yaml image.tag`
+                    sed -i.bak s%\${string_to_replace}%${env.BUILD_NUMBER}%g values.yaml
+
+                    # Package chart
+                    cd ..
+                    helm package inventory
+
+                    # Clone devops
+                    git clone https://\${DEVOPS_REPO}
+
+                    # Move package chart
+                    mv -f *.tgz refarch-cloudnative-devops/docs/edge
+                    cd refarch-cloudnative-devops/docs
+
+                    # Reindex repo with new chart information
+                    helm repo index edge
+
+                    # git add & commit new change
+                    git remote set-url origin https://\${GITHUB_USER}:\${GITHUB_TOKEN}@\${DEVOPS_REPO}
+                    git add -A && git commit -m \"Created new inventory chart from build ${env.BUILD_NUMBER}\"
+
+                    # push to github using https
+                    git push origin master
+
+                    """
+                }
             }
         }
     }

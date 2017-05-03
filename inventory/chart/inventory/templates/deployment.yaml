@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: catalog-deployment
+  name: inventory-deployment
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
@@ -11,17 +11,27 @@ spec:
       labels:
         app: "{{ .Chart.Name }}"
         tier: backend
-        micro: catalog
+        micro: inventory
     spec:
       containers:
-      - name: catalog
-        image: "{{ .Values.registry.name }}/catalog:{{ .Values.image.tag }}"
+      - name: inventory
+        image: "{{ .Values.registry.name }}/inventory:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
-        - containerPort: 8081
+        - containerPort: 8080
         env:
         - name: elastic
           valueFrom:
             secretKeyRef:
               name: "{{ .Values.elasticsearch.secret }}"
+              key: binding
+        - name: mysql
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.mysql.secret }}"
+              key: binding
+        - name: messagehub
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.messagehub.secret }}"
               key: binding

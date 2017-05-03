@@ -5,7 +5,9 @@ registry:
 
 image:
   pullPolicy: IfNotPresent
-  tag: 12
+  tag: 49
 
-secrets:
-  elasticsearch: binding-refarch-compose-for-elasticsearch
+elasticsearch:
+  serviceName: refarch-compose-for-elasticsearch
+  servicePlan: Standard
+  secret: binding-refarch-compose-for-elasticsearch

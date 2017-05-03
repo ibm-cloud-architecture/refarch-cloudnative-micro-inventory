@@ -1,7 +1,8 @@
 podTemplate(label: 'pod',
     volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
               secretVolume(secretName: 'bx-auth-secret-new', mountPath: '/var/run/secrets/bx-auth-secret'),
-              secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret')],
+              secretVolume(secretName: 'bluemix-default-secret', mountPath: '/var/run/secrets/bluemix-default-secret'),
+              configMapVolume(configMapName: 'bluemix-target', mountPath: '/var/run/configs/bluemix-target')],
     containers: [
         containerTemplate(name: 'java', image: 'openjdk:8-jdk-alpine', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker', image: 'docker:17.03', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
@@ -54,6 +55,7 @@ podTemplate(label: 'pod',
                     #!/bin/bash
 
                     # Setup Git & helm
+                    DEVOPS_REPO=`cat /var/run/configs/bluemix-target/devops-repo`
                     GITHUB_NAME=`cat /var/run/secrets/bx-auth-secret/GITHUB_NAME`
                     GITHUB_EMAIL=`cat /var/run/secrets/bx-auth-secret/GITHUB_EMAIL`
                     GITHUB_USER=`cat /var/run/secrets/bx-auth-secret/GITHUB_USER`
@@ -74,7 +76,7 @@ podTemplate(label: 'pod',
                     helm package catalog
 
                     # Clone devops
-                    git clone https://github.com/fabiogomezdiaz/refarch-cloudnative-devops.git
+                    git clone https://\${DEVOPS_REPO}
 
                     # Move package chart
                     mv -f *.tgz refarch-cloudnative-devops/docs/edge
@@ -84,7 +86,7 @@ podTemplate(label: 'pod',
                     helm repo index edge
 
                     # git add & commit new change
-                    git remote set-url origin https://\${GITHUB_USER}:\${GITHUB_TOKEN}@github.com/fabiogomezdiaz/refarch-cloudnative-devops.git
+                    git remote set-url origin https://\${GITHUB_USER}:\${GITHUB_TOKEN}@\${DEVOPS_REPO}
                     git add -A && git commit -m \"Created new catalog chart from build ${env.BUILD_NUMBER}\"
 
                     # push to github using https
