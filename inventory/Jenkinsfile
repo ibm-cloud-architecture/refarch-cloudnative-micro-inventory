@@ -60,18 +60,16 @@ podTemplate(label: 'pod',
                     string_to_replace=`yaml read values.yaml image.tag`
                     sed -i.bak s%${string_to_replace}%$build_number%g values.yaml
 
+                    # Install/Upgrade Chart
                     cd ..
 
-                    # Install Chart
                     release=`helm list | grep inventory | awk '{print \$1}' | head -1`
 
                     if [[ -z \"${release// }\" ]]; then
-                        # Install Chart
                         echo -e 'Installing inventory chart for the first time'
                         helm install bc-inventory
 
                     else
-                        # Upgrade Chart Release
                         echo -e 'Upgrading inventory chart release'
                         helm upgrade \${release} bc-inventory
                     fi
