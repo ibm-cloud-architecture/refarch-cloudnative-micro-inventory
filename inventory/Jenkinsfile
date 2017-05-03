@@ -4,7 +4,7 @@ podTemplate(label: 'pod',
               configMapVolume(configMapName: 'bluemix-target', mountPath: '/var/run/configs/bluemix-target')],
     containers: [
         containerTemplate(name: 'java', image: 'openjdk:8-jdk-alpine', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'docker', image: 'bluemix-image-deploy', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'docker', image: 'ibmcase/bluemix-image-deploy:latest', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.3.1', alwaysPullImage: true, ttyEnabled: true, command: 'cat')
     ]) {
 
