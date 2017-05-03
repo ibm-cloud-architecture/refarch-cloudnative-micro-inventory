@@ -43,7 +43,7 @@ podTemplate(label: 'pod',
                     bx login -a \${BX_API_ENDPOINT} -s \${BX_SPACE}
 
                     # initialize docker using container registry secret
-                    bx plugin install container-registry -r Bluemix
+                    #bx plugin install container-registry -r Bluemix
                     bx cr login
 
                     docker push registry.ng.bluemix.net/kyanite-int/bc-inventory:${env.BUILD_NUMBER}
