@@ -1,10 +1,3 @@
-eureka:
-  instance:
-     preferIpAddress: true
-  client:
-    serviceUrl:
-       defaultZone: http://microservices-refapp-eureka-chrisking.mybluemix.net/eureka/
-
 # Server configuration
 server:
   context-path: /micro

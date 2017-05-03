@@ -47,7 +47,7 @@ public class MHConsumer {
         // Assign topic and message
         topic = config.getTopic();
         if (topic == null || topic.equals("")) {
-            topic = "inventory";
+            topic = "orders";
         }
 
         // Assign username and password

@@ -43,7 +43,7 @@ elasticsearch:
 
 # Message Hub properties
 message_hub:
-  topic: inventory
+  topic: orders
   user:
   password:
   api_key:
