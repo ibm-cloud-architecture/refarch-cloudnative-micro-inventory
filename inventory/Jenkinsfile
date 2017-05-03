@@ -58,7 +58,7 @@ podTemplate(label: 'pod',
                     cd inventory/chart/bc-inventory
                     build_number=\${env.BUILD_NUMBER}
                     string_to_replace=`yaml read values.yaml image.tag`
-                    sed -i.bak s%${string_to_replace}%${build_number}%g values.yaml
+                    sed -i.bak s%${string_to_replace}%$build_number%g values.yaml
 
                     # Install Chart
                     cd ..
