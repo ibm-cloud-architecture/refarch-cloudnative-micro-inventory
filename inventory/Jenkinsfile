@@ -53,7 +53,7 @@ podTemplate(label: 'pod',
         }
 
         stage('Chart') {
-            container('chart') {
+            container('helm') {
                 stage ('Install Chart') {
                     sh """#!/bin/bash
                     cd inventory/scripts
