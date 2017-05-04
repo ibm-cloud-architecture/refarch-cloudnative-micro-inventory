@@ -1,12 +1,13 @@
 replicaCount: 3
 
 registry:
-  name: registry.ng.bluemix.net/kyanite_int
+  name: registry.ng.bluemix.net
+  namespace: bluecompute
 
 image:
-  name: bc-inventory
+  name: inventory
   pullPolicy: IfNotPresent
-  tag: 1
+  tag: 40
 
 elasticsearch:
   serviceName: refarch-compose-for-elasticsearch

@@ -65,8 +65,11 @@ podTemplate(label: 'pod',
                 stage ('Install Chart') {
                     sh """
                     #!/bin/bash
+                    BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
+                    BX_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-namespace`
+
                     cd inventory/scripts
-                    ./deploy.sh ${env.BUILD_NUMBER}
+                    ./deploy.sh ${env.BUILD_NUMBER} \${BX_REGISTRY} \$BX_NAMESPACE
                     """
                 }
             }
