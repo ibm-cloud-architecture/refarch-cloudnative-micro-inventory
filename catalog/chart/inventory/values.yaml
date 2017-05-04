@@ -2,10 +2,12 @@ replicaCount: 3
 
 registry:
   name: ibmcase
+  namespace: bluecompute
 
 image:
+  name: catalog
   pullPolicy: IfNotPresent
-  tag: 49
+  tag: latest
 
 elasticsearch:
   serviceName: refarch-compose-for-elasticsearch

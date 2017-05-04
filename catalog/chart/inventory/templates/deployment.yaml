@@ -3,19 +3,23 @@ kind: Deployment
 metadata:
   name: catalog-deployment
   labels:
+    app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    tier: backend
+    micro: catalog
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app: "{{ .Chart.Name }}"
+        app: bluecompute
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         tier: backend
         micro: catalog
     spec:
       containers:
       - name: catalog
-        image: "{{ .Values.registry.name }}/catalog:{{ .Values.image.tag }}"
+        image: "{{ .Values.registry.name }}/{{ .Values.registry.namespace }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
         - containerPort: 8081

@@ -23,7 +23,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: bind-elasticsearch
-        image: jkwong/bluemix-cluster-deployer
+        image: ibmcase/bluemix-cluster-deployer:latest
         command: [ "/bin/bash", "-c" ]
         args: ["source /scripts/bx_login.sh; bx cs init; bx cs cluster-service-bind ${KUBE_CLUSTER_NAME} default {{ .Values.elasticsearch.serviceName }}"]
         imagePullPolicy: Always

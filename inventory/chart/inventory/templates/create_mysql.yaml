@@ -23,7 +23,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: create-mysql
-        image: jkwong/bluemix-deployer
+        image: ibmcase/bluemix-deployer:latest
         command: [ "/bin/bash", "-c" ]
         args: ["source /scripts/bx_login.sh; bx service list | grep compose-for-mysql | grep '^{{ .Values.mysql.serviceName }} ' || bx service create compose-for-mysql {{ .Values.mysql.servicePlan}} {{ .Values.mysql.serviceName }}"]
         imagePullPolicy: Always

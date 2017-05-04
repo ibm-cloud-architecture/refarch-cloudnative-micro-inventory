@@ -23,7 +23,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: create-elasticsearch
-        image: jkwong/bluemix-deployer
+        image: ibmcase/bluemix-deployer:latest
         command: [ "/bin/bash", "-c" ]
         args: ["source /scripts/bx_login.sh; bx service list | grep compose-for-elasticsearch | grep '^{{ .Values.elasticsearch.serviceName }} ' || bx service create compose-for-elasticsearch {{ .Values.elasticsearch.servicePlan}} {{ .Values.elasticsearch.serviceName }}"]
         imagePullPolicy: Always
