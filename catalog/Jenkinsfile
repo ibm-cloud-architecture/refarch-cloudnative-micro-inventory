@@ -34,7 +34,7 @@ podTemplate(label: 'pod',
                     BX_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-namespace`
 
                     cd catalog/docker
-                    docker build -t \${BX_REGISTRY}/\${BX_NAMESPACE}/bc-catalog:${env.BUILD_NUMBER} .
+                    docker build -t \${BX_REGISTRY}/\${BX_NAMESPACE}/catalog:${env.BUILD_NUMBER} .
                     """
                 }
                 stage ('Push Docker Image to Registry') {
@@ -54,7 +54,7 @@ podTemplate(label: 'pod',
                     #bx plugin install container-registry -r Bluemix
                     bx cr login
 
-                    docker push \${BX_REGISTRY}/\${BX_NAMESPACE}/bc-catalog:${env.BUILD_NUMBER}
+                    docker push \${BX_REGISTRY}/\${BX_NAMESPACE}/catalog:${env.BUILD_NUMBER}
                     """
                 }
             }
