@@ -1,89 +1,117 @@
-podTemplate(label: 'pod',
-    volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-              secretVolume(secretName: 'bluemix-api-key', mountPath: '/var/run/secrets/bluemix-api-key'),
-              configMapVolume(configMapName: 'bluemix-target', mountPath: '/var/run/configs/bluemix-target')],
+podTemplate(
+    label: 'pod',
     containers: [
-        containerTemplate(name: 'java', image: 'openjdk:8-jdk-alpine', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'docker', image: 'ibmcase/bluemix-image-deploy:latest', alwaysPullImage: true, ttyEnabled: true),
-        containerTemplate(name: 'helm', image: 'ibmcase/helm:latest', alwaysPullImage: true, ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'kubectl', image: 'ibmcase/kubectl:latest', alwaysPullImage: true, ttyEnabled: true, command: 'cat')
-    ]) {
+        containerTemplate(
+            name: 'java', 
+            image: 'openjdk:8-jdk-alpine', 
+            alwaysPullImage: true, 
+            ttyEnabled: true, 
+            command: 'cat'
+        ),
+        containerTemplate(
+            name: 'docker', 
+            image: 'ibmcase/bluemix-image-deploy:latest', 
+            alwaysPullImage: true, 
+            ttyEnabled: true
+        ),
+        containerTemplate(
+            name: 'helm', 
+            image: 'ibmcase/helm:latest', 
+            alwaysPullImage: true, 
+            ttyEnabled: true, 
+            command: 'cat'
+        ),
+        containerTemplate(
+            name: 'kubectl', 
+            image: 'ibmcase/kubectl:latest', 
+            alwaysPullImage: true, 
+            ttyEnabled: true, 
+            command: 'cat'
+        )
+    ],
+    volumes: [
+        hostPathVolume(
+            hostPath: '/var/run/docker.sock', 
+            mountPath: '/var/run/docker.sock'
+        ),
+        secretVolume(
+            secretName: 'bluemix-api-key', 
+            mountPath: '/var/run/secrets/bluemix-api-key'
+        ),
+        configMapVolume(
+            configMapName: 'bluemix-target', 
+            mountPath: '/var/run/configs/bluemix-target'
+        )
+    ],
+) {
 
     node ('pod') {
 
-        stage('Build') {
-            checkout scm
-            container('java') {
-                stage('Build Gradle Project') {
-                    sh """
-                    #!/bin/bash
-                    cd inventory
-                    ./gradlew build -x test
-                    ./gradlew docker
-                    """
-                }
+        checkout scm
+        container('java') {
+            stage('Build Gradle Project') {
+                sh """
+                #!/bin/bash
+                cd inventory
+                ./gradlew build -x test
+                ./gradlew docker
+                """
             }
         }
 
-        stage('Docker') {
-            container('docker') {
-                stage ('Build Docker Image') {
-                    sh """
-                    #!/bin/bash
-                    BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
-                    BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
+        container('docker') {
+            stage ('Build Docker Image') {
+                sh """
+                #!/bin/bash
+                BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
+                BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
 
-                    cd inventory/docker
-                    docker build -t \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/inventory:${env.BUILD_NUMBER} .
-                    """
-                }
-                stage ('Push Docker Image to Registry') {
-                    sh """
-                    #!/bin/bash
-                    export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
-                    BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-space`
-                    BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
-                    BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
-                    BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
+                cd inventory/docker
+                docker build -t \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/inventory:${env.BUILD_NUMBER} .
+                """
+            }
+            stage ('Push Docker Image to Registry') {
+                sh """
+                #!/bin/bash
+                export BLUEMIX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
+                BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-space`
+                BX_API_ENDPOINT=`cat /var/run/configs/bluemix-target/bluemix-api-endpoint`
+                BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
+                BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
 
-                    # Bluemix Login
-                    # source /login.sh
-                    bx login -a \${BX_API_ENDPOINT} -s \${BX_SPACE}
+                # Bluemix Login
+                # source /login.sh
+                bx login -a \${BX_API_ENDPOINT} -s \${BX_SPACE}
 
-                    # initialize docker using container registry secret
-                    #bx plugin install container-registry -r Bluemix
-                    bx cr login
+                # initialize docker using container registry secret
+                #bx plugin install container-registry -r Bluemix
+                bx cr login
 
-                    docker push \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/inventory:${env.BUILD_NUMBER}
-                    """
-                }
+                docker push \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/inventory:${env.BUILD_NUMBER}
+                """
             }
         }
 
-        stage('Chart') {
-            container('helm') {
-                stage ('Install Chart') {
-                    sh """
-                    #!/bin/bash
-                    BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
-                    BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
+        container('helm') {
+            stage ('Install Chart') {
+                sh """
+                #!/bin/bash
+                BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
+                BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
 
-                    cd inventory/scripts
-                    ./deploy.sh ${env.BUILD_NUMBER} \${BX_REGISTRY} \$BX_CR_NAMESPACE
-                    """
-                }
+                cd inventory/scripts
+                ./deploy.sh ${env.BUILD_NUMBER} \${BX_REGISTRY} \$BX_CR_NAMESPACE
+                """
             }
         }
 
-        stage('Cleanup') {
-            container('kubectl') {
-                stage ('Cleanup Helm Install Jobs') {
-                    sh """
-                    #!/bin/bash
-                    cd inventory/scripts
-                    ./kubecleanup.sh
-                    """
-                }
+        container('kubectl') {
+            stage ('Cleanup Helm Install Jobs') {
+                sh """
+                #!/bin/bash
+                cd inventory/scripts
+                ./kubecleanup.sh
+                """
             }
         }
     }
