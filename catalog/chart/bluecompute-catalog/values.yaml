@@ -1,11 +1,7 @@
 replicaCount: 3
 
-registry:
-  name: registry.ng.bluemix.net
-  namespace: kyanite_int
-
 image:
-  name: bluecompute-catalog
+  repository: ibmcase/bluecompute-catalog
   pullPolicy: IfNotPresent
   tag: latest
 
