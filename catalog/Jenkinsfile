@@ -67,7 +67,7 @@ podTemplate(
                     BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
 
                     cd catalog/docker
-                    docker build -t \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/catalog:${env.BUILD_NUMBER} .
+                    docker build -t \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/bluecompute-catalog:${env.BUILD_NUMBER} .
                     """
                 }
                 stage ('Push Docker Image to Registry') {
@@ -87,7 +87,7 @@ podTemplate(
                     #bx plugin install container-registry -r Bluemix
                     bx cr login
 
-                    docker push \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/catalog:${env.BUILD_NUMBER}
+                    docker push \${BX_REGISTRY}/\${BX_CR_NAMESPACE}/bluecompute-catalog:${env.BUILD_NUMBER}
                     """
                 }
             }
@@ -122,7 +122,7 @@ podTemplate(
 
                     # initialize docker using container registry secret
                     bx cr login
-                    bx cr image-rm \${BX_REGISTRY}/\${BX_NAMESPACE}/catalog:${env.BUILD_NUMBER}
+                    bx cr image-rm \${BX_REGISTRY}/\${BX_NAMESPACE}/bluecompute-catalog:${env.BUILD_NUMBER}
                    
                     """
                 }
@@ -173,8 +173,8 @@ podTemplate(
 
                 for i in \${images_to_delete}; do
                     # delete images smaller than current build
-                    echo "Deleting \${BX_REGISTRY}/\${BX_NAMESPACE}/catalog:\${i} ..."
-                    bx cr image-rm \${BX_REGISTRY}/\${BX_NAMESPACE}/catalog:\${i}
+                    echo "Deleting \${BX_REGISTRY}/\${BX_NAMESPACE}/bluecompute-catalog:\${i} ..."
+                    bx cr image-rm \${BX_REGISTRY}/\${BX_NAMESPACE}/bluecompute-catalog:\${i}
                 done
                 
                 """

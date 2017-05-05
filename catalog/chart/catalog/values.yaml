@@ -5,7 +5,7 @@ registry:
   namespace: kyanite_int
 
 image:
-  name: catalog
+  name: bluecompute-catalog
   pullPolicy: IfNotPresent
   tag: latest
 
