@@ -2,7 +2,7 @@
 set -x
 
 # Delete all helm jobs for this chart
-cd ../chart/catalog
+cd ../chart/bluecompute-catalog
 chart_name=$(yaml read Chart.yaml name)
 chart_version=$(yaml read Chart.yaml version)
 
