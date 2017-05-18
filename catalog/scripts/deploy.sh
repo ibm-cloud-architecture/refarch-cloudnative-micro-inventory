@@ -19,7 +19,6 @@ cd ../chart/bluecompute-catalog
 cat values.yaml | \
     yaml w - image.tag ${BUILD_NUMBER} | \
     yaml w - image.repository ${BX_REGISTRY}/${BX_CR_NAMESPACE}/bluecompute-catalog | \
-    yaml w - hs256key.skipDelete true | \
     yaml w - configMap.skipDelete true | \
     yaml w - secret.skipDelete true | \
     yaml w - configMap.bluemixOrg ${BX_ORG} | \
