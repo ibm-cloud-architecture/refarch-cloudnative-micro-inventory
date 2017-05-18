@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bluecompute-inventory
+  labels:
+    app: bluecompute
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    tier: backend
+    micro: inventory
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: bluecompute
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        tier: backend
+        micro: inventory
+    spec:
+      containers:
+      - name: bluecompute-inventory
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        ports:
+        - containerPort: 8080
+        env:
+        - name: elastic
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.elasticsearch.secret }}"
+              key: binding
+        - name: mysql
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.mysql.secret }}"
+              key: binding
+        - name: messagehub
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.messagehub.secret }}"
+              key: binding

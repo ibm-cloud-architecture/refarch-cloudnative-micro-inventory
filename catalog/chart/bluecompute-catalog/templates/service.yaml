@@ -2,8 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: catalog-service
-  labels: 
+  labels:
     app: bluecompute
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
     micro: catalog
 spec:
@@ -13,5 +14,6 @@ spec:
       targetPort: 8081
   selector: 
     app: bluecompute
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
     micro: catalog
