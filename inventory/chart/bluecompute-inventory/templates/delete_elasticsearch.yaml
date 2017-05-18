@@ -27,7 +27,11 @@ spec:
       - name: delete-elasticsearch
         image: ibmcase/bluemix-cluster-deployer:latest
         command: [ "/bin/bash", "-c" ]
-        args: ["source /scripts/bx_login.sh; set -x; bx cs init; \
+        args: ["if [[ \"{{ .Values.elasticsearch.skipDelete }}\" == \"true\" ]]; then \
+          echo \"Skipping\"; \
+          exit 0; \
+        fi; \
+        source /scripts/bx_login.sh; set -x; bx cs init; \
         bx cs cluster-service-unbind ${KUBE_CLUSTER_NAME} {{ .Release.Namespace }} {{ .Values.elasticsearch.serviceName }}; \
         bx service delete {{ .Values.elasticsearch.serviceName }} -f || \
         echo \"{{ .Values.elasticsearch.serviceName }} already deleted\""]

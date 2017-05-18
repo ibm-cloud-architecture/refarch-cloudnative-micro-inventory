@@ -11,7 +11,7 @@ metadata:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
     "helm.sh/hook": post-delete
-    "helm.sh/hook-weight": "12"
+    "helm.sh/hook-weight": "11"
 spec:
   template:
     metadata:
@@ -27,7 +27,11 @@ spec:
       - name: delete-messagehub
         image: ibmcase/bluemix-cluster-deployer:latest
         command: [ "/bin/bash", "-c" ]
-        args: ["source /scripts/bx_login.sh; set -x; bx cs init; \
+        args: ["if [[ \"{{ .Values.messagehub.skipDelete }}\" == \"true\" ]]; then \
+          echo \"Skipping\"; \
+          exit 0; \
+        fi; \
+        source /scripts/bx_login.sh; set -x; bx cs init; \
         bx cs cluster-service-unbind ${KUBE_CLUSTER_NAME} {{ .Release.Namespace }} {{ .Values.messagehub.serviceName }}; \
         bx service delete {{ .Values.messagehub.serviceName }} -f || \
         echo \"{{ .Values.messagehub.serviceName }} already deleted\""]

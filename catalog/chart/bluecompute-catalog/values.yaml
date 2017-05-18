@@ -6,12 +6,14 @@ image:
   tag: latest
 
 elasticsearch:
+  skipDelete: false
   serviceName: refarch-compose-for-elasticsearch
   servicePlan: Standard
   secret: binding-refarch-compose-for-elasticsearch
 
 # Declare variables to be passed into your templates.
 configMap:
+  skipDelete: false
   bluemixAPIEndpoint: api.ng.bluemix.net
   bluemixOrg: PUT_YOUR_BLUEMIX_ORG_HERE
   bluemixSpace: PUT_YOUR_BLUEMIX_SPACE_HERE
@@ -21,4 +23,5 @@ configMap:
 
 # All values pasted here will be base64 encoded by the charts
 secret:
+  skipDelete: false
   apiKey: PUT_YOUR_API_KEY_HERE

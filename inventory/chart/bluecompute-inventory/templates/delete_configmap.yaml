@@ -27,6 +27,11 @@ spec:
       - name: delete-configmap
         image: ibmcase/kubectl:latest
         command: [ "/bin/bash", "-c" ]
-        args: ["set -x; kubectl --namespace {{ .Release.Namespace }} delete configmaps bluemix-target || 
-        echo \"bluemix-target already deleted\""]
+        args: ["if [[ \"{{ .Values.configMap.skipDelete }}\" == \"true\" ]]; then \
+          echo \"Skipping\"; \
+          exit 0; \
+        else \
+          kubectl --namespace {{ .Release.Namespace }} delete configmaps bluemix-target || \
+          echo \"bluemix-target already deleted\"; \
+        fi"]
         imagePullPolicy: IfNotPresent

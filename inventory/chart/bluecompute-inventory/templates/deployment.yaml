@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: inventory-deployment
+  name: bluecompute-inventory
   labels:
     app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
@@ -18,7 +18,7 @@ spec:
         micro: inventory
     spec:
       containers:
-      - name: inventory
+      - name: bluecompute-inventory
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
