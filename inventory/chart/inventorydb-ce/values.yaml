@@ -1,0 +1,17 @@
+replicaCount: 1
+micro: inventory-ce
+dbname: inventorydb
+mysqluser: dbuser
+
+image:
+  repository: mysql
+  tag: latest
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

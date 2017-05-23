@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-dbloader-job
+  labels:
+    app: bluecompute
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    tier: backend
+    micro: {{ .Values.micro }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "20"
+spec:
+  template:
+    metadata:
+      name: {{.Chart.Name}}-dbloader
+      labels:
+        app: bluecompute
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        tier: backend
+        micro: {{ .Values.micro }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: {{ .Chart.Name }}-dbloader
+        image: ibmcase/mysql-loader:latest
+        command: [ "/bin/bash", "-c" ]
+        args: ["./load-data.sh '' '' {{.Chart.Name}}-service"]
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MYSQL_USER
+            value: {{ .Values.mysqluser | quote }}
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Chart.Name }}-secret
+                key:  mysqlpass
+          - name: MYSQL_DATABASE
+            value: {{ .Values.dbname | quote }}
