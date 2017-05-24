@@ -62,7 +62,7 @@ export JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
 
 # Checks for elastic "variable" set by Kubernetes secret
 if [ -z ${elastic+x} ]; then 
-	echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
+    echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
 else 
 	echo "Found elastic secret"
     el_uri=$(echo $elastic | jq .uri | sed s%\"%%g)
@@ -82,7 +82,7 @@ fi
 
 # Checks for mysql "variable" set by Kubernetes secret
 if [ -z ${mysql+x} ]; then 
-    echo "Secret not in \"mysql\" variable. Probably NOT running in Kubernetes";
+    echo "Secret not in \"msyql\" variable. Probably NOT running in Kubernetes";
 else 
     echo "Found mysql secret"
     mysql_uri=$(echo $mysql | jq .uri | sed s%\"%%g)

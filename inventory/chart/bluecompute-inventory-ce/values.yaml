@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: ibmcase/bluecompute-inventory
+  pullPolicy: IfNotPresent
+  tag: latest
+
+elasticsearch:
+  secret: binding-refarch-compose-for-elasticsearch
+
+mysql:
+  secret: binding-refarch-compose-for-mysql

@@ -13,6 +13,10 @@ public class Application {
 
         // Subscribe to Message Hub topics
         MHConsumer mh = (MHConsumer) ctx.getBean("MHConsumer");
-        mh.subscribe();
+        if (mh.valid_config) {
+            mh.subscribe();
+        } else {
+            System.out.println("Will not use Message Hub due to invalid configuration");
+        }
     }
 }

@@ -41,6 +41,8 @@ public class MHConsumer {
     private String rest_url;
     private String api_key;
 
+    public Boolean valid_config = true;
+
     @PostConstruct
     public void init() {
 
@@ -56,6 +58,26 @@ public class MHConsumer {
         servers = config.getServers();
         rest_url = config.getKafka_rest_url();
         api_key = config.getApi_key();
+
+        if (username == null || username.equals("")) {
+            valid_config = false;
+            return;
+        }
+
+        if (password == null || password.equals("")) {
+            valid_config = false;
+            return;
+        }
+
+        if (rest_url == null || rest_url.equals("")) {
+            valid_config = false;
+            return;
+        }
+
+        if (api_key == null || api_key.equals("")) {
+            valid_config = false;
+            return;
+        }
 
         try {
 

@@ -6,7 +6,7 @@ metadata:
     app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
-    micro: catalog
+    micro: inventory
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
@@ -15,17 +15,22 @@ spec:
         app: bluecompute
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         tier: backend
-        micro: catalog
+        micro: inventory
     spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
-        - containerPort: 8081
+          - containerPort: 8080
         env:
         - name: elastic
           valueFrom:
             secretKeyRef:
               name: "{{ .Values.elasticsearch.secret }}"
+              key: binding
+        - name: mysql
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.mysql.secret }}"
               key: binding

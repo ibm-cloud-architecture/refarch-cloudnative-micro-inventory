@@ -1,4 +1,5 @@
 apiVersion: v1
 description: BlueCompute Inventory Microservice
-name: bluecompute-inventory
+name: inventory-mysql
 version: 0.1.1
+engine: gotpl

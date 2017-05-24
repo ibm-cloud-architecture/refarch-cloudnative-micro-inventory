@@ -1,0 +1,9 @@
+replicaCount: 1
+
+image:
+  repository: ibmcase/bluecompute-catalog
+  pullPolicy: IfNotPresent
+  tag: latest
+
+elasticsearch:
+  secret: binding-refarch-compose-for-elasticsearch
