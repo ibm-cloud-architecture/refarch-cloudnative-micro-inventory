@@ -1,21 +1,25 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: es
+  name: {{ .Chart.Name }}
   labels:
+    app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    component: elasticsearch
+    tier: backend
+    micro: catalog
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
+        app: bluecompute
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-        component: elasticsearch
+        tier: backend
+        micro: catalog
     spec:
-      serviceAccount: elasticsearch
+      serviceAccount: {{ .Chart.Name }}
       containers:
-      - name: es
+      - name: {{ .Chart.Name }}
         securityContext:
           capabilities:
             add:

@@ -6,14 +6,14 @@ metadata:
     app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
-    micro: catalog
+    micro: inventory
 spec:
   ports:
     - protocol: TCP
-      port: 8081
-      targetPort: 8081
+      port: 8080
+      targetPort: 8080
   selector: 
     app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend
-    micro: catalog
+    micro: inventory

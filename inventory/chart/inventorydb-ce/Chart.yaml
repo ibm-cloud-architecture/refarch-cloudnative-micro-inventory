@@ -1,4 +1,0 @@
-apiVersion: v1
-description: MySQL inventorydb deployment
-name: inventorydb-ce
-version: 0.1.0

@@ -9,10 +9,13 @@ metadata:
     micro: catalog
 spec:
   ports:
-    - protocol: TCP
-      port: 8081
-      targetPort: 8081
-  selector: 
+  - name: http
+    port: 9200
+    protocol: TCP
+  - name: transport
+    port: 9300
+    protocol: TCP
+  selector:
     app: bluecompute
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     tier: backend

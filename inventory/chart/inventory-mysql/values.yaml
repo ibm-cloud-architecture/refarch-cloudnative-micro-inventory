@@ -1,0 +1,11 @@
+image:
+  repository: mysql
+  pullPolicy: IfNotPresent
+  tag: 5.7.14
+
+rootPassword: admin123
+user: dbuser
+password: password
+database: inventorydb
+
+secretName: binding-refarch-compose-for-mysql

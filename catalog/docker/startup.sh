@@ -62,7 +62,7 @@ export JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
 
 # Checks for elastic "variable" set by Kubernetes secret
 if [ -z ${elastic+x} ]; then 
-	echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
+    echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
 else 
 	echo "Running in Kubernetes";
     el_uri=$(echo $elastic | jq .uri | sed s%\"%%g)

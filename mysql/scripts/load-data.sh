@@ -54,7 +54,7 @@ if [[ -z "$mysql_database" ]]; then
 fi
 
 # load data
-while !(mysql -u${mysql_user} -p${mysql_password} --host ${mysql_host} --port ${mysql_port} --ssl-mode=REQUIRED <load-data.sql)
+while !(mysql -u${mysql_user} -p${mysql_password} --host ${mysql_host} --port ${mysql_port} <load-data.sql)
 do
   printf "Waiting for MySQL to fully initialize\n\n"
   sleep 1
