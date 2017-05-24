@@ -25,15 +25,11 @@ spec:
       - name: {{ .Chart.Name }}-dbloader
         image: ibmcase/mysql-loader:latest
         command: [ "/bin/bash", "-c" ]
-        args: ["./load-data.sh '' '' {{.Chart.Name}}-service"]
+        args: ["./startup.sh"]
         imagePullPolicy: IfNotPresent
         env:
-          - name: MYSQL_USER
-            value: {{ .Values.mysqluser | quote }}
-          - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Chart.Name }}-secret
-                key:  mysqlpass
-          - name: MYSQL_DATABASE
-            value: {{ .Values.dbname | quote }}
+        - name: mysql
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Chart.Name }}-secret"
+              key: binding
