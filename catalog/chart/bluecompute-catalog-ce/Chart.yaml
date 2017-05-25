@@ -1,4 +1,4 @@
 apiVersion: v1
 description: BlueCompute Catalog Microservice
-name: bluecompute-catalog
+name: bluecompute-catalog-ce
 version: 0.1.1
