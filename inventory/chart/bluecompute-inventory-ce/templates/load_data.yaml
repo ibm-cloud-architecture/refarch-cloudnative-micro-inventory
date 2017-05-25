@@ -10,7 +10,7 @@ metadata:
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
-    "helm.sh/hook": post-install
+    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "1"
 spec:
   template:
@@ -21,6 +21,25 @@ spec:
         heritage: {{.Release.Service | quote }}
         release: {{.Release.Name | quote }}
         chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "test-mysql",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "Always",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
+            "env": [{ 
+              "name": "mysql",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "name": "{{ .Values.mysql.secret }}",
+                  "key": "binding"
+                }
+              }
+            }]
+          }
+        ]'
     spec:
       restartPolicy: Never
       containers:
@@ -33,5 +52,5 @@ spec:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.secretName }}
+              name: {{ .Values.mysql.secret }}
               key: binding
