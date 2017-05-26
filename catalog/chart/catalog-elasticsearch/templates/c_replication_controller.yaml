@@ -49,6 +49,8 @@ spec:
         - containerPort: 9300
           name: transport
           protocol: TCP
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         volumeMounts:
         - mountPath: /data
           name: storage

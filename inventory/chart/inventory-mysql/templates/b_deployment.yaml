@@ -36,9 +36,7 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
+{{ toYaml .Values.resources | indent 12 }}
         env:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
@@ -57,6 +55,8 @@ spec:
         ports:
         - name: mysql
           containerPort: 3306
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         livenessProbe:
           exec:
             command:

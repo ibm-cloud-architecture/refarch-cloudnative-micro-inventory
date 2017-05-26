@@ -42,6 +42,8 @@ spec:
           value: "true"
         - name: HTTP_ENABLE
           value: "true"
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         ports:
         - containerPort: 9200
           name: http

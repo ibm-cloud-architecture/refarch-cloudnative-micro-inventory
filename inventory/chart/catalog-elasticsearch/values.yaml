@@ -5,4 +5,10 @@ image:
   pullPolicy: IfNotPresent
   tag: 1.7.1-4
 
+resources:
+  limits:
+    memory: 700Mi
+  requests:
+    memory: 350Mi
+
 secretName: binding-refarch-compose-for-elasticsearch
