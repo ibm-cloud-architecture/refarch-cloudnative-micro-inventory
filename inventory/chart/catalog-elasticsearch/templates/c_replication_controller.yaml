@@ -42,6 +42,8 @@ spec:
           value: "true"
         - name: HTTP_ENABLE
           value: "true"
+        - name: "ES_JAVA_OPTS"
+          value: "-Xms256m -Xmx256m"
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         ports:
