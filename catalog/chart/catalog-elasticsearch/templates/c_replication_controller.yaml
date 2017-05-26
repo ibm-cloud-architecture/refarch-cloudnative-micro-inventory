@@ -42,6 +42,8 @@ spec:
           value: "true"
         - name: HTTP_ENABLE
           value: "true"
+        - name: "ES_JAVA_OPTS"
+          value: "-Xms256m -Xmx256m"
         ports:
         - containerPort: 9200
           name: http
@@ -49,6 +51,8 @@ spec:
         - containerPort: 9300
           name: transport
           protocol: TCP
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         volumeMounts:
         - mountPath: /data
           name: storage

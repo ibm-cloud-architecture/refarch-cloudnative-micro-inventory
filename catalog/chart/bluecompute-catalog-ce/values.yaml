@@ -7,3 +7,9 @@ image:
 
 elasticsearch:
   secret: binding-refarch-compose-for-elasticsearch
+
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    memory: 64Mi

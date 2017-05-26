@@ -8,4 +8,10 @@ user: dbuser
 password: password
 database: inventorydb
 
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    memory: 64Mi
+  
 secretName: binding-refarch-compose-for-mysql
