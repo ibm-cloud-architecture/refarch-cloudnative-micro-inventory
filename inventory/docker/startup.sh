@@ -57,8 +57,12 @@ function uri_parser() {
     return 0
 }
 
+# find the java heap size as 50% of container memory using sysfs
+max_heap=`cat /sys/fs/cgroup/memory/memory.limit_in_bytes | xargs -I{} echo "({} / 1024 / 1024) / 2" | bc`
+export JAVA_OPTS="${JAVA_OPTS} -Xmx${max_heap}m"
+
 # Set basic java options
-export JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom"
+export JAVA_OPTS="${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom"
 
 # Checks for elastic "variable" set by Kubernetes secret
 if [ -z ${elastic+x} ]; then 
