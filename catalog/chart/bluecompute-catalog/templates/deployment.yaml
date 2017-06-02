@@ -16,6 +16,25 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
         tier: backend
         micro: catalog
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "test-elasticsearch",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "Always",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
+            "env": [{ 
+              "name": "elastic",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "name": "{{ .Values.elasticsearch.secret }}",
+                  "key": "binding"
+                }
+              }
+            }]
+          }
+        ]'
     spec:
       containers:
       - name: {{ .Chart.Name }}
