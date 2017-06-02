@@ -21,17 +21,36 @@ spec:
         heritage: {{.Release.Service | quote }}
         release: {{.Release.Name | quote }}
         chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "test-mysql",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "Always",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
+            "env": [{ 
+              "name": "mysql",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "name": "{{ .Values.mysql.secret }}",
+                  "key": "binding"
+                }
+              }
+            }]
+          }
+        ]'
     spec:
       restartPolicy: Never
       containers:
       - name: populate-mysql
         image: ibmcase/mysql-loader:latest
         command: [ "/bin/bash", "-c" ]
-        args: ["./startup.sh"]
-        imagePullPolicy: IfNotPresent
+        args: ["set -x; ./startup.sh"]
+        imagePullPolicy: Always
         env:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.mysql.secret }}"
+              name: {{ .Values.mysql.secret }}
               key: binding

@@ -3,7 +3,7 @@
 ## Spring Boot Netflix OSS Microservice Apps Integration with ElasticSearch and MySQL Database Server
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
-https://github.com/ibm-cloud-architecture/refarch-cloudnative*
+https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
 
 ## Table of Contents
 - **[Introduction](#introduction)**
