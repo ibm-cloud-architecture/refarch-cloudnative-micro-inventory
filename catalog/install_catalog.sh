@@ -19,7 +19,7 @@ BX_CR_NAMESPACE=""
 BX_ORG=""
 
 function check_tiller {
-	kubectl --namespace=kube-system get pods | grep tiller | grep Runnin
+	kubectl --namespace=kube-system get pods | grep tiller | grep Running | grep 1/1
 }
 
 function bluemix_login {
@@ -124,22 +124,33 @@ function initialize_helm {
 }
 
 function install_bluecompute_catalog {
-	printf "\n\n${grn}Installing bluecompute-catalog chart. This will take a few minutes...${end} ${coffee3}\n\n"
-	cd chart
+	local release=$(helm list | grep bluecompute-catalog)
 
-	time helm install --name catalog --debug --wait --timeout 600 \
-	--set configMap.bluemixOrg=${BX_ORG} \
-	--set configMap.bluemixSpace=${BX_SPACE} \
-	--set configMap.bluemixRegistryNamespace=${BX_CR_NAMESPACE} \
-	--set configMap.kubeClusterName=${CLUSTER_NAME} \
-	--set secret.apiKey=${BX_API_KEY} \
-	bluecompute-catalog
+	# Creating for API KEY
+	if [[ -z "${release// }" ]]; then
+		printf "\n\n${grn}Installing bluecompute-catalog chart. This will take a few minutes...${end} ${coffee3}\n\n"
+		time helm install --name catalog --debug --wait --timeout 600 \
+		--set configMap.bluemixOrg=${BX_ORG} \
+		--set configMap.bluemixSpace=${BX_SPACE} \
+		--set configMap.bluemixRegistryNamespace=${BX_CR_NAMESPACE} \
+		--set configMap.kubeClusterName=${CLUSTER_NAME} \
+		--set secret.apiKey=${BX_API_KEY} \
+		bluecompute-catalog
 
-	printf "\n\n${grn}bluecompute-catalog was successfully installed!${end}\n"
-	printf "\n\n${grn}Cleaning up...${end}\n"
-	kubectl delete pods,jobs -l heritage=Tiller
+		local status=$?
 
-	cd ..
+		if [ $status -ne 0 ]; then
+			printf "\n\n${red}Error installing bluecompute-catalog... Exiting.${end}\n"
+			exit 1
+		fi
+
+		printf "\n\n${grn}bluecompute-catalog was successfully installed!${end}\n"
+		printf "\n\n${grn}Cleaning up...${end}\n"
+		kubectl delete pods,jobs -l heritage=Tiller
+
+	else
+		printf "\n\n${grn}bluecompute-catalog was already installed!${end}\n"
+	fi
 }
 
 # Setup Stuff
@@ -153,7 +164,9 @@ set_cluster_context
 initialize_helm
 
 # Install Bluecompute
+cd chart
 install_bluecompute_catalog
+cd ..
 
 printf "\n\nTo see Kubernetes Dashboard, paste the following in your terminal:\n"
 echo "${cyn}export KUBECONFIG=${KUBECONFIG}${end}"
