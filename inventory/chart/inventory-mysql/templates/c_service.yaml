@@ -4,9 +4,11 @@ metadata:
   name: inventory-mysql
   labels:
     app: bluecompute
+    micro: mysql
+    tier: data
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    tier: backend
-    micro: inventory
 spec:
   ports:
   - name: mysql
@@ -14,6 +16,8 @@ spec:
     targetPort: mysql
   selector:
     app: bluecompute
+    micro: mysql
+    tier: data
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    tier: backend
-    micro: inventory

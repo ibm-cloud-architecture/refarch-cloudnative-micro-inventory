@@ -4,18 +4,22 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: bluecompute
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    micro: elasticsearch
     tier: backend
-    micro: catalog
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
         app: bluecompute
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+        micro: elasticsearch
         tier: backend
-        micro: catalog
+        heritage: {{.Release.Service | quote }}
+        release: {{.Release.Name | quote }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
       serviceAccount: {{ .Chart.Name }}
       containers:
@@ -44,8 +48,6 @@ spec:
           value: "true"
         - name: "ES_JAVA_OPTS"
           value: "-Xms256m -Xmx256m"
-        resources:
-{{ toYaml .Values.resources | indent 12 }}
         ports:
         - containerPort: 9200
           name: http
@@ -53,6 +55,8 @@ spec:
         - containerPort: 9300
           name: transport
           protocol: TCP
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         volumeMounts:
         - mountPath: /data
           name: storage

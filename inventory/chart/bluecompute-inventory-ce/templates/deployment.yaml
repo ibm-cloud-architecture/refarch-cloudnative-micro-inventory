@@ -4,18 +4,57 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: bluecompute
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    tier: backend
     micro: inventory
+    tier: backend
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
         app: bluecompute
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-        tier: backend
         micro: inventory
+        tier: backend
+        heritage: {{.Release.Service | quote }}
+        release: {{.Release.Name | quote }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+      annotations:
+        pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "test-mysql",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "Always",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
+            "env": [{ 
+              "name": "mysql",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "name": "{{ .Values.mysql.secret }}",
+                  "key": "binding"
+                }
+              }
+            }]
+          },
+          {
+            "name": "test-elasticsearch",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "Always",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
+            "env": [{ 
+              "name": "elastic",
+              "valueFrom": {
+                "secretKeyRef": {
+                  "name": "{{ .Values.elasticsearch.secret }}",
+                  "key": "binding"
+                }
+              }
+            }]
+          }
+        ]'
     spec:
       containers:
       - name: {{ .Chart.Name }}

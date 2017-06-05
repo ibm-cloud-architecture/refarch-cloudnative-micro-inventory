@@ -4,9 +4,11 @@ metadata:
   name: {{ .Chart.Name }}
   labels:
     app: bluecompute
+    micro: elasticsearch
+    tier: data
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    tier: backend
-    micro: catalog
 spec:
   ports:
   - name: http
@@ -17,6 +19,8 @@ spec:
     protocol: TCP
   selector:
     app: bluecompute
+    micro: elasticsearch
+    tier: data
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    tier: backend
-    micro: catalog
