@@ -68,7 +68,7 @@ You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the a
 
 
 ### Message Hub
-1. [Provision](https://console.ng.bluemix.net/catalog/services/message-hub) an instance of Message Hub into your Bluemix space.
+1. Provision an instance of [Message Hub](https://console.ng.bluemix.net/catalog/services/message-hub) into your Bluemix space.
   - Select name for your instance.
   - Click the `Create` button.
 2. Refresh the page until you see `Status: Ready`.
