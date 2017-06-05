@@ -1,4 +1,4 @@
 apiVersion: v1
 description: BlueCompute Inventory Microservice
-name: bluecompute-inventory-ce
+name: inventory-ce
 version: 0.1.1

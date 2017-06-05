@@ -1,12 +1,11 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: inventory-mysql
+  name: {{ .Chart.Name }}
   labels:
     app: bluecompute
     micro: mysql
     tier: data
-    heritage: {{.Release.Service | quote }}
     release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
@@ -16,7 +15,6 @@ spec:
         app: bluecompute
         micro: mysql
         tier: data
-        heritage: {{.Release.Service | quote }}
         release: {{.Release.Name | quote }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
       annotations:
@@ -36,7 +34,7 @@ spec:
           ]'
     spec:
       containers:
-      - name: inventory-mysql
+      - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:

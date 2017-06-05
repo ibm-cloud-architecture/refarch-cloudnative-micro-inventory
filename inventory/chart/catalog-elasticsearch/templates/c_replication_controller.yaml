@@ -5,8 +5,7 @@ metadata:
   labels:
     app: bluecompute
     micro: elasticsearch
-    tier: backend
-    heritage: {{.Release.Service | quote }}
+    tier: data
     release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
@@ -16,8 +15,7 @@ spec:
       labels:
         app: bluecompute
         micro: elasticsearch
-        tier: backend
-        heritage: {{.Release.Service | quote }}
+        tier: data
         release: {{.Release.Name | quote }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:

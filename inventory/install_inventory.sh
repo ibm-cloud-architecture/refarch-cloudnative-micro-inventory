@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 # Terminal Colors
 red=$'\e[1;31m'
 grn=$'\e[1;32m'
@@ -130,32 +129,32 @@ function initialize_helm {
 }
 
 function install_bluecompute_inventory {
-	local release=$(helm list | grep bluecompute-inventory)
+	local release=$(helm list | grep inventory)
 
 	# Creating for API KEY
 	if [[ -z "${release// }" ]]; then
-		printf "\n\n${grn}Installing bluecompute-inventory chart. This will take a few minutes...${end} ${coffee3}\n\n"
+		printf "\n\n${grn}Installing inventory chart. This will take a few minutes...${end} ${coffee3}\n\n"
 		time helm install --name inventory --debug --timeout 600 \
 		--set configMap.bluemixOrg=${BX_ORG} \
 		--set configMap.bluemixSpace=${BX_SPACE} \
 		--set configMap.bluemixRegistryNamespace=${BX_CR_NAMESPACE} \
 		--set configMap.kubeClusterName=${CLUSTER_NAME} \
 		--set secret.apiKey=${BX_API_KEY} \
-		bluecompute-inventory
+		inventory
 
 		local status=$?
 
 		if [ $status -ne 0 ]; then
-			printf "\n\n${red}Error installing bluecompute-inventory... Exiting.${end}\n"
+			printf "\n\n${red}Error installing inventory... Exiting.${end}\n"
 			exit 1
 		fi
 
-		printf "\n\n${grn}bluecompute-inventory was successfully installed!${end}\n"
+		printf "\n\n${grn}inventory was successfully installed!${end}\n"
 		printf "\n\n${grn}Cleaning up...${end}\n"
 		kubectl delete pods,jobs -l heritage=Tiller
 
 	else
-		printf "\n\n${grn}bluecompute-inventory was already installed!${end}\n"
+		printf "\n\n${grn}inventory was already installed!${end}\n"
 	fi
 }
 
@@ -180,5 +179,5 @@ echo "${cyn}export KUBECONFIG=${KUBECONFIG}${end}"
 printf "\nThen run this command to connect to Kubernetes Dashboard:\n"
 echo "${cyn}kubectl proxy${end}"
 
-printf "\nThen open a browser window and paste the following URL to see the Services created by bluecompute-inventory Chart:\n"
+printf "\nThen open a browser window and paste the following URL to see the Services created by inventory Chart:\n"
 echo "${cyn}http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/service?namespace=default${end}"
