@@ -362,9 +362,9 @@ In this section you will learn how to deploy the Inventory and Catalog apps in B
     # cf ic namespace get
     ```
 
-5. **If there is no namespace set for your , then set a namespace**.
+5. **If there is no namespace set for your organization, then set a namespace**.
     ```
-    # cf ic namespace get
+    # cf ic namespace set
     ```
 
 6. **Change to the mysql directory**.
