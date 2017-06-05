@@ -446,7 +446,7 @@ Inventory database is now setup in IBM Bluemix Container.
     # cf ic namespace get
     ```
 
-5. **If there is no namespace set for your , then set a namespace**.
+5. **If there is no namespace set for your organization, then set a namespace**.
     ```
     # cf ic namespace get
     ```
