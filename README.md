@@ -102,7 +102,7 @@ You can use the following button to deploy the Inventory and Catalog microservic
 [![Create BlueCompute Deployment Toolchain](https://console.ng.bluemix.net/devops/graphics/create_toolchain_button.png)](https://console.ng.bluemix.net/devops/setup/deploy?repository=https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git)
 
 
-##Run Inventory and Catalog Locally
+## Run Inventory and Catalog Locally
 In this section you will learn how to build and run the Inventory and Catalog apps locally.
 
 ### Deploy MySQL on local docker container
