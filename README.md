@@ -479,7 +479,7 @@ Inventory database is now setup in IBM Bluemix Container.
 
 12. **Get container Private IP Address**. 
     ```
-    # cf ic inspect elasticsearch-container | grep -i ipaddress
+    # cf ic inspect elasticsearch | grep -i ipaddress
                 "IPAddress": "172.29.0.240",
                         "IPAddress": "172.29.0.240"
     ```
