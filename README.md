@@ -473,7 +473,7 @@ Inventory database is now setup in IBM Bluemix Container.
 
 10. **Verify container is `Running`**.
     ```
-    # cf ic ps | grep elasticsearch-container
+    # cf ic ps | grep elasticsearch
     a9a5a80c-bff        registry.ng.bluemix.net/chrisking/elasticsearch:latest    ""                  About an hour ago   Running             169.46.17.110:9200->9200/tcp   elasticsearch-container
     ```
 
