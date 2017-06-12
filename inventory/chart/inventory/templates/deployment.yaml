@@ -76,3 +76,7 @@ spec:
             secretKeyRef:
               name: "{{ .Values.messagehub.secret }}"
               key: binding
+      {{if eq .Values.image.usePullSecret true}}
+      imagePullSecrets:
+        - name: "{{ .Values.image.pullSecretName }}"
+      {{end}}

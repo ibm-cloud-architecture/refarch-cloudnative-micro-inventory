@@ -4,6 +4,8 @@ image:
   repository: ibmcase/bluecompute-catalog
   pullPolicy: IfNotPresent
   tag: latest
+  usePullSecret: false
+  pullSecretName: registry-token
 
 elasticsearch:
   skipDelete: false
