@@ -104,4 +104,5 @@ spec:
             name: data
       volumes:
       - name: data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/mysql-inventory
