@@ -76,6 +76,32 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql
+      - name: inventory-backup-container
+        image: patrocinio/ibm-backup-restore
+        command: ["/bin/bash"]
+        args: ["-c", "/backup_restore/vbackup"]
+        env:
+        - name: BACKUP_NAME
+          value: bluecompute-inventory-mysql
+        - name: BACKUP_DIRECTORY
+          value: /var/lib/mysql
+        - name: PROJECTID
+          value: 0f64bd4bd6da481b8c8da6aed68a894d
+        - name: REGION
+          value: dallas
+        - name: USERID
+          value: 266d2076dfa94512ab6133f1f2bebce5
+        - name: PASSWORD
+          value: M!KiQ3.Cp4r3WVdK
+        - name: SCHEDULE_TYPE
+          value: periodic
+        - name: SCHEDULE_INFO
+          value: daily
+        - name: BACKUP_TYPE
+          value: incremental
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: data
       volumes:
       - name: data
         emptyDir: {}
