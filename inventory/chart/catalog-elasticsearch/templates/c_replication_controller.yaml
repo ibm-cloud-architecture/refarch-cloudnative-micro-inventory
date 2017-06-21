@@ -19,7 +19,6 @@ spec:
         release: {{.Release.Name | quote }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
-      serviceAccount: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
         securityContext:
@@ -37,7 +36,7 @@ spec:
         - name: "CLUSTER_NAME"
           value: "myesdb"
         - name: "DISCOVERY_SERVICE"
-          value: "elasticsearch"
+          value: "{{ .Chart.Name }}"
         - name: NODE_MASTER
           value: "true"
         - name: NODE_DATA
