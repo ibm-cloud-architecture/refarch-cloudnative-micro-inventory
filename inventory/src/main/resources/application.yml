@@ -44,14 +44,14 @@ elasticsearch:
 # Message Hub properties
 message_hub:
   topic: orders
-  user: 0s2cJCnFGeP7eUGb
-  password: cVES29DlAz97ASGnoU1PTn3R0qvDVgmi
-  api_key: 0s2cJCnFGeP7eUGbcVES29DlAz97ASGnoU1PTn3R0qvDVgmi
-  kafka_rest_url: https://kafka-rest-prod01.messagehub.services.us-south.bluemix.net:443
+  user: 
+  password: 
+  api_key: 
+  kafka_rest_url: 
   # Add all brokers listed in Message Hub Credentials
   kafka_brokers_sasl:
-    - kafka01-prod01.messagehub.services.us-south.bluemix.net:9093
-    - kafka02-prod01.messagehub.services.us-south.bluemix.net:9093
-    - kafka03-prod01.messagehub.services.us-south.bluemix.net:9093
-    - kafka04-prod01.messagehub.services.us-south.bluemix.net:9093
+    - 
+    - 
+    - 
+    - 
     - kafka05-prod01.messagehub.services.us-south.bluemix.net:9093
