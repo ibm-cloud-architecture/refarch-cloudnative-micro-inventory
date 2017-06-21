@@ -78,4 +78,5 @@ spec:
           mountPath: /var/lib/mysql
       volumes:
       - name: data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/mysql-inv2
