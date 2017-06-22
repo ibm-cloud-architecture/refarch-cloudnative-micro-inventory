@@ -33,14 +33,6 @@ spring:
       ddl-auto: update
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
 
-# Elasticsearch
-elasticsearch:
-  url: http://localhost:9200
-  user:
-  password:
-  index: micro
-  doc_type: items
-
 # Message Hub properties
 message_hub:
   topic: orders

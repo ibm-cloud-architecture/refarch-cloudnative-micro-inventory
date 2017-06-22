@@ -13,7 +13,7 @@ BX_API_KEY=$7
 helm init
 
 # Install/Upgrade Chart
-cd ../chart/bluecompute-inventory
+cd ../chart/inventory
 
 # Replace values
 cat values.yaml | \
