@@ -37,5 +37,5 @@ if [[ -z "${release// }" ]]; then
     time helm install --name catalog . --debug --wait --timeout 600
 else
     echo "Upgrading bluecompute-catalog chart release"
-    time helm upgrade catalog . --debug --wait --timeout 600
+    time helm upgrade catalog . --reuse-values --debug --wait --timeout 600
 fi

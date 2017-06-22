@@ -37,5 +37,5 @@ if [[ -z "${release// }" ]]; then
     time helm install --name inventory . --debug --wait --timeout 600
 else
     echo "Upgrading bluecompute-inventory chart release"
-    time helm upgrade inventory . --debug --wait --timeout 600
+    time helm upgrade inventory . --reuse-values --debug --wait --timeout 600
 fi
