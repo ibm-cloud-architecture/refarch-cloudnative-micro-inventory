@@ -1,5 +1,7 @@
 package catalog;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -16,13 +18,15 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 @EnableCircuitBreaker
 @EnableFeignClients
 public class Application {
+	private static final Logger logger = LoggerFactory.getLogger(ElasticSearch.class);
+	
 	@Autowired
 	private InventoryRefreshTask refreshTask;
 	
     public static void main(String[] args) {
         final ApplicationContext ctx = SpringApplication.run(Application.class, args);
         
-        System.out.println("Catalog microservice is ready for business...");
+        logger.info("Catalog microservice is ready for business...");
     }
     
     @Bean
@@ -37,6 +41,7 @@ public class Application {
 			
 			@Override
 			public void run(String... args) throws Exception {
+				logger.info("Starting Inventory Refresh background task ...");
 				executor.execute(refreshTask);
 				
 			}
