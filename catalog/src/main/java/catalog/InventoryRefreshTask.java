@@ -1,5 +1,6 @@
 package catalog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class InventoryRefreshTask  implements Runnable {
 				logger.debug("Querying Inventory Service for all items ...");
 				final List<Item> allItems = invClient.getAllItems();
 				
-				final List<catalog.models.Item> modelItems = new List<catalog.models.Item>(allItems.size());
+				final List<catalog.models.Item> modelItems = new ArrayList<catalog.models.Item>(allItems.size());
 				
 				for (final Item item : allItems) {
 					modelItems.add(item.toModel());
