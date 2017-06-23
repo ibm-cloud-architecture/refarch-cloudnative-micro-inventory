@@ -79,7 +79,7 @@ public class ElasticSearch {
 			}
     	
             logger.debug("Loading row: \n" + jsonString);
-            sb.append("{ \"doc\": " + jsonString + "}");
+            sb.append("{ \"doc\": \"" + jsonString + "\" }");
     	}
 
 		try {
@@ -89,7 +89,7 @@ public class ElasticSearch {
 
 			// Build URL
 			//String url = String.format("%s/%s/%s/%s", this.url, index, doc_type, item.getId());
-			String url = String.format("%s/_bulk");
+			String url = String.format("%s/_bulk", this.url);
 
 			Request.Builder builder = new Request.Builder().url(url)
 					.post(body)
