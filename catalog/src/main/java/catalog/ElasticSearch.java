@@ -83,7 +83,7 @@ public class ElasticSearch {
     	}
 
 		try {
-			logger.info("post body:\n" + sb.toString() );
+			logger.debug("post body:\n" + sb.toString() );
 			MediaType mediaType = MediaType.parse("application/json");
 			RequestBody body = RequestBody.create(mediaType, sb.toString());
 
@@ -105,9 +105,12 @@ public class ElasticSearch {
 			Response response = client.newCall(request).execute();
 			String resp_string = response.body().string();
 			logger.debug("resp_string: \n" + resp_string);
-			logger.info("response: " + resp_string);
-			//JSONObject resp = new JSONObject(resp_string);
-			//boolean created = resp.getBoolean("created");
+			JSONObject resp = new JSONObject(resp_string);
+			boolean errors = resp.getBoolean("errors");
+			
+			if (errors) {
+				logger.error("Error(s) were found with bulk items update: " + resp_string);
+			}
 
 			//logger.info(String.format("Item %s was %s\n\n", resp.getString("_id"), ((created == true) ? "Created" : "Updated")));
 

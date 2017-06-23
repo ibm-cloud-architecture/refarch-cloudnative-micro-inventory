@@ -13,6 +13,8 @@ import catalog.client.Item;
 @Component
 public class InventoryRefreshTask  implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(InventoryRefreshTask.class);
+	
+	private static final int INVENTORY_REFRESH_SLEEP_TIME_MS = 2500;
 		
 	@Autowired
 	private InventoryServiceClient invClient;
@@ -23,7 +25,7 @@ public class InventoryRefreshTask  implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				logger.info("Querying Inventory Service for all items ...");
+				logger.debug("Querying Inventory Service for all items ...");
 				List<Item> allItems = invClient.getAllItems();
 				
 				elasticSearch.loadRows(allItems);
@@ -31,7 +33,7 @@ public class InventoryRefreshTask  implements Runnable {
 				logger.warn("Caught exception, ignoring", e);
 			}
 			try {
-				Thread.sleep(2500);
+				Thread.sleep(INVENTORY_REFRESH_SLEEP_TIME_MS);
 			} catch (InterruptedException e) {
 				logger.warn("Caught InterruptedException, quitting");
 				break;
