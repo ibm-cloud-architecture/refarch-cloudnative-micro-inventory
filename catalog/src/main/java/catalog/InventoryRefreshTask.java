@@ -26,9 +26,15 @@ public class InventoryRefreshTask  implements Runnable {
 		while (true) {
 			try {
 				logger.debug("Querying Inventory Service for all items ...");
-				List<Item> allItems = invClient.getAllItems();
+				final List<Item> allItems = invClient.getAllItems();
 				
-				elasticSearch.loadRows(allItems);
+				final List<catalog.models.Item> modelItems = new List<catalog.models.Item>(allItems.size());
+				
+				for (final Item item : allItems) {
+					modelItems.add(item.toModel());
+				}
+				
+				elasticSearch.loadRows(modelItems);
 			} catch (Exception e) {
 				logger.warn("Caught exception, ignoring", e);
 			}

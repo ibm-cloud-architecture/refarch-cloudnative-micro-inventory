@@ -94,7 +94,48 @@ public class Item {
     public void setStock(int value) {
         this.stock = value;
     }
+    
+    public boolean equals(Object otherObj) {
+    	if (otherObj.getClass() != Item.class) {
+    		return false;
+    	}
+    	
+    	final Item otherItem = (Item)otherObj;
+    	
+    	if (otherItem.getId() != this.id) {
+    		return false;
+    	}
 
+    	if (!otherItem.getName().equals(this.name)) {
+    		return false;
+    	}
+    	
+    	if (!otherItem.getDescription().equals(this.description)) {
+    		return false;
+    	}
+    	
+    	if (otherItem.getPrice() != this.price) {
+    		return false;
+    	}
+    	
+    	if (!otherItem.getImg().equals(this.img)) {
+    		return false;
+    	}
+    	 
+    	if (!otherItem.getImgAlt().equals(this.imgAlt)) {
+    		return false;
+    	}
+    	
+   	
+    	if (otherItem.getStock() != this.stock) {
+    		return false;
+    	}
+    	
+    	return true;
+
+    }
+
+    @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
         string.append("{\n");

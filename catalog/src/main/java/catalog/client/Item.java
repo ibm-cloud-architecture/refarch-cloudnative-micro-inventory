@@ -94,6 +94,20 @@ public class Item {
     public void setStock(int value) {
         this.stock = value;
     }
+    
+    public catalog.models.Item toModel() {
+    	final catalog.models.Item newItem = new catalog.models.Item();
+    	
+    	newItem.setId(this.id);
+    	newItem.setName(this.name);
+    	newItem.setDescription(this.description);
+    	newItem.setImg(this.img);
+    	newItem.setImgAlt(this.imgAlt);
+    	newItem.setPrice(this.price);
+    	newItem.setStock(this.stock);
+    	
+    	return newItem;
+    }
 
     public String toString() {
         StringBuilder string = new StringBuilder();

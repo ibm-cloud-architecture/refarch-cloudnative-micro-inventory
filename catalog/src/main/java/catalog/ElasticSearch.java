@@ -1,6 +1,8 @@
 package catalog;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -13,7 +15,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import catalog.client.Item;
+import catalog.models.Item;
+import catalog.models.ItemService;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -26,7 +29,10 @@ public class ElasticSearch {
 	private static final Logger logger = LoggerFactory.getLogger(ElasticSearch.class);
 	
     @Autowired
-    ElasticsearchConfig config;
+    private ElasticsearchConfig config;
+    
+    @Autowired
+    private ItemService itemService;
     
     private String url;
     private String user;
@@ -57,18 +63,39 @@ public class ElasticSearch {
         client = new OkHttpClient();
 
     }
+    
+    private Map<Long, Item> getAllRowsFromCache() {
+    	final List<catalog.models.Item> allItems = itemService.findAll();
+    	
+    	
+    	// hash the items by Id
+    	final Map<Long, Item> itemMap = new HashMap<Long, Item>();
+    	for (final Item item : allItems) {
+    		itemMap.put(item.getId(), item);
+    	}
+    	
+    	return itemMap;
+    	
+    }
 
     // load multi-rows
     public void loadRows(List<Item> items) {
     	// convert Item to JSONArray
     	final ObjectMapper objMapper = new ObjectMapper();
     	
+    	final Map<Long, Item> allItemMap = getAllRowsFromCache();
     	final StringBuilder sb = new StringBuilder();
     	
     	// convert to a bulk update
     	// { "index": {"_index": "<index>", "_type": "<type>", "_id": "<itemId", "_retry_on_conflict": "3" } }
     	// { "doc": <document> }
     	for (final Item item : items) {
+    		if (allItemMap.containsKey(item.getId()) &&
+    			(allItemMap.remove(item.getId()).equals(item))) {
+    			// the item already exists, and it's exactly the same.  continue
+    			continue;
+    		}
+    			
     		sb.append("{ \"index\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
 			String jsonString;
 			try {
@@ -78,8 +105,14 @@ public class ElasticSearch {
 				continue;
 			}
     	
-            logger.debug("Loading row: \n" + jsonString);
+            logger.info("Adding/updating item: \n" + item.getId() + ": " + jsonString);
             sb.append(jsonString + "\n");
+    	}
+    	
+    	// everything left in allItemMap is stuff that is still in cache that we should remove
+    	for (final Item item : allItemMap.values()) {
+            logger.info("Deleting item: \n" + item.getId());
+			sb.append("{ \"delete\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
     	}
 
 		try {
