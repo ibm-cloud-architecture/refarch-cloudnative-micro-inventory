@@ -79,11 +79,11 @@ public class ElasticSearch {
 			}
     	
             logger.debug("Loading row: \n" + jsonString);
-            sb.append("{ \"doc\": \"" + jsonString + "\" }");
+            sb.append("{ \"doc\": \"" + jsonString + "\" }\n");
     	}
 
 		try {
-			logger.info("post body" + sb.toString() );
+			logger.info("post body:\n" + sb.toString() );
 			MediaType mediaType = MediaType.parse("application/json");
 			RequestBody body = RequestBody.create(mediaType, sb.toString());
 
