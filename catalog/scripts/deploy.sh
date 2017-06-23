@@ -47,7 +47,7 @@ else
         --set configMap.bluemixSpace=${BX_SPACE} \
         --set configMap.bluemixRegistryNamespace=${BX_CR_NAMESPACE} \
         --set configMap.kubeClusterName=${CLUSTER_NAME} \
-        --set secret.apiKey=${BX_API_KEY}
+        --set secret.apiKey=${BX_API_KEY} \
         --debug \
         --wait \
         --timeout 600
