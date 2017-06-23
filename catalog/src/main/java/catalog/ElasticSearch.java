@@ -116,7 +116,7 @@ public class ElasticSearch {
     	}
 
 		try {
-			logger.debug("post body:\n" + sb.toString() );
+			logger.info("post body:\n" + sb.toString() );
 			MediaType mediaType = MediaType.parse("application/json");
 			RequestBody body = RequestBody.create(mediaType, sb.toString());
 
