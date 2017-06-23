@@ -137,7 +137,7 @@ public class ElasticSearch {
 
 			Response response = client.newCall(request).execute();
 			String resp_string = response.body().string();
-			logger.debug("resp_string: \n" + resp_string);
+			logger.info("resp_string: \n" + resp_string);
 			JSONObject resp = new JSONObject(resp_string);
 			boolean errors = resp.getBoolean("errors");
 			
