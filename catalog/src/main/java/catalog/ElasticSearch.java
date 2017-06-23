@@ -58,12 +58,18 @@ public class ElasticSearch {
 
     }
 
-    // Subscribe to topic and start polling
+    // load multi-rows
     public void loadRows(List<Item> items) {
     	// convert Item to JSONArray
     	final ObjectMapper objMapper = new ObjectMapper();
     	
+    	final StringBuilder sb = new StringBuilder();
+    	
+    	// convert to a bulk update
+    	// { "update": {"_index": "<index>", "_type": "<type>", "_id": "<itemId", "_retry_on_conflict": "3" } }
+    	// { "doc": <document> }
     	for (final Item item : items) {
+    		sb.append("{ \"update\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
 			String jsonString;
 			try {
 				jsonString = objMapper.writeValueAsString(item);
@@ -72,37 +78,42 @@ public class ElasticSearch {
 				continue;
 			}
     	
-            logger.info("Loading row: \n" + jsonString);
+            logger.debug("Loading row: \n" + jsonString);
+            sb.append("{ \"doc\": " + jsonString + "}");
+    	}
 
-            try {
-                MediaType mediaType = MediaType.parse("application/json");
-                RequestBody body = RequestBody.create(mediaType, jsonString);
+		try {
+			logger.info("post body" + sb.toString() );
+			MediaType mediaType = MediaType.parse("application/json");
+			RequestBody body = RequestBody.create(mediaType, sb.toString());
 
-                // Build URL
-                String url = String.format("%s/%s/%s/%s", this.url, index, doc_type, item.getId());
+			// Build URL
+			//String url = String.format("%s/%s/%s/%s", this.url, index, doc_type, item.getId());
+			String url = String.format("%s/_bulk");
 
-                Request.Builder builder = new Request.Builder().url(url)
-                        .put(body)
-                        .addHeader("content-type", "application/json");
+			Request.Builder builder = new Request.Builder().url(url)
+					.post(body)
+					.addHeader("content-type", "application/json");
 
-                if (user != null && !user.equals("") && password != null && !password.equals("")) {
-                    logger.debug("Adding credentials to request");
-                    builder.addHeader("Authorization", Credentials.basic(user, password));
-                }
+			if (user != null && !user.equals("") && password != null && !password.equals("")) {
+				logger.debug("Adding credentials to request");
+				builder.addHeader("Authorization", Credentials.basic(user, password));
+			}
 
-                Request request = builder.build();
+			Request request = builder.build();
 
-                Response response = client.newCall(request).execute();
-                String resp_string = response.body().string();
-                logger.debug("resp_string: \n" + resp_string);
-                JSONObject resp = new JSONObject(resp_string);
-                boolean created = resp.getBoolean("created");
+			Response response = client.newCall(request).execute();
+			String resp_string = response.body().string();
+			logger.debug("resp_string: \n" + resp_string);
+			logger.info("response: " + resp_string);
+			//JSONObject resp = new JSONObject(resp_string);
+			//boolean created = resp.getBoolean("created");
 
-                logger.info(String.format("Item %s was %s\n\n", resp.getString("_id"), ((created == true) ? "Created" : "Updated")));
+			//logger.info(String.format("Item %s was %s\n\n", resp.getString("_id"), ((created == true) ? "Created" : "Updated")));
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			//e.printStackTrace();
+		}
     }
 }
