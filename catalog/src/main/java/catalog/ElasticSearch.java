@@ -66,10 +66,10 @@ public class ElasticSearch {
     	final StringBuilder sb = new StringBuilder();
     	
     	// convert to a bulk update
-    	// { "update": {"_index": "<index>", "_type": "<type>", "_id": "<itemId", "_retry_on_conflict": "3" } }
+    	// { "index": {"_index": "<index>", "_type": "<type>", "_id": "<itemId", "_retry_on_conflict": "3" } }
     	// { "doc": <document> }
     	for (final Item item : items) {
-    		sb.append("{ \"update\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
+    		sb.append("{ \"index\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
 			String jsonString;
 			try {
 				jsonString = objMapper.writeValueAsString(item);
