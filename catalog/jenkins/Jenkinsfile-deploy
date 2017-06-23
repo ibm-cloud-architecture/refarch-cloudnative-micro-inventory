@@ -1,0 +1,78 @@
+podTemplate(
+    label: 'deploy-catalog-service-__CLUSTER__-pod',
+    containers: [
+        containerTemplate(
+            name: 'helm', 
+            image: 'ibmcase/helm:latest', 
+            alwaysPullImage: true, 
+            ttyEnabled: true, 
+            command: 'cat'
+        )
+    ],
+    volumes: [
+        secretVolume(
+            secretName: 'bluemix-api-key', 
+            mountPath: '/var/run/secrets/bluemix-api-key'
+        ),
+        configMapVolume(
+            configMapName: 'bluemix-target', 
+            mountPath: '/var/run/configs/bluemix-target'
+        )
+    ],
+) {
+
+    node ('deploy-catalog-service-__CLUSTER__-pod') {
+        checkout scm
+
+        container('helm') {
+            stage ('Install Chart') {
+                sh """
+                #!/bin/bash
+                BX_REGISTRY=`cat /var/run/configs/bluemix-target/bluemix-registry`
+                BX_CR_NAMESPACE=`cat /var/run/configs/bluemix-target/bluemix-registry-namespace`
+                BX_ORG=`cat /var/run/configs/bluemix-target/bluemix-org`
+                BX_SPACE=`cat /var/run/configs/bluemix-target/bluemix-space`
+                CLUSTER_NAME=`cat /var/run/configs/bluemix-target/kube-cluster-name`
+                BX_API_KEY=`cat /var/run/secrets/bluemix-api-key/api-key`
+
+                # Init helm
+                helm init
+
+                # Install/Upgrade Chart
+                cd chart/catalog
+
+                release=\$(helm list | grep catalog | awk '{print $1}' | head -1)
+
+                if [[ -z "\${release// }" ]]; then
+                    echo "Installing catalog chart for the first time"
+                    time helm install \
+                        --name catalog \
+                        . \
+                        --debug \
+                        --wait \
+                        --timeout 600 \
+                        --set image.tag=${env.image_tag} \
+                        --set image.repository=${env.image_repository} \
+                        --set configMap.skipDelete=true \
+                        --set secret.skipDelete=true \
+                        --set configMap.bluemixOrg=\${BX_ORG} \
+                        --set configMap.bluemixSpace=\${BX_SPACE} \
+                        --set configMap.bluemixRegistryNamespace=\${BX_CR_NAMESPACE} \
+                        --set configMap.kubeClusterName=\${CLUSTER_NAME} \
+                        --set secret.apiKey=\${BX_API_KEY}
+
+                else
+                    echo "Upgrading catalog chart release"
+                    time helm upgrade catalog . \
+                        --reuse-values \
+                        --set image.tag=${env.image_tag} \
+                        --set image.repository=${env.image_repository} \
+                        --debug \
+                        --wait \
+                        --timeout 600
+                fi                
+                """
+            }
+        }
+    }
+}
