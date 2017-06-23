@@ -79,7 +79,7 @@ public class ElasticSearch {
 			}
     	
             logger.debug("Loading row: \n" + jsonString);
-            sb.append("{ \"doc\": \"" + jsonString + "\" }\n");
+            sb.append("{ \"doc\": " + jsonString + " }\n");
     	}
 
 		try {
