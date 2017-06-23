@@ -116,7 +116,12 @@ public class ElasticSearch {
     	}
 
 		try {
-			logger.info("post body:\n" + sb.toString() );
+			logger.debug("post body:\n" + sb.toString() );
+			
+			if (sb.toString().length() == 0) {
+				logger.debug("Nothing to update.");
+				return;
+			}
 			MediaType mediaType = MediaType.parse("application/json");
 			RequestBody body = RequestBody.create(mediaType, sb.toString());
 
@@ -137,7 +142,7 @@ public class ElasticSearch {
 
 			Response response = client.newCall(request).execute();
 			String resp_string = response.body().string();
-			logger.info("resp_string: \n" + resp_string);
+			logger.debug("resp_string: \n" + resp_string);
 			JSONObject resp = new JSONObject(resp_string);
 			boolean errors = resp.getBoolean("errors");
 			
