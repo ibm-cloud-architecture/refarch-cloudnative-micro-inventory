@@ -1,4 +1,4 @@
 apiVersion: v1
 description: BlueCompute ElasticSearch for Catalog
-name: catalog-elasticsearch
+name: ibmcase-elasticsearch
 version: 0.1.1
