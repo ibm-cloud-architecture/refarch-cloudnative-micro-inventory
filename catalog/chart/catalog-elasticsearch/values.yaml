@@ -1,14 +1,20 @@
-replicaCount: 1
 
-image:
-  repository: quay.io/pires/docker-elasticsearch-kubernetes
-  pullPolicy: IfNotPresent
-  tag: 1.7.1-4
+elasticsearch:
+  replicaCount: 1
+  image:
+    repository: quay.io/pires/docker-elasticsearch-kubernetes
+    pullPolicy: IfNotPresent
+    tag: 1.7.1-4
+  
+  service:
+    name: 
 
-resources:
-  limits:
-    memory: 700Mi
-  requests:
-    memory: 350Mi
-
-secretName: binding-refarch-compose-for-elasticsearch
+  labels:
+  
+  resources:
+    limits:
+      memory: 700Mi
+    requests:
+      memory: 350Mi
+  
+  secretName: binding-refarch-compose-for-elasticsearch

@@ -11,8 +11,5 @@ resources:
   requests:
     memory: 64Mi
   
-elasticsearch:
-  secret: binding-refarch-compose-for-elasticsearch
-
 mysql:
   secret: binding-refarch-compose-for-mysql

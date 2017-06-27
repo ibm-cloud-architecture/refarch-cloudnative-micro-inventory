@@ -6,7 +6,27 @@ image:
   tag: latest
 
 elasticsearch:
-  secret: binding-refarch-compose-for-elasticsearch
+  replicaCount: 1
+  image:
+    repository: quay.io/pires/docker-elasticsearch-kubernetes
+    pullPolicy: IfNotPresent
+    tag: 1.7.1-4
+  
+  service:
+    name: catalog-elasticsearch
+
+  labels:
+    app: bluecompute
+    micro: catalog
+    tier: data
+  
+  resources:
+    limits:
+      memory: 700Mi
+    requests:
+      memory: 350Mi
+  
+  secretName: binding-refarch-compose-for-elasticsearch
 
 resources:
   limits:

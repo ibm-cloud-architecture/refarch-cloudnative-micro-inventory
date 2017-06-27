@@ -71,26 +71,6 @@ export JAVA_OPTS="${JAVA_OPTS} -Xmx${max_heap}m"
 # Set basic java options
 export JAVA_OPTS="${JAVA_OPTS} -Djava.security.egd=file:/dev/./urandom"
 
-# Checks for elastic "variable" set by Kubernetes secret
-if [ -z ${elastic+x} ]; then 
-    echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
-else 
-	echo "Found elastic secret"
-    el_uri=$(echo $elastic | jq .uri | sed s%\"%%g)
-
-	# Do the URL parsing
-	uri_parser $el_uri
-
-	# Construct elasticsearch url
-	el_url="${uri_schema}://${uri_host}:${uri_port}"
-	el_user=${uri_user}
-	el_password=${uri_password}
-
-    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.url=${el_url}"
-    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.user=${el_user}"
-    JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.password=${el_password}"
-fi
-
 # Checks for mysql "variable" set by Kubernetes secret
 if [ -z ${mysql+x} ]; then 
     echo "Secret not in \"msyql\" variable. Probably NOT running in Kubernetes";
@@ -111,7 +91,6 @@ else
     JAVA_OPTS="${JAVA_OPTS} -Dspring.datasource.username=${mysql_user}"
     JAVA_OPTS="${JAVA_OPTS} -Dspring.datasource.password=${mysql_password}"
     JAVA_OPTS="${JAVA_OPTS} -Dspring.datasource.port=${mysql_port}"
-
 fi
 
 # Checks for messagehub "variable" set by Kubernetes secret

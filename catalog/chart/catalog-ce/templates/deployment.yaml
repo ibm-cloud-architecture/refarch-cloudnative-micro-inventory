@@ -23,18 +23,25 @@ spec:
           {
             "name": "test-elasticsearch",
             "image": "ibmcase/mysql-loader:latest",
-            "imagePullPolicy": "Always",
+            "imagePullPolicy": "IfNotPresent",
             "command": ["/bin/bash", "-c"], 
             "args": ["elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
             "env": [{ 
               "name": "elastic",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.elasticsearch.secret }}",
+                  "name": "{{ .Values.elasticsearch.secretName }}",
                   "key": "binding"
                 }
               }
             }]
+          },
+          {
+            "name": "test-inventory-service",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "IfNotPresent",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["until curl http://inventory-service:8080; do echo waiting for inventory-service; sleep 1; done"]
           }
         ]'
     spec:
@@ -50,5 +57,5 @@ spec:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.elasticsearch.secret }}"
+              name: "{{ .Values.elasticsearch.secretName }}"
               key: binding

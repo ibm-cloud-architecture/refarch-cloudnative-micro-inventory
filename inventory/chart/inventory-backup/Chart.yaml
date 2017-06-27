@@ -1,5 +1,0 @@
-apiVersion: v1
-description: BlueCompute Inventory Backup Microservice
-name: inventory-backup
-version: 0.1.1
-engine: gotpl

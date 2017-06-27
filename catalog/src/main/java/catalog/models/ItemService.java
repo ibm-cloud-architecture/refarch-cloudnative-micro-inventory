@@ -131,6 +131,11 @@ public class ItemService {
         List<Item> list = new ArrayList<Item>();
 
         JSONObject resp = new JSONObject(response.body().string());
+        if (!resp.has("hits")) {
+        	// empty cache
+        	return list;
+        }
+        
         JSONArray hits = resp.getJSONObject("hits").getJSONArray("hits");
 
         for (int i = 0; i < hits.length(); i++) {

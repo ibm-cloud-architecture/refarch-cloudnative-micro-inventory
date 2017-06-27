@@ -30,11 +30,18 @@ spec:
               "name": "elastic",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.elasticsearch.secret }}",
+                  "name": "{{ .Values.elasticsearch.secretName }}",
                   "key": "binding"
                 }
               }
             }]
+          },
+          {
+            "name": "test-inventory-service",
+            "image": "ibmcase/mysql-loader:latest",
+            "imagePullPolicy": "IfNotPresent",
+            "command": ["/bin/bash", "-c"], 
+            "args": ["until curl http://inventory-service:8080; do echo waiting for inventory-service; sleep 1; done"]
           }
         ]'
     spec:
@@ -48,7 +55,7 @@ spec:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.elasticsearch.secret }}"
+              name: "{{ .Values.elasticsearch.secretName }}"
               key: binding
       {{if eq .Values.image.usePullSecret true}}
       imagePullSecrets:
