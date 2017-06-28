@@ -5,7 +5,7 @@ image:
   pullPolicy: IfNotPresent
   tag: latest
 
-elasticsearch:
+ibmcase-elasticsearch:
   replicaCount: 1
   image:
     repository: quay.io/pires/docker-elasticsearch-kubernetes

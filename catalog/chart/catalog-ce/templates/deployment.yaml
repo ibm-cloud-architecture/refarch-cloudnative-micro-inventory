@@ -30,7 +30,7 @@ spec:
               "name": "elastic",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.elasticsearch.secretName }}",
+                  "name": "{{ (index .Values "ibmcase-elasticsearch").secretName }}",
                   "key": "binding"
                 }
               }
@@ -57,5 +57,5 @@ spec:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.elasticsearch.secretName }}"
+              name: "{{ (index .Values "ibmcase-elasticsearch").secretName }}"
               key: binding

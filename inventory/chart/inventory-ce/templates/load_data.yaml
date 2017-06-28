@@ -12,7 +12,7 @@ metadata:
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": post-install
     "helm.sh/hook-weight": "1"
 spec:
   template:
@@ -37,7 +37,7 @@ spec:
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.mysql.secret }}",
+                  "name": "{{ (index .Values "ibmcase-mysql").binding.name }}",
                   "key": "binding"
                 }
               }
@@ -56,5 +56,5 @@ spec:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.mysql.secret }}
+              name: {{ (index .Values "ibmcase-mysql").binding.name }}
               key: binding

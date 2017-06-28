@@ -30,7 +30,7 @@ spec:
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.mysql.secret }}",
+                  "name": "{{ (index .Values "ibmcase-mysql").binding.name }}",
                   "key": "binding"
                 }
               }
@@ -50,5 +50,5 @@ spec:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.mysql.secret }}"
+              name: "{{ (index .Values "ibmcase-mysql").binding.name }}"
               key: binding
