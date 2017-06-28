@@ -11,5 +11,16 @@ resources:
   requests:
     memory: 64Mi
   
-mysql:
-  secret: binding-refarch-compose-for-mysql
+ibmcase-mysql:
+  binding:
+    name: binding-refarch-compose-for-mysql
+
+  labels:
+    app: bluecompute
+    tier: data
+    micro: inventory
+  
+  dbname: inventorydb
+
+  service:
+    name: inventorydb-mysql
