@@ -1,9 +1,3 @@
-replicaCount: 1
-
-image:
-  repository: ibmcase/bluecompute-catalog
-  pullPolicy: IfNotPresent
-  tag: latest
 
 elasticsearch:
   replicaCount: 1
@@ -13,12 +7,9 @@ elasticsearch:
     tag: 1.7.1-4
   
   service:
-    name: catalog-elasticsearch
+    name: 
 
   labels:
-    app: bluecompute
-    micro: catalog
-    tier: data
   
   resources:
     limits:
@@ -27,9 +18,3 @@ elasticsearch:
       memory: 350Mi
   
   secretName: binding-refarch-compose-for-elasticsearch
-
-resources:
-  limits:
-    memory: 128Mi
-  requests:
-    memory: 64Mi

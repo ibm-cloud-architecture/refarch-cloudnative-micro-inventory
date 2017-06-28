@@ -35,22 +35,6 @@ spec:
                 }
               }
             }]
-          },
-          {
-            "name": "test-elasticsearch",
-            "image": "ibmcase/mysql-loader:latest",
-            "imagePullPolicy": "Always",
-            "command": ["/bin/bash", "-c"], 
-            "args": ["elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
-            "env": [{ 
-              "name": "elastic",
-              "valueFrom": {
-                "secretKeyRef": {
-                  "name": "{{ .Values.elasticsearch.secret }}",
-                  "key": "binding"
-                }
-              }
-            }]
           }
         ]'
     spec:
@@ -63,11 +47,6 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         env:
-        - name: elastic
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.elasticsearch.secret }}"
-              key: binding
         - name: mysql
           valueFrom:
             secretKeyRef:

@@ -11,11 +11,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ItemService {
+	private static final Logger logger = LoggerFactory.getLogger(ItemService.class);
     @Value("${elasticsearch.url}")
     private String url;
 
@@ -41,8 +44,8 @@ public class ItemService {
     // Get all rows from database
     public List<Item> findAll() {
         List<Item> list;
-        String req_url = url + "/" + index + "/" + doc_type + "/_search?size=1000&pretty=1";
-        Response response = perform_request(req_url);
+        final String req_url = url + "/" + index + "/" + doc_type + "/_search?size=1000&pretty=1";
+        final Response response = perform_request(req_url);
 
         try {
             list = getItemsFromResponse(response);
@@ -50,7 +53,7 @@ public class ItemService {
         } catch (IOException e) {
             // Just to be safe
             list = null;
-            System.out.println(e);
+            logger.error(e.getMessage(), e);
         }
 
         return list;
@@ -64,17 +67,16 @@ public class ItemService {
 
         try {
             JSONObject resp = new JSONObject(response.body().string());
-            System.out.println("Response: " + resp.toString());
+            logger.debug("Response: " + resp.toString());
 
             if (resp.has("found") && resp.getBoolean("found") == true) {
                 JSONObject itm = resp.getJSONObject("_source");
-                System.out.println("Found item: " + id);
-                System.out.println(itm);
+                logger.debug("Found item: " + id + "\n" + itm);
                 item = new ObjectMapper().readValue(itm.toString(), Item.class);
             }
 
         } catch (IOException e) {
-            System.out.println(e);
+            logger.error(e.getMessage(), e);
         }
 
         return item;
@@ -92,7 +94,7 @@ public class ItemService {
         } catch (IOException e) {
             // Just to be safe
             list = null;
-            System.out.println(e);
+            logger.error(e.getMessage(), e);
         }
 
         return list;
@@ -100,7 +102,7 @@ public class ItemService {
 
     private Response perform_request(String req_url) {
         Response response;
-        System.out.println("req_url: " + req_url);
+        logger.debug("req_url: " + req_url);
 
         try {
             Request.Builder builder = new Request.Builder()
@@ -109,7 +111,7 @@ public class ItemService {
                     .addHeader("content-type", "application/json");
 
             if (user != null && !user.equals("") && password != null && !password.equals("")) {
-                System.out.println("Adding credentials to request");
+                logger.debug("Adding credentials to request");
                 builder.addHeader("Authorization", Credentials.basic(user, password));
             }
 
@@ -129,6 +131,11 @@ public class ItemService {
         List<Item> list = new ArrayList<Item>();
 
         JSONObject resp = new JSONObject(response.body().string());
+        if (!resp.has("hits")) {
+        	// empty cache
+        	return list;
+        }
+        
         JSONArray hits = resp.getJSONObject("hits").getJSONArray("hits");
 
         for (int i = 0; i < hits.length(); i++) {

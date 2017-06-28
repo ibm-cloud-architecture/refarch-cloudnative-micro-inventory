@@ -15,3 +15,7 @@ elasticsearch:
   password:
   index: micro
   doc_type: items
+
+inventoryService:
+  url: http://inventory-service:8080
+ 

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Chart.Name }}
+  name: inventory-service
   labels:
     app: bluecompute
     micro: inventory

@@ -9,25 +9,29 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import inventory.config.MHConfig;
+import inventory.models.Inventory;
+import inventory.models.InventoryRepo;
 import inventory.rest.RESTAdmin;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-
 @Component("MHConsumer")
 public class MHConsumer {
+	private static final Logger logger = LoggerFactory.getLogger(MHConsumer.class);
 
-    @Autowired
-    @Qualifier("ElasticSearch")
-    private ElasticSearch es;
+	@Autowired
+	@Qualifier("inventoryRepo")
+	private InventoryRepo itemsRepo;
 
     @Autowired
     @Qualifier("MHConfig")
@@ -99,7 +103,7 @@ public class MHConsumer {
 
             // Get topics to see if our topic exists
             String topics_string = RESTAdmin.listTopics(rest_url, api_key);
-            System.out.println("REST Listing Topics: " + topics_string);
+            logger.debug("REST Listing Topics: " + topics_string);
 
             // Check if topic exist
             JSONArray topics = new JSONArray(topics_string);
@@ -110,7 +114,7 @@ public class MHConsumer {
                 String t_name = t.getString("name");
 
                 if (t_name.equals(topic)) {
-                    System.out.println("Topic " + topic + " already exists!");
+                    logger.warn("Topic " + topic + " already exists!");
                     create_topic = false;
                     break;
                 }
@@ -118,7 +122,7 @@ public class MHConsumer {
 
             // Create topic if it does not exist
             if (create_topic) {
-                System.out.println("Creating the topic " + topic);
+                logger.info("Creating the topic " + topic);
                 String restResponse = RESTAdmin.createTopic(rest_url, api_key, topic);
                 JSONObject json = new JSONObject(restResponse);
                 String error = json.has("errorMessage") ? json.getString("errorMessage") : null;
@@ -127,15 +131,14 @@ public class MHConsumer {
                     throw new Exception(error);
                 }
 
-                System.out.println("Successfully created the topic");
+                logger.info("Successfully created the topic");
             }
 
             consumer = new KafkaConsumer<String, String>(props);
-            System.out.println("Created Kafka Consumer");
+            logger.info("Created Kafka Consumer");
 
         } catch (Exception e) {
-            System.out.println("Exception occurred, application will terminate:");
-            System.out.println(e);
+            logger.error("Exception occurred, application will terminate:", e);
             e.printStackTrace();
             System.exit(-1);
         }
@@ -149,20 +152,32 @@ public class MHConsumer {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(3000);
             for (ConsumerRecord<String, String> record : records) {
-                System.out.printf("\nMessage = %s\n", record.value());
+                logger.debug("\nMessage = %s\n", record.value());
 
                 try {
                     JSONObject object = new JSONObject(record.value());
 
                     // Check if it has required fields
-                    if (object.has("itemId") && object.has("count")) {
-                        System.out.println("Valid object: " + object.getLong("itemId"));
-                        es.refresh_cache(object);
+                    if (!object.has("itemId") || !object.has("count")) {
+						logger.warn("Invalid message received: " + record.value() + ", ignoring");
+						continue;
                     }
+                    
+					logger.info("Valid object: " + object.getLong("itemId") + " count: " + object.getInt("count"));
+					
+					// get item for itemRepo:
+					final Inventory item = itemsRepo.findOne(object.getLong("itemId"));
+					if (item == null) {
+						logger.warn("Received message for item that does not exist!" + object.getLong("itemId"));
+						continue;
+					}
+					
+					item.setStock(item.getStock() - object.getInt("count"));
+					itemsRepo.save(item);
+					logger.info("Updated inventory: " + object.getLong("itemId") + " new stock: " + item.getStock());
 
                 } catch (Exception e) {
-                    System.out.println("Something happened parsing out message (probably not valid or JSON): ");
-                    System.out.println(e);
+                    logger.error("Something happened parsing out message (probably not valid or JSON): " + record.value() , e);
                 }
             }
         }
@@ -203,20 +218,19 @@ public class MHConsumer {
         try {
             jaasOutStream = new FileOutputStream(jaas_file_path, false);
             jaasOutStream.write(jaas.toString().getBytes(Charset.forName("UTF-8")));
-            System.out.println("Successfully wrote to JAAS configuration file");
+            logger.info("Successfully wrote to JAAS configuration file");
 
         } catch (final IOException e) {
-            System.out.println("Error: Failed accessing to JAAS config file:");
-            System.out.println(e);
+            logger.error("Error: Failed accessing to JAAS config file:");
+            logger.error(e.getMessage(), e);
             throw e;
         } finally {
             if (jaasOutStream != null) {
                 try {
                     jaasOutStream.close();
-                    System.out.println("Closed JAAS file");
+                    logger.info("Closed JAAS file");
                 } catch (final Exception e) {
-                    System.out.println("Error closing generated JAAS config file:");
-                    System.out.println(e);
+                    logger.error("Error closing generated JAAS config file:", e);
                 }
             }
         }

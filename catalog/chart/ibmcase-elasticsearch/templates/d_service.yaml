@@ -1,11 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Values.elasticsearch.service.name }}
   labels:
-    app: bluecompute
-    micro: elasticsearch
-    tier: data
+{{ toYaml .Values.elasticsearch.labels | indent 4 -}}
     release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 spec:
@@ -17,8 +15,6 @@ spec:
     port: 9300
     protocol: TCP
   selector:
-    app: bluecompute
-    micro: elasticsearch
-    tier: data
+{{ toYaml .Values.elasticsearch.labels | indent 4 -}}
     release: {{.Release.Name | quote }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"

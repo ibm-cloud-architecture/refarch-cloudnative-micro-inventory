@@ -7,12 +7,6 @@ image:
   usePullSecret: false
   pullSecretName: registry-token
 
-elasticsearch:
-  skipDelete: false
-  serviceName: refarch-compose-for-elasticsearch
-  servicePlan: Standard
-  secret: binding-refarch-compose-for-elasticsearch
-
 mysql:
   skipDelete: false
   serviceName: refarch-compose-for-mysql

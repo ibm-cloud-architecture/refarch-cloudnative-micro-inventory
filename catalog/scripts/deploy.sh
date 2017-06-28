@@ -13,29 +13,42 @@ BX_API_KEY=$7
 helm init
 
 # Install/Upgrade Chart
-cd ../chart/bluecompute-catalog
-
-# Replace values
-cat values.yaml | \
-    yaml w - image.tag ${BUILD_NUMBER} | \
-    yaml w - image.repository ${BX_REGISTRY}/${BX_CR_NAMESPACE}/bluecompute-catalog | \
-    yaml w - configMap.skipDelete true | \
-    yaml w - secret.skipDelete true | \
-    yaml w - configMap.bluemixOrg ${BX_ORG} | \
-    yaml w - configMap.bluemixSpace ${BX_SPACE} | \
-    yaml w - configMap.bluemixRegistryNamespace ${BX_CR_NAMESPACE} | \
-    yaml w - configMap.kubeClusterName ${CLUSTER_NAME} | \
-    yaml w - secret.apiKey ${BX_API_KEY} > \
-        values_new.yaml
-
-mv values_new.yaml values.yaml
+cd ../chart/catalog
 
 release=$(helm list | grep catalog | awk '{print $1}' | head -1)
 
 if [[ -z "${release// }" ]]; then
     echo "Installing bluecompute-catalog chart for the first time"
-    time helm install --name catalog . --debug --wait --timeout 600
+    time helm install \
+        --name catalog \
+        . \
+        --debug \
+        --wait \
+        --timeout 600 \
+        --set image.tag=${BUILD_NUMBER} \
+        --set image.repository=${BX_REGISTRY}/${BX_CR_NAMESPACE}/bluecompute-catalog \
+        --set configMap.skipDelete=true \
+        --set secret.skipDelete=true \
+        --set configMap.bluemixOrg=${BX_ORG} \
+        --set configMap.bluemixSpace=${BX_SPACE} \
+        --set configMap.bluemixRegistryNamespace=${BX_CR_NAMESPACE} \
+        --set configMap.kubeClusterName=${CLUSTER_NAME} \
+        --set secret.apiKey=${BX_API_KEY}
+
 else
     echo "Upgrading bluecompute-catalog chart release"
-    time helm upgrade catalog . --debug --wait --timeout 600
+    time helm upgrade catalog . \
+        --reuse-values \
+        --set image.tag=${BUILD_NUMBER} \
+        --set image.repository=${BX_REGISTRY}/${BX_CR_NAMESPACE}/bluecompute-catalog \
+        --set configMap.skipDelete=true \
+        --set secret.skipDelete=true \
+        --set configMap.bluemixOrg=${BX_ORG} \
+        --set configMap.bluemixSpace=${BX_SPACE} \
+        --set configMap.bluemixRegistryNamespace=${BX_CR_NAMESPACE} \
+        --set configMap.kubeClusterName=${CLUSTER_NAME} \
+        --set secret.apiKey=${BX_API_KEY} \
+        --debug \
+        --wait \
+        --timeout 600
 fi

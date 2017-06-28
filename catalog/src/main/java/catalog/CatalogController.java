@@ -23,7 +23,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RestController
 public class CatalogController {
 
-    Logger logger = LoggerFactory.getLogger(CatalogController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CatalogController.class);
 
     @Autowired
     ItemService itemsRepo;
@@ -35,6 +35,7 @@ public class CatalogController {
     @RequestMapping(value = "/items", method = RequestMethod.GET)
     @ResponseBody
     List<Item> getInventory() {
+    	logger.info("/items");
         return itemsRepo.findAll();
     }
 
@@ -43,7 +44,8 @@ public class CatalogController {
      */
     @RequestMapping(value = "/items/{id}", method = RequestMethod.GET)
     ResponseEntity<?> getById(@PathVariable long id) {
-        Item item = itemsRepo.findById(id);
+    	logger.info("/items/" + id);
+        final Item item = itemsRepo.findById(id);
         if (item == null) {
             return ResponseEntity.notFound().build();
         }
@@ -57,6 +59,7 @@ public class CatalogController {
     @RequestMapping(value = "/items/name/{name}", method = RequestMethod.GET)
     @ResponseBody
     List<Item> getByName(@PathVariable String name) {
+    	logger.info("/items/name/" + name);
         return itemsRepo.findByNameContaining(name);
     }
 
