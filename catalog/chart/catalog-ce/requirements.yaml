@@ -1,5 +1,4 @@
 dependencies:
       - name: ibmcase-elasticsearch
-#        repository: https://jkwong888.github.io/refarch-cloudnative-kubernetes/charts
-        repository: http://localhost:8879
+        repository: https://jkwong888.github.io/refarch-cloudnative-kubernetes/charts
         version: 0.1.1

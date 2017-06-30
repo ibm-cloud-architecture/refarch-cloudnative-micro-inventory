@@ -11,6 +11,8 @@ ibmcase-elasticsearch:
     repository: quay.io/pires/docker-elasticsearch-kubernetes
     pullPolicy: IfNotPresent
     tag: 1.7.1-4
+
+  clustername: catalogdb
   
   service:
     name: catalog-elasticsearch
@@ -26,7 +28,7 @@ ibmcase-elasticsearch:
     requests:
       memory: 350Mi
   
-  secretName: binding-refarch-compose-for-elasticsearch
+  secretName: binding-catalog-elasticsearch
 
 resources:
   limits:

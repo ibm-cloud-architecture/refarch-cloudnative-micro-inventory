@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}-{{ .Values.clustername }}-elasticsearch
   labels:
 {{ toYaml .Values.labels | indent 4 -}}
     release: {{.Release.Name | quote }}
@@ -16,7 +16,7 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: {{ .Release.Name }}-{{ .Values.clustername }}-elasticsearch
         securityContext:
           capabilities:
             add:
@@ -30,7 +30,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: "CLUSTER_NAME"
-          value: "myesdb"
+          value: "{{ .Values.clustername }}"
         - name: "DISCOVERY_SERVICE"
           value: "{{ .Values.service.name }}"
         - name: NODE_MASTER
