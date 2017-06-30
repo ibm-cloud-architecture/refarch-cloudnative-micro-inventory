@@ -31,3 +31,10 @@ build
 # Maven
 log/
 target/
+
+
+chart/catalog/charts
+chart/catalog/requirements.lock
+
+chart/catalog-ce/charts
+chart/catalog-ce/requirements.lock

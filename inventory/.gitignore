@@ -31,3 +31,10 @@ build
 # Maven
 log/
 target/
+
+
+chart/inventory/charts
+chart/inventory/requirements.lock
+
+chart/inventory-ce/charts
+chart/inventory-ce/requirements.lock
