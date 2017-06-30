@@ -4,6 +4,8 @@ image:
   pullPolicy: IfNotPresent
   tag: 1.7.1-4
 
+clustername:
+
 service:
   name: 
 
