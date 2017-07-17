@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
   labels:
     app: bluecompute
     micro: inventory
@@ -25,12 +25,12 @@ spec:
             "image": "ibmcase/mysql-loader:latest",
             "imagePullPolicy": "Always",
             "command": ["/bin/bash", "-c"], 
-            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
+            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | base64 -d | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
             "env": [{ 
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.mysql.secret }}",
+                  "name": "{{ template "mysqlBindingName" . }}",
                   "key": "binding"
                 }
               }
@@ -39,23 +39,17 @@ spec:
         ]'
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: inventory
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
-        - containerPort: 8080
+          - containerPort: 8080
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         env:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.mysql.secret }}"
+              name: {{ template "mysqlBindingName" . }}
               key: binding
-        - name: messagehub
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.messagehub.secret }}"
-              key: binding
-      {{if eq .Values.image.usePullSecret true}}
-      imagePullSecrets:
-        - name: "{{ .Values.image.pullSecretName }}"
-      {{end}}
+        {{ template "messageHubBinding" . }}
