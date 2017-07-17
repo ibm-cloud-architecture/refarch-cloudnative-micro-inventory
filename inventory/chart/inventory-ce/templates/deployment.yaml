@@ -30,7 +30,7 @@ spec:
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ (index .Values "ibmcase-mysql").binding.name }}",
+                  "name": "{{ template "mysqlBindingName" . }}",
                   "key": "binding"
                 }
               }
@@ -50,5 +50,6 @@ spec:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: "{{ (index .Values "ibmcase-mysql").binding.name }}"
+              name: {{ template "mysqlBindingName" . }}
               key: binding
+        {{ template "messageHubBinding" . }}
