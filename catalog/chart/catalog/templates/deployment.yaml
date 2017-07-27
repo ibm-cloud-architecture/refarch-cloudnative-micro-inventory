@@ -25,7 +25,7 @@ spec:
             "image": "ibmcase/mysql-loader:latest",
             "imagePullPolicy": "IfNotPresent",
             "command": ["/bin/bash", "-c"], 
-            "args": ["elastic_uri=`echo $elastic | base64 -d | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
+            "args": ["elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
             "env": [{ 
               "name": "elastic",
               "valueFrom": {
