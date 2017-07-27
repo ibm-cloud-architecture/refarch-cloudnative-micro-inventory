@@ -77,7 +77,7 @@ if [ -z ${elastic+x} ]; then
     echo "Secret not in \"elastic\" variable. Probably NOT running in Kubernetes";
 else 
 	echo "Running in Kubernetes";
-    el_uri=$(echo $elastic | base64 -d | jq -r .uri)
+    el_uri=$(echo $elastic | jq -r .uri)
 
 	# Do the URL parsing
 	uri_parser $el_uri
