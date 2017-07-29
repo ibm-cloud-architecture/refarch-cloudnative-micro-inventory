@@ -76,7 +76,7 @@ if [ -z ${mysql+x} ]; then
     echo "Secret not in \"msyql\" variable. Probably NOT running in Kubernetes";
 else 
     echo "Found mysql secret"
-    mysql_uri=$(echo $mysql | base64 -d | jq -r '.uri')
+    mysql_uri=$(echo $mysql  | jq -r '.uri')
 
     # Do the URL parsing
     uri_parser $mysql_uri
@@ -100,15 +100,15 @@ else
     echo "Found messagehub secret"
 
     # Construct messagehub environment variables
-    mh_user=$(echo $messagehub | base64 -d | jq -r '.user')
-    mh_password=$(echo $messagehub | base64 -d | jq -r '.password')
-    mh_api_key=$(echo $messagehub | base64 -d | jq -r '.api_key')
-    mh_kafka_rest_url=$(echo $messagehub | base64 -d | jq -r '.kafka_rest_url')
-    mh_kafka_server_0=$(echo $messagehub | base64 -d | jq -r '.kafka_brokers_sasl[0]')
-    mh_kafka_server_1=$(echo $messagehub | base64 -d | jq -r '.kafka_brokers_sasl[1]')
-    mh_kafka_server_2=$(echo $messagehub | base64 -d | jq -r '.kafka_brokers_sasl[2]')
-    mh_kafka_server_3=$(echo $messagehub | base64 -d | jq -r '.kafka_brokers_sasl[3]')
-    mh_kafka_server_4=$(echo $messagehub | base64 -d | jq -r '.kafka_brokers_sasl[4]')
+    mh_user=$(echo $messagehub  | jq -r '.user')
+    mh_password=$(echo $messagehub  | jq -r '.password')
+    mh_api_key=$(echo $messagehub  | jq -r '.api_key')
+    mh_kafka_rest_url=$(echo $messagehub  | jq -r '.kafka_rest_url')
+    mh_kafka_server_0=$(echo $messagehub  | jq -r '.kafka_brokers_sasl[0]')
+    mh_kafka_server_1=$(echo $messagehub  | jq -r '.kafka_brokers_sasl[1]')
+    mh_kafka_server_2=$(echo $messagehub  | jq -r '.kafka_brokers_sasl[2]')
+    mh_kafka_server_3=$(echo $messagehub  | jq -r '.kafka_brokers_sasl[3]')
+    mh_kafka_server_4=$(echo $messagehub  | jq -r '.kafka_brokers_sasl[4]')
 
     JAVA_OPTS="${JAVA_OPTS} -Dmessage_hub.user=${mh_user}"
     JAVA_OPTS="${JAVA_OPTS} -Dmessage_hub.password=${mh_password}"
