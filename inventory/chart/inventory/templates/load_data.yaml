@@ -30,7 +30,7 @@ spec:
             "image": "ibmcase/mysql-loader:jkwong-dev",
             "imagePullPolicy": "Always",
             "command": ["/bin/bash", "-c"], 
-            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
+            "args": ["source /helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
             "env": [{ 
               "name": "mysql",
               "valueFrom": {
@@ -47,8 +47,7 @@ spec:
       containers:
       - name: populate-mysql
         image: ibmcase/mysql-loader:jkwong-dev
-        command: [ "/bin/bash", "-c" ]
-        args: ["set -x; ./startup.sh"]
+        args: [ "https://raw.githubusercontent.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/master/mysql/scripts/load-data.sql" ]
         imagePullPolicy: Always
         env:
         - name: mysql
