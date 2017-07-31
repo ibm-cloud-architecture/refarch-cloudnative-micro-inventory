@@ -30,7 +30,7 @@ spec:
               "name": "elastic",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.elasticsearch.secretName }}",
+                  "name": "{{ .Values.elasticsearch.secret }}",
                   "key": "binding"
                 }
               }
@@ -55,7 +55,7 @@ spec:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.elasticsearch.secretName }}"
+              name: "{{ .Values.elasticsearch.secret }}"
               key: binding
       {{if eq .Values.image.usePullSecret true}}
       imagePullSecrets:
