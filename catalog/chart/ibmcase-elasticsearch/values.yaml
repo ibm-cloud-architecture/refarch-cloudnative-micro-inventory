@@ -4,10 +4,10 @@ image:
   pullPolicy: IfNotPresent
   tag: 1.7.1-4
 
-clustername:
+clustername: default-cluster
 
 service:
-  name: 
+  name: catalog-elasticsearch
 
 labels:
   datastore: elasticsearch
