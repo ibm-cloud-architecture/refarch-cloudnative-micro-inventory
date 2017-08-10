@@ -1,0 +1,16 @@
+dependencies:
+  - name: ibmcase-elasticsearch
+    #repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-kubernetes/charts
+    repository: http://localhost:8879
+    version: 0.1.1
+    condition: ibmcase-elasticsearch.enabled
+    tags:
+    - localdb
+  - name: ibmcase-bluemix-service
+    #repository: https://fabiogomezdiaz.github.io/refarch-cloudnative-kubernetes/charts
+    repository: http://localhost:8879
+    version: 0.1.0
+    alias: bluemix-compose-elasticsearch
+    condition: bluemix-compose-elasticsearch.enabled
+    tags:
+    - bluemix

@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
   labels:
     app: bluecompute
     micro: inventory
@@ -30,7 +30,7 @@ spec:
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.mysql.secret }}",
+                  "name": "{{ template "mysqlBindingName" . }}",
                   "key": "binding"
                 }
               }
@@ -39,23 +39,17 @@ spec:
         ]'
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: inventory
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
-        - containerPort: 8080
+          - containerPort: 8080
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         env:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.mysql.secret }}"
+              name: {{ template "mysqlBindingName" . }}
               key: binding
-        - name: messagehub
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.messagehub.secret }}"
-              key: binding
-      {{if eq .Values.image.usePullSecret true}}
-      imagePullSecrets:
-        - name: "{{ .Values.image.pullSecretName }}"
-      {{end}}
+        {{ template "messageHubBinding" . }}

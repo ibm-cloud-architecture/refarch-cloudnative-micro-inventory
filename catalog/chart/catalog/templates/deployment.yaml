@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
   labels:
     app: bluecompute
     micro: catalog
@@ -23,14 +23,14 @@ spec:
           {
             "name": "test-elasticsearch",
             "image": "ibmcase/mysql-loader:latest",
-            "imagePullPolicy": "Always",
+            "imagePullPolicy": "IfNotPresent",
             "command": ["/bin/bash", "-c"], 
             "args": ["elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | grep green; do echo waiting for elasticsearch; sleep 1; done"],
             "env": [{ 
               "name": "elastic",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.elasticsearch.secretName }}",
+                  "name": "{{ template "elasticsearchBindingName" . }}",
                   "key": "binding"
                 }
               }
@@ -46,18 +46,16 @@ spec:
         ]'
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: catalog
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
         - containerPort: 8081
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
         env:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.elasticsearch.secretName }}"
+              name: {{ template "elasticsearchBindingName" . }}
               key: binding
-      {{if eq .Values.image.usePullSecret true}}
-      imagePullSecrets:
-        - name: "{{ .Values.image.pullSecretName }}"
-      {{end}}

@@ -1,27 +1,25 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{.Chart.Name}}-populate-mysql-{{.Release.Name}}-{{ randAlphaNum 5 | lower }}"
+  name: {{ cat .Release.Name "-" .Chart.Name "-populate-mysql-" (randAlphaNum 5 | lower) | nospace | trunc 63 }}
   labels:
     app: bluecompute
     micro: inventory
-    tier: backend
     heritage: {{.Release.Service | quote }}
     release: {{.Release.Name | quote }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   annotations:
     # This is what defines this resource as a hook. Without this line, the
     # job is considered part of the release.
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "14"
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
 spec:
   template:
     metadata:
-      name: "{{.Chart.Name}}-populate-mysql-{{.Release.Name}}-{{ randAlphaNum 5 | lower }}"
+      name: {{ cat .Release.Name "-" .Chart.Name "-populate-mysql-" (randAlphaNum 5 | lower) | nospace }}
       labels:
         app: bluecompute
         micro: inventory
-        tier: backend
         heritage: {{.Release.Service | quote }}
         release: {{.Release.Name | quote }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
@@ -29,15 +27,15 @@ spec:
         pod.beta.kubernetes.io/init-containers: '[
           {
             "name": "test-mysql",
-            "image": "ibmcase/mysql-loader:latest",
+            "image": "ibmcase/mysql-loader:jkwong-dev",
             "imagePullPolicy": "Always",
             "command": ["/bin/bash", "-c"], 
-            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
+            "args": ["source /helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
             "env": [{ 
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.mysql.secret }}",
+                  "name": "{{ (index .Values "ibmcase-mysql").binding.name }}",
                   "key": "binding"
                 }
               }
@@ -48,13 +46,12 @@ spec:
       restartPolicy: Never
       containers:
       - name: populate-mysql
-        image: ibmcase/mysql-loader:latest
-        command: [ "/bin/bash", "-c" ]
-        args: ["set -x; ./startup.sh"]
+        image: ibmcase/mysql-loader:jkwong-dev
+        args: [ "https://raw.githubusercontent.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/master/mysql/scripts/load-data.sql" ]
         imagePullPolicy: Always
         env:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.mysql.secret }}
+              name: {{ (index .Values "ibmcase-mysql").binding.name }}
               key: binding

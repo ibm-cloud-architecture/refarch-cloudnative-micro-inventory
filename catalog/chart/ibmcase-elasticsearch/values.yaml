@@ -10,9 +10,7 @@ service:
   name: catalog-elasticsearch
 
 labels:
-  app: bluecompute
-  tier: data
-  micro: catalog
+  datastore: elasticsearch
 
 resources:
   limits:
