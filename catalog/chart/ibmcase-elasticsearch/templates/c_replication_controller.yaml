@@ -32,7 +32,7 @@ spec:
         - name: "CLUSTER_NAME"
           value: "{{ .Values.clustername }}"
         - name: "DISCOVERY_SERVICE"
-          value: "{{ .Values.service.name }}"
+          value: "{{ .Release.Name }}-{{ .Values.service.name }}"
         - name: NODE_MASTER
           value: "true"
         - name: NODE_DATA
