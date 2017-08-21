@@ -16,8 +16,6 @@ spec:
         app: bluecompute
         micro: catalog
         tier: backend
-        release: {{.Release.Name | quote }}
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
           {
@@ -41,7 +39,7 @@ spec:
             "image": "ibmcase/mysql-loader:latest",
             "imagePullPolicy": "IfNotPresent",
             "command": ["/bin/bash", "-c"], 
-            "args": ["until curl http://inventory-service:8080; do echo waiting for inventory-service; sleep 1; done"]
+            "args": ["until curl {{ template "inventoryServiceUrl" . }}; do echo waiting for inventory-service at {{ template "inventoryServiceUrl" . }}; sleep 1; done"]
           }
         ]'
     spec:
@@ -50,7 +48,8 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
-        - containerPort: 8081
+        - containerPort: {{ .Values.service.internalPort }}
+          protocol: TCP
         resources:
 {{ toYaml .Values.resources | indent 12 }}
         env:
@@ -59,3 +58,5 @@ spec:
             secretKeyRef:
               name: {{ template "elasticsearchBindingName" . }}
               key: binding
+        - name: INVENTORYSERVICE_URL
+          value: {{ template "inventoryServiceUrl" . }}

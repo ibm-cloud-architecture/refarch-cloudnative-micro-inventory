@@ -2,8 +2,18 @@ replicaCount: 1
 
 image:
   repository: ibmcase/bluecompute-catalog
-  pullPolicy: IfNotPresent
-  tag: latest
+  pullPolicy: Always
+  tag: dev
+
+service:
+  name: catalog
+  type: ClusterIP
+  externalPort: 8081
+  internalPort: 8081
+
+inventory:
+  service:
+    url:
 
 ibmcase-elasticsearch:
   replicaCount: 1
