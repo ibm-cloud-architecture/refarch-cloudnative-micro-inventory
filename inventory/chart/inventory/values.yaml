@@ -11,6 +11,12 @@ resources:
   requests:
     memory: 64Mi
 
+service:
+  name: inventory
+  type: ClusterIP
+  externalPort: 8080
+  internalPort: 8080
+
 global:
   bluemix:
     apiKey:
