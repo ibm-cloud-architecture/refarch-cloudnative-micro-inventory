@@ -16,3 +16,5 @@ build
 # Mac
 .DS_Store
 *.swp
+.settings/
+bin/

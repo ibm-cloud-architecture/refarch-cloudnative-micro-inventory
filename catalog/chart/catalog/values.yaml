@@ -5,6 +5,16 @@ image:
   pullPolicy: IfNotPresent
   tag: latest
 
+service:
+  name: catalog
+  type: ClusterIP
+  externalPort: 8081
+  internalPort: 8081
+
+inventory:
+  service:
+    url:
+
 ibmcase-elasticsearch:
   replicaCount: 1
   image:
