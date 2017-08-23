@@ -19,3 +19,8 @@ resources:
     memory: 350Mi
 
 secretName: binding-refarch-compose-for-elasticsearch
+
+global:
+  persistenceEnabled: false
+
+existingPVCName: 
