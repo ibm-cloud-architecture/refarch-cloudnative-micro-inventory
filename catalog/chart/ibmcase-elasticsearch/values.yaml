@@ -20,7 +20,18 @@ resources:
 
 secretName: binding-refarch-compose-for-elasticsearch
 
-global:
-  persistenceEnabled: false
+persistence:
+  enabled: false
+  existingName:
+  volume:
+    storageClass:
+    size: 
 
-existingPVCName: 
+global:
+  persistence: 
+    enabled: false
+    volume: 
+      storageClass:
+      size: 
+
+
