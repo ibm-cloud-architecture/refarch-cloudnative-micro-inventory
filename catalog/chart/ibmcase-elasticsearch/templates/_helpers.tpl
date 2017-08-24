@@ -54,6 +54,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- else if .Values.global.persistence.volume.storageClass -}}
     {{ .Values.global.persistence.volume.storageClass }}
   {{- else -}}
-    {{- printf "default" -}}
+    {{- printf "" -}}
   {{- end -}}
 {{- end -}}
