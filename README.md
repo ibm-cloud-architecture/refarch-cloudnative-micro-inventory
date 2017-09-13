@@ -306,21 +306,3 @@ That's it! **Inventory is now installed** in your Kubernetes Cluster. To see the
 Then open a browser and paste the following URL to see the **Services** created by Inventory Chart:
 
   http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/service?namespace=default
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
