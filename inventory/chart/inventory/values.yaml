@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ibmcase/bluecompute-inventory
   pullPolicy: Always
-  tag: dev
+  tag: latest
 
 resources:
   limits:

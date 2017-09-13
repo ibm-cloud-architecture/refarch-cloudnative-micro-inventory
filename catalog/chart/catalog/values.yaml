@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ibmcase/bluecompute-catalog
   pullPolicy: Always
-  tag: dev
+  tag: latest
 
 service:
   name: catalog
