@@ -90,6 +90,20 @@ else
     JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.url=${el_url}"
     JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.user=${el_user}"
     JAVA_OPTS="${JAVA_OPTS} -Delasticsearch.password=${el_password}"
+
+    cert=$(echo $elastic | jq .ca_certificate_base64 -r);
+    if [[ ! -z "${cert// }" && "$cert" != "null" ]]; then
+        echo "Updating bluecompute-ca-certificate.crt"
+        echo $elastic | jq .ca_certificate_base64 -r | base64 -d >> /etc/ssl/certs/bluecompute-ca-certificate.crt
+
+        echo "Updating Java keystore"
+        ls -l $JAVA_HOME/jre/lib/security/cacerts
+
+        keytool -import -noprompt -trustcacerts -alias bluecompute -file /etc/ssl/certs/bluecompute-ca-certificate.crt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit
+        keytool -list -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit | grep bluecompute
+    else
+        echo "No certificate to update"
+    fi
 fi
 
 # disable eureka
