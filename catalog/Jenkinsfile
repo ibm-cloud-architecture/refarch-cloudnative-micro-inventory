@@ -17,7 +17,7 @@ podTemplate(
         container('gradle') {
             stage('Build Gradle Project') {
                 sh """
-                #!/bin/bash
+                #!/bin/sh
                 cd catalog
                 gradle build -x test
                 gradle docker
