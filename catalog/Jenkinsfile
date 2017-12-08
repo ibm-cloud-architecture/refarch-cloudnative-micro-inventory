@@ -31,7 +31,7 @@ podTemplate(
                     NAMESPACE=`cat /var/run/configs/registry-config/namespace`
                     REGISTRY=`cat /var/run/configs/registry-config/registry`
 
-                    cd docker
+                    cd catalog/docker
                     docker build -t \${REGISTRY}/\${NAMESPACE}/bluecompute-catalog:${env.BUILD_NUMBER} .                    
                 """
             }
