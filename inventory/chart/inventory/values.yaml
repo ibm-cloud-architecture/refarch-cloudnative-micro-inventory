@@ -11,12 +11,18 @@ resources:
   requests:
     memory: 64Mi
 
+dataloader:
+  image:
+    repository: ibmcase/bluecompute-dataloader
+    tag: latest
+
 service:
   name: inventory
   type: ClusterIP
   externalPort: 8080
   internalPort: 8080
 
+<<<<<<< Updated upstream
 global:
   bluemix:
     apiKey:
@@ -79,3 +85,12 @@ bluemix-compose-mysql:
 tags:
   bluemix: false
   localdb: false
+=======
+mysql:
+  binding:
+    name: binding-inventorydb-mysql
+
+messagehub:
+  binding:
+    name:
+>>>>>>> Stashed changes
