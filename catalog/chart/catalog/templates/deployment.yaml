@@ -20,7 +20,7 @@ spec:
         pod.beta.kubernetes.io/init-containers: '[
           {
             "name": "test-elasticsearch",
-            "image": "{{ template dataLoaderDockerImage . }}:{{ .Values.dataloader.image.tag }}",
+            "image": "{{ .Values.dataloader.image.repository }}:{{ .Values.dataloader.image.tag }}",
             "imagePullPolicy": "IfNotPresent",
             "command": ["/bin/bash", "-c"],
             "args": ["cert=$(echo $elastic | jq .ca_certificate_base64 -r); if [[ ! -z \"${cert// }\" && \"$cert\" != \"null\" ]]; then echo \"Updating ca-certificates.crt\"; echo $elastic | jq .ca_certificate_base64 -r | base64 -d >> /etc/ssl/certs/ca-certificates.crt; else echo \"No certificate to update\"; fi; elastic_uri=`echo $elastic | jq .uri -r`; until curl -s ${elastic_uri}_cluster/health | jq .status | egrep \"yellow|green\"; do echo waiting for elasticsearch; sleep 1; done"],
@@ -36,7 +36,7 @@ spec:
           },
           {
             "name": "test-inventory-service",
-            "image": "{{ template dataLoaderDockerImage . }}:{{ .Values.dataloader.image.tag }}",
+            "image": "{{ .Values.dataloader.image.repository }}:{{ .Values.dataloader.image.tag }}",
             "imagePullPolicy": "IfNotPresent",
             "command": ["/bin/bash", "-c"],
             "args": ["until curl {{ template "inventoryServiceUrl" . }}; do echo waiting for inventory-service at {{ template "inventoryServiceUrl" . }}; sleep 1; done"]

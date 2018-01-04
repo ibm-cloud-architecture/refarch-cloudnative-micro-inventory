@@ -10,11 +10,3 @@
     {{- printf "http://%s-inventory:8080" .Release.Name -}}
   {{- end }}
 {{- end -}}
-
-{{- define "catalogDockerImage" -}}
-  {{- .Values.image.repository }}
-{{- end -}}
-
-{{- define "dataLoaderDockerImage" -}}
-  {{- .Values.dataloader.image.repository }}
-{{- end -}}

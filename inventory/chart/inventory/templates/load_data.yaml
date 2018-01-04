@@ -22,7 +22,7 @@ spec:
         pod.beta.kubernetes.io/init-containers: '[
           {
             "name": "test-mysql",
-            "image": "{{ template dataLoaderDockerImage . }}:{{ .Values.dataloader.image.tag }}",
+            "image": "{{ .Values.dataloader.image.repository }}:{{ .Values.dataloader.image.tag }}",
             "imagePullPolicy": "Always",
             "command": ["/bin/bash", "-c"],
             "args": ["source /helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
@@ -30,7 +30,7 @@ spec:
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ (index .Values "ibmcase-mysql").binding.name }}",
+                  "name": "{{ .Values.mysql.binding.name }}",
                   "key": "binding"
                 }
               }
@@ -41,12 +41,11 @@ spec:
       restartPolicy: Never
       containers:
       - name: populate-mysql
-        image: "{{ template "dataLoaderDockerImage" . }}:{{ .Values.dataloader.image.tag }}"
-        args: [ "/startup.sh" ]
+        image: {{ .Values.dataloader.image.repository }}:{{ .Values.dataloader.image.tag }}
         imagePullPolicy: Always
         env:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: {{ (index .Values "ibmcase-mysql").binding.name }}
+              name: {{ .Values.mysql.binding.name }}
               key: binding
