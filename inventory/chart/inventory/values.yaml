@@ -11,71 +11,21 @@ resources:
   requests:
     memory: 64Mi
 
+dataloader:
+  image:
+    repository: ibmcase/bluecompute-dataloader
+    tag: latest
+
 service:
   name: inventory
   type: ClusterIP
   externalPort: 8080
   internalPort: 8080
 
-global:
-  bluemix:
-    apiKey:
-  
-    target:
-      endpoint: api.ng.bluemix.net
-      org:
-      space:
-  
-    clusterName:
-   
-  
-ibmcase-mysql:
+mysql:
   binding:
     name: binding-inventorydb-mysql
 
-  labels:
-    app: bluecompute
-    tier: data
-    micro: inventory
-  
-  dbname: inventorydb
-
-  service:
-    name: inventory-mysql
-
-bluemix-messagehub:
-  # if installing with umbrella chart, umbrella chart handles the installation so disable the
-  # installation here
-  enabled: false
-  apiKey:
-
-  target:
-    endpoint: api.ng.bluemix.net
-    org:
-    space:
-
-  clusterName:
-  
-  service:
-    name: orders-messagehub
-    type: messagehub
-    plan: standard
-  
-bluemix-compose-mysql:
-  apiKey:
-
-  target:
-    endpoint: api.ng.bluemix.net
-    org:
-    space:
-
-  clusterName:
-  
-  service:
-    name: inventorydb-mysql
-    type: compose-for-mysql
-    plan: Standard
-
-tags:
-  bluemix: false
-  localdb: false
+messagehub:
+  binding:
+    name:

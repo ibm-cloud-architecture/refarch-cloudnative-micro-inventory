@@ -11,67 +11,21 @@ service:
   externalPort: 8081
   internalPort: 8081
 
+dataloader:
+  image:
+    repository: ibmcase/bluecompute-dataloader
+    tag: latest
+
 inventory:
   service:
     url:
 
-ibmcase-elasticsearch:
-  replicaCount: 1
-  image:
-    repository: quay.io/pires/docker-elasticsearch-kubernetes
-    pullPolicy: IfNotPresent
-    tag: 1.7.1-4
-
-  clustername: catalogdb
-  
-  service:
-    name: catalog-elasticsearch
-
-  labels:
-    app: bluecompute
-    micro: catalog
-    tier: data
-  
-  resources:
-    limits:
-      memory: 700Mi
-    requests:
-      memory: 350Mi
-  
-  secretName: binding-catalog-elasticsearch
+elasticsearch:
+  binding:
+    name: binding-catalog-elasticsearch
 
 resources:
   limits:
     memory: 128Mi
   requests:
     memory: 64Mi
-
-bluemix-compose-elasticsearch:
-  apiKey:
-
-  target:
-    endpoint: api.ng.bluemix.net
-    org:
-    space:
-
-  clusterName:
-  
-  service:
-    name: catalog-elasticsearch
-    type: compose-for-elasticsearch
-    plan: Standard
-
-global:
-  bluemix:
-    apiKey:
-  
-    target:
-      endpoint: api.ng.bluemix.net
-      org:
-      space:
-  
-    clusterName:
-
-tags:
-  bluemix: false
-  localdb: false
