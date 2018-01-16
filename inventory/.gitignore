@@ -5,6 +5,11 @@
 /.classpath
 /.project
 /.settings
+/.factorypath
+/.bluemix
+/.cfignore
+/.dockerignore
+/.ibm-project
 
 /caches
 /local.properties
