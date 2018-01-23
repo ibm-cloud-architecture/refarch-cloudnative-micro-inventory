@@ -2,6 +2,7 @@ package catalog;
 
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 
@@ -18,6 +20,8 @@ import catalog.models.ItemService;
 
 @Path("items")
 @Produces(MediaType.APPLICATION_JSON)
+@Health
+@ApplicationScoped
 public class CatalogService implements HealthCheck {
 
 	@Inject
