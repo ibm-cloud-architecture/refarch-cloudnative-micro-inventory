@@ -16,6 +16,7 @@ import org.eclipse.microprofile.health.HealthCheckResponse;
 import catalog.models.Item;
 import catalog.models.ItemService;
 
+@Path("items")
 @Produces(MediaType.APPLICATION_JSON)
 public class CatalogService implements HealthCheck {
 
@@ -26,8 +27,7 @@ public class CatalogService implements HealthCheck {
      * @return all items in inventory
      */
 	@GET
-	@Path("/items")
-    List<Item> getInventory() {
+    public List<Item> getInventory() {
         return itemsRepo.findAll();
     }
 
@@ -35,8 +35,8 @@ public class CatalogService implements HealthCheck {
      * @return item by id
      */
 	@GET
-	@Path("/items/{id}")
-    Response getById(@PathParam("id") long id) {
+	@Path("{id}")
+    public Response getById(@PathParam("id") long id) {
         final Item item = itemsRepo.findById(id);
         if (item == null) {
         		return Response.status(Response.Status.NOT_FOUND).build();
@@ -49,8 +49,8 @@ public class CatalogService implements HealthCheck {
      * @return item(s) containing name
      */
 	@GET
-	@Path("/items/name/{name}")
-    List<Item> getByName(@PathParam("name") String name) {
+	@Path("name/{name}")
+    public List<Item> getByName(@PathParam("name") String name) {
         return itemsRepo.findByNameContaining(name);
     }
 
