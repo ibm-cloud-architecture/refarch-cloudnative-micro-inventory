@@ -1,4 +1,4 @@
-package catalog;
+package application.rest;
 
 import java.util.List;
 
@@ -14,51 +14,52 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import catalog.models.Item;
-import catalog.models.ItemService;
+import models.Item;
 
-@Path("items")
+@Path("/items")
 @Produces(MediaType.APPLICATION_JSON)
 @Health
 @ApplicationScoped
-public class CatalogService implements HealthCheck {
+public class CatalogService {
+
+	private static final Logger logger = LoggerFactory.getLogger(CatalogService.class);
 
 	@Inject
 	ItemService itemsRepo;
 
-    /**
-     * @return all items in inventory
-     */
 	@GET
-    public List<Item> getInventory() {
-        return itemsRepo.findAll();
+	public String getInventory() {
+    logger.info("/items");
+    new Thread(new InventoryRefreshTask()).start();
+		System.out.println("I am in CatalogService class");
+      //return itemsRepo.findAll();
+		//Using this for testing purposes
+		return "test";
     }
 
-    /**
-     * @return item by id
-     */
 	@GET
 	@Path("{id}")
-    public Response getById(@PathParam("id") long id) {
+	public Response getById(@PathParam("id") long id) {
+    	logger.info("/items/" + id);
         final Item item = itemsRepo.findById(id);
         if (item == null) {
-        		return Response.status(Response.Status.NOT_FOUND).build();
+        	return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         return Response.ok(item, MediaType.APPLICATION_JSON).build();
     }
 
-    /**
-     * @return item(s) containing name
-     */
 	@GET
 	@Path("name/{name}")
     public List<Item> getByName(@PathParam("name") String name) {
+    	logger.info("/items/name/" + name);
         return itemsRepo.findByNameContaining(name);
     }
 
-    @Override
+  
     public HealthCheckResponse call() {
 	    return HealthCheckResponse.named(CatalogService.class.getSimpleName()).up().build();
 	}

@@ -1,5 +1,5 @@
 # The IBM version of this configuration
-version : 0.0.2
+version : 0.0.3
 
 # The container name used for the run container
 container-name-run : "catalog"
@@ -26,13 +26,13 @@ image-name-tools : "bx-dev-java-maven-tools"
 host-path-run : "target"
 
 # The command to build the code and docker image for RUN
-build-cmd-run : "mvn install -Dmaven.repo.local=/project/.m2/repository"
+build-cmd-run : "mvn install -Dmaven.repo.local=/project/.m2/repository -DoutputDirectory=/tmp/liberty"
 
 # The command to execute tests for the code in the tools container
-test-cmd : "mvn install -Dmaven.repo.local=/project/.m2/repository"
+test-cmd : "mvn install -Dmaven.repo.local=/project/.m2/repository -DoutputDirectory=/tmp/liberty"
 
 # The command to build the code and docker image for DEBUG
-build-cmd-debug : "mvn install -Dmaven.repo.local=/project/.m2/repository"
+build-cmd-debug : "mvn install -Dmaven.repo.local=/project/.m2/repository -DoutputDirectory=/tmp/liberty"
 
 # The command to execute debug of the code in the tools container
 debug-cmd : "server debug"
