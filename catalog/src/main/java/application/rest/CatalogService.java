@@ -50,6 +50,7 @@ public class CatalogService {
 	@Path("{id}")
 	public Response getById(@PathParam("id") long id) {
     	logger.info("/items/" + id);
+    	new Thread(new InventoryRefreshTask()).start();
         final Item item = itemsRepo.findById(id);
         if (item == null) {
         	return Response.status(Response.Status.NOT_FOUND).build();
@@ -62,6 +63,7 @@ public class CatalogService {
 	@Path("name/{name}")
     public List<Item> getByName(@PathParam("name") String name) {
     	logger.info("/items/name/" + name);
+    	new Thread(new InventoryRefreshTask()).start();
         return itemsRepo.findByNameContaining(name);
     }
 
