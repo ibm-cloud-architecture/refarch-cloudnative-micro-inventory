@@ -27,6 +27,7 @@ public class InventoryDAOImpl {
 		while (rs.next()) {
 		 Inventory inv = new Inventory();
 		 inv.setId(rs.getLong("id"));
+		 inv.setName(rs.getString("name"));
 		 inv.setStock(rs.getInt("stock"));
 		 inv.setPrice(rs.getInt("price"));
 		 inv.setImgAlt(rs.getString("img_alt"));
@@ -61,6 +62,7 @@ public class InventoryDAOImpl {
 		 Inventory inv = new Inventory();
 		 inv.setId(rs.getLong("id"));
 		 inv.setStock(rs.getInt("stock"));
+		 inv.setName(rs.getString("name"));
 		 inv.setPrice(rs.getInt("price"));
 		 inv.setImgAlt(rs.getString("img_alt"));
 		 inv.setImg(rs.getString("img"));
@@ -94,6 +96,7 @@ public class InventoryDAOImpl {
 		 Inventory inv = new Inventory();
 		 inv.setId(rs.getLong("id"));
 		 inv.setStock(rs.getInt("stock"));
+		 inv.setName(rs.getString("name"));
 		 inv.setPrice(rs.getInt("price"));
 		 inv.setImgAlt(rs.getString("img_alt"));
 		 inv.setImg(rs.getString("img"));
@@ -128,6 +131,7 @@ public class InventoryDAOImpl {
 		 inv.setId(rs.getLong("id"));
 		 inv.setStock(rs.getInt("stock"));
 		 inv.setPrice(rs.getInt("price"));
+		 inv.setName(rs.getString("name"));
 		 inv.setImgAlt(rs.getString("img_alt"));
 		 inv.setImg(rs.getString("img"));
 		 inv.setDescription(rs.getString("description"));
