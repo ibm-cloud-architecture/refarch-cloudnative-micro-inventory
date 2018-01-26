@@ -28,15 +28,15 @@ public class ElasticSearch {
 
 	private ItemService itemService = new ItemService() ;
 
-	private String url;
-    private String user;
-    private String password;
-    private String index;
-    private String doc_type;
+	private String url="http://elasticsearch:9200";
+    private String user="";
+    private String password="";
+    private String index="micro";
+    private String doc_type="items";
 
-    private OkHttpClient client;
+    private OkHttpClient client = new OkHttpClient();
 
-    public void init() {
+   /* public void init() {
         // Get es_url, es_index, and es_doc_type
         //url = config.getUrl();
 				System.out.println("I am in elastic search init method");
@@ -59,26 +59,25 @@ public class ElasticSearch {
 
         client = new OkHttpClient();
 
-    }
+    }*/
 
     private Map<Long, Item> getAllRowsFromCache() {
-			System.out.println("I am in elastic search getAllRowsFromCache  method");
+    	
     	final List<models.Item> allItems = itemService.findAll();
-
 
     	// hash the items by Id
     	final Map<Long, Item> itemMap = new HashMap<Long, Item>();
     	for (final Item item : allItems) {
     		itemMap.put(item.getId(), item);
     	}
-
+        
     	return itemMap;
 
     }
 
- // load multi-rows
+    // load multi-rows
     public void loadRows(List<Item> items) {
-			System.out.println("I am in elastic search loadRows  method");
+    	
     	// convert Item to JSONArray
     	final ObjectMapper objMapper = new ObjectMapper();
 
@@ -97,6 +96,7 @@ public class ElasticSearch {
 
     		sb.append("{ \"index\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
 			String jsonString;
+			
 			try {
 				jsonString = objMapper.writeValueAsString(item);
 			} catch (JsonProcessingException e1) {
@@ -121,13 +121,13 @@ public class ElasticSearch {
 				logger.debug("Nothing to update.");
 				return;
 			}
-			MediaType mediaType = MediaType.parse("application/json");
-			RequestBody body = RequestBody.create(mediaType, sb.toString());
+			
+		    MediaType mediaType = MediaType.parse("application/json");
+		    RequestBody body = RequestBody.create(mediaType, sb.toString());
 
 			// Build URL
 			//String url = String.format("%s/%s/%s/%s", this.url, index, doc_type, item.getId());
 			String url = String.format("%s/_bulk", this.url);
-
 			Request.Builder builder = new Request.Builder().url(url)
 					.post(body)
 					.addHeader("content-type", "application/json");

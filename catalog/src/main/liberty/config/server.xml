@@ -13,6 +13,6 @@
   <!-- Automatically expand WAR files and EAR files -->
   <applicationManager autoExpand="true"/>
 
-  <webApplication name="catalog" location="${app.location}"/>
+  <webApplication name="catalog" location="${app.location}"/> 
 
 </server>

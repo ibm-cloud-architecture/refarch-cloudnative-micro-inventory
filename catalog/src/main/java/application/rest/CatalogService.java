@@ -8,9 +8,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -31,13 +34,16 @@ public class CatalogService {
 	ItemService itemsRepo;
 
 	@GET
-	public String getInventory() {
-    logger.info("/items");
-    new Thread(new InventoryRefreshTask()).start();
-		System.out.println("I am in CatalogService class");
-      //return itemsRepo.findAll();
+	public List<Item> getInventory() {
+        logger.info("/items");
+        new Thread(new InventoryRefreshTask()).start();
+	    //InventoryRefreshTask invTask = new InventoryRefreshTask();
+	    //invTask.getData();
+        //asyncResponse.resume(result);
+        return itemsRepo.findAll();
 		//Using this for testing purposes
-		return "test";
+		//return "test";
+	    //return result;
     }
 
 	@GET

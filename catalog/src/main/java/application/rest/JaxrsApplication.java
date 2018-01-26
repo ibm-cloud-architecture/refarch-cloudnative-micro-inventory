@@ -10,10 +10,5 @@ import org.slf4j.LoggerFactory;
 public class JaxrsApplication extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(ElasticSearch.class);
 	
-	public static void main(String args[]){
-		System.out.println("thread meeeeeeeeee");
-		 new Thread(new InventoryRefreshTask()).start();
-	}
-  
 
 }
