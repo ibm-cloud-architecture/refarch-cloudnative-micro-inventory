@@ -2,40 +2,40 @@ package application.rest;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
 
-
 import models.Item;
-import okhttp3.CipherSuite;
-import okhttp3.ConnectionSpec;
+
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.TlsVersion;
-
 
 @ApplicationScoped
 public class ItemService {
+	
+	Config config = ConfigProvider.getConfig();
 
-    private String url = "http://elasticsearch:9200";
+    private String url = config.getValue("elasticsearch-url", String.class);
 
+    // Optional
     private String user;
 
+    //Optional
     private String password;
 
-    private String index="micro";
+    private String index= config.getValue("elasticsearch-index", String.class);
 
-    private String doc_type="items";
+    private String doc_type= config.getValue("elasticsearch-doc_type", String.class);
 
     private OkHttpClient client;
 
