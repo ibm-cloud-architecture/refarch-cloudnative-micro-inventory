@@ -27,39 +27,14 @@ public class ElasticSearch {
 	private ElasticsearchConfig config = new ElasticsearchConfig();
 
 	private ItemService itemService = new ItemService() ;
-
-	private String url="http://elasticsearch:9200";
+	
+	private String url = config.getUrl();
     private String user="";
     private String password="";
-    private String index="micro";
-    private String doc_type="items";
+    private String index = config.getIndex();
+    private String doc_type = config.getDoc_type();
 
     private OkHttpClient client = new OkHttpClient();
-
-   /* public void init() {
-        // Get es_url, es_index, and es_doc_type
-        //url = config.getUrl();
-				System.out.println("I am in elastic search init method");
-    	url = "http://elasticsearch:9200";
-        user = "";//admin";
-				password = "";//GEVXDZEGPZUUAMIY";
-				//user = config.getUser();
-        //password = config.getPassword();
-
-        // Optional
-        index = config.getIndex();
-        if (index == null || index.equals("")) {
-            index = "micro";
-        }
-
-        doc_type = config.getDoc_type();
-        if (doc_type == null || doc_type.equals("")) {
-            doc_type = "items";
-        }
-
-        client = new OkHttpClient();
-
-    }*/
 
     private Map<Long, Item> getAllRowsFromCache() {
     	

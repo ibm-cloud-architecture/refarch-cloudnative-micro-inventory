@@ -1,11 +1,27 @@
 package models;
 
-public class ElasticsearchConfig {
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+@ApplicationScoped
+public class ElasticsearchConfig {
+	
+	@Inject
+    @ConfigProperty(name="elasticsearch-url")
 	private String url;
+	
     private String user;
+    
     private String password;
+    
+    @Inject
+    @ConfigProperty(name="elasticsearch-index")
     private String index;
+    
+    @Inject
+    @ConfigProperty(name="elasticsearch-doc_type")
     private String doc_type;
 
     public String getUrl() {
