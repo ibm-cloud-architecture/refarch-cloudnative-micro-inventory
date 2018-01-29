@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import client.InventoryServiceClient;
 import client.Item;
 
-class InventoryRefreshTask implements Runnable {
+public class InventoryRefreshTask implements Runnable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(InventoryRefreshTask.class);
 
@@ -48,29 +48,6 @@ class InventoryRefreshTask implements Runnable {
 			}
 		}
 	}
-	
-	/*public void getData()
-	{
-		try {
-			//logger.debug("Querying Inventory Service for all items ...");
-            System.out.println("Querying Inventory Service for all items ...");
-            //System.out.println("invClient : "+invClient.toString());
-			final List<Item> allItems = invClient.getAllItems();
-			//System.out.println("Getting items from inventory"+allItems);
-			final List<models.Item> modelItems = new ArrayList<models.Item>(allItems.size());
-
-			for (final Item item : allItems) {
-				modelItems.add(item.toModel());
-			}
-            //System.out.println("loading rows"+modelItems);
-			elasticSearch.loadRows(modelItems);
-			
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Caught exception, ignoring" + e);
-			logger.warn("Caught exception, ignoring", e);
-		}*/
 		
-	}
+}
 
