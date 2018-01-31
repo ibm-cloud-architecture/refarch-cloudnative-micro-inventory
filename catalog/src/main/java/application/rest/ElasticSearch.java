@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +26,21 @@ public class ElasticSearch {
 
 	private static final Logger logger = LoggerFactory.getLogger(ElasticSearch.class);
 
-	private ElasticsearchConfig config = new ElasticsearchConfig();
-
 	private ItemService itemService = new ItemService() ;
-	
-	private String url = config.getUrl();
-    private String user="";
-    private String password="";
-    private String index = config.getIndex();
-    private String doc_type = config.getDoc_type();
+    
+    Config config = ConfigProvider.getConfig();
+
+    private String url = config.getValue("elasticsearch-url", String.class);
+
+    // Optional
+    private String user;
+
+    //Optional
+    private String password;
+
+    private String index= config.getValue("elasticsearch-index", String.class);
+
+    private String doc_type= config.getValue("elasticsearch-doc_type", String.class);
 
     private OkHttpClient client = new OkHttpClient();
 
