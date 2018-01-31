@@ -14,6 +14,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.faulttolerance.Asynchronous;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -33,17 +37,22 @@ public class CatalogService {
 	@Inject
 	ItemService itemsRepo;
 
+	//time in ms
+	@Timeout(1000)
+	@Retry(maxRetries = 10, maxDuration= 2000)
+	@CircuitBreaker(successThreshold = 5, requestVolumeThreshold = 2, failureRatio=0.375,
+	  delay = 1000)
+	@Fallback(fallbackMethod="fallbackInventory")
 	@GET
 	public List<Item> getInventory() {
         logger.info("/items");
         new Thread(new InventoryRefreshTask()).start();
-	    //InventoryRefreshTask invTask = new InventoryRefreshTask();
-	    //invTask.getData();
-        //asyncResponse.resume(result);
         return itemsRepo.findAll();
-		//Using this for testing purposes
-		//return "test";
-	    //return result;
+    }
+	
+	public List<Item> fallbackInventory() {
+    	List<Item> items = null;
+        return items;
     }
 
 	@GET
