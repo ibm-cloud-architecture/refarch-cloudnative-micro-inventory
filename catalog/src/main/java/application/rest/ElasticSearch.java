@@ -7,13 +7,10 @@ import java.util.Map;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import models.ElasticsearchConfig;
 import models.Item;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
@@ -23,8 +20,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ElasticSearch {
-
-	private static final Logger logger = LoggerFactory.getLogger(ElasticSearch.class);
 
 	private ItemService itemService = new ItemService() ;
     
@@ -83,25 +78,23 @@ public class ElasticSearch {
 			try {
 				jsonString = objMapper.writeValueAsString(item);
 			} catch (JsonProcessingException e1) {
-				logger.error("Failed to convert object to JSON", e1);
+				System.err.println("Failed to convert object to JSON "+ e1);
 				continue;
 			}
 
-            logger.info("Adding/updating item: \n" + item.getId() + ": " + jsonString);
+            System.out.println("Adding/updating item: \n" + item.getId() + ": " + jsonString);
             sb.append(jsonString + "\n");
     	}
 
     	// everything left in allItemMap is stuff that is still in cache that we should remove
     	for (final Item item : allItemMap.values()) {
-            logger.info("Deleting item: \n" + item.getId());
+    		System.out.println("Deleting item: \n" + item.getId());
 			sb.append("{ \"delete\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
     	}
 
 		try {
-			logger.debug("post body:\n" + sb.toString() );
 
 			if (sb.toString().length() == 0) {
-				logger.debug("Nothing to update.");
 				return;
 			}
 			
@@ -116,7 +109,6 @@ public class ElasticSearch {
 					.addHeader("content-type", "application/json");
 
 			if (user != null && !user.equals("") && password != null && !password.equals("")) {
-				logger.debug("Adding credentials to request");
 				builder.addHeader("Authorization", Credentials.basic(user, password));
 			}
 
@@ -124,19 +116,16 @@ public class ElasticSearch {
 
 			Response response = client.newCall(request).execute();
 			String resp_string = response.body().string();
-			logger.debug("resp_string: \n" + resp_string);
+			System.out.println("resp_string: \n" + resp_string);
 			JSONObject resp = new JSONObject(resp_string);
 			boolean errors = resp.getBoolean("errors");
 
 			if (errors) {
-				logger.error("Error(s) were found with bulk items update: " + resp_string);
+				System.err.println("Error(s) were found with bulk items update: " + resp_string);
 			}
 
-			//logger.info(String.format("Item %s was %s\n\n", resp.getString("_id"), ((created == true) ? "Created" : "Updated")));
-
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
     }
 

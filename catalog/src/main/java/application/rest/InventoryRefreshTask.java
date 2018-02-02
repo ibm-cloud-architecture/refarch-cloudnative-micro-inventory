@@ -5,15 +5,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import client.InventoryServiceClient;
 import client.Item;
 
-public class InventoryRefreshTask implements Runnable {
-	
-	private static final Logger logger = LoggerFactory.getLogger(InventoryRefreshTask.class);
+
+public class InventoryRefreshTask extends Thread {
 
 	private static final int INVENTORY_REFRESH_SLEEP_TIME_MS = 2500;
 
@@ -23,11 +19,11 @@ public class InventoryRefreshTask implements Runnable {
 	
 	@Inject
 	ItemService itemsRepo;
-
+ 
 	public void run() {
 		while (true) {
 			try {
-				logger.debug("Querying Inventory Service for all items ...");
+				System.out.println("Querying Inventory Service for all items ...");
 				final List<Item> allItems = invClient.getAllItems();
 				final List<models.Item> modelItems = new ArrayList<models.Item>(allItems.size());
 
@@ -36,18 +32,17 @@ public class InventoryRefreshTask implements Runnable {
 				}
                 
 				elasticSearch.loadRows(modelItems);
+				System.out.println("rows loaded");
 			} catch (Exception e) {
 				e.printStackTrace();
-				logger.warn("Caught exception, ignoring", e);
 			}
 			try {
 				Thread.sleep(INVENTORY_REFRESH_SLEEP_TIME_MS);
 			} catch (InterruptedException e) {
-				logger.warn("Caught InterruptedException, quitting");
 				break;
 			}
 		}
 	}
-		
+	
 }
 

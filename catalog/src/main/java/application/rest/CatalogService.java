@@ -2,37 +2,27 @@ package application.rest;
 
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.faulttolerance.Asynchronous;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.health.Health;
-import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import models.Item;
 
 @Path("/items")
 @Produces(MediaType.APPLICATION_JSON)
 @Health
-@ApplicationScoped
 public class CatalogService {
-
-	private static final Logger logger = LoggerFactory.getLogger(CatalogService.class);
 
 	@Inject
 	ItemService itemsRepo;
@@ -45,8 +35,6 @@ public class CatalogService {
 	@Fallback(fallbackMethod="fallbackInventory")
 	@GET
 	public List<Item> getInventory() {
-        logger.info("/items");
-        new Thread(new InventoryRefreshTask()).start();
         return itemsRepo.findAll();
     }
 	
@@ -58,8 +46,6 @@ public class CatalogService {
 	@GET
 	@Path("{id}")
 	public Response getById(@PathParam("id") long id) {
-    	logger.info("/items/" + id);
-    	new Thread(new InventoryRefreshTask()).start();
         final Item item = itemsRepo.findById(id);
         if (item == null) {
         	return Response.status(Response.Status.NOT_FOUND).build();
@@ -71,8 +57,6 @@ public class CatalogService {
 	@GET
 	@Path("name/{name}")
     public List<Item> getByName(@PathParam("name") String name) {
-    	logger.info("/items/name/" + name);
-    	new Thread(new InventoryRefreshTask()).start();
         return itemsRepo.findByNameContaining(name);
     }
 
