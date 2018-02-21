@@ -24,8 +24,8 @@ public class InventoryServiceClient {
 
 	  Config config = ConfigProvider.getConfig();
 	  
-	  String inv_url = config.getValue("inventory-url", String.class);
-	  String inv_health = config.getValue("inventory-health", String.class);
+	  String inv_url = config.getValue("inventory_url", String.class);
+	  String inv_health = config.getValue("inventory_health", String.class);
 
 	  public List<Item> getAllItems()
 	  {

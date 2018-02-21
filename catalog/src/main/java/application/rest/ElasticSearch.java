@@ -25,7 +25,7 @@ public class ElasticSearch {
     
     Config config = ConfigProvider.getConfig();
 
-    private String url = config.getValue("elasticsearch-url", String.class);
+    private String url = config.getValue("elasticsearch_url", String.class);
 
     // Optional
     private String user;
@@ -33,9 +33,9 @@ public class ElasticSearch {
     //Optional
     private String password;
 
-    private String index= config.getValue("elasticsearch-index", String.class);
+    private String index= config.getValue("elasticsearch_index", String.class);
 
-    private String doc_type= config.getValue("elasticsearch-doc_type", String.class);
+    private String doc_type= config.getValue("elasticsearch_doc_type", String.class);
 
     private OkHttpClient client = new OkHttpClient();
 
