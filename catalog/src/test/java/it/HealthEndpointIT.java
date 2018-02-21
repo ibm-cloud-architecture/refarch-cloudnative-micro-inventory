@@ -13,7 +13,7 @@ public class HealthEndpointIT {
 
     private String port = System.getProperty("liberty.test.port");
     private String warContext = System.getProperty("war.context");
-    private String endpoint = "/micro/health";
+    private String endpoint = "/rest/health";
     private String url = "http://localhost:" + port + "/" + warContext + endpoint;
 
     @Test

@@ -7,7 +7,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 
-@ApplicationPath("/micro")
+@ApplicationPath("/rest")
 @Singleton
 @Startup
 public class JaxrsApplication extends Application {
