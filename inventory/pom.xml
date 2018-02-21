@@ -20,7 +20,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <app.name>inventory</app.name>
-        <testServerHttpPort>9080</testServerHttpPort>
+        <testServerHttpPort>9081</testServerHttpPort>
         <testServerHttpsPort>9443</testServerHttpsPort>
         <warContext>${app.name}</warContext>
         <package.file>${project.build.directory}/${project.artifactId}-${project.version}.zip</package.file>
@@ -127,10 +127,6 @@
                 <groupId>net.wasdev.wlp.maven.plugins</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
                 <configuration>
-                    <install>
-                        <type>webProfile7</type>
-                        <version>2017.+</version>
-                    </install>
                     <configFile>${basedir}/src/main/liberty/config/server.xml</configFile>
                     <serverEnv>${basedir}/src/main/liberty/config/server.env</serverEnv>
                     <jvmOptionsFile>${basedir}/src/main/liberty/config/jvm.options</jvmOptionsFile>
