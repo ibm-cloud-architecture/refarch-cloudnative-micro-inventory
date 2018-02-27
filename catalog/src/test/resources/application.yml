@@ -1,0 +1,12 @@
+# Server configuration
+server:
+  context-path: /micro
+  port: 8081
+
+# Elasticsearch
+spring:
+  data:
+    elasticsearch:
+      properties:
+        path:
+          home: /tmp/es-data

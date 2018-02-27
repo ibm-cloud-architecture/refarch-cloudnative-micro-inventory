@@ -1,6 +1,5 @@
 package catalog;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import catalog.client.InventoryServiceClient;
 import catalog.client.Item;
+import catalog.models.CatalogItemRepository;
 
 @Component
 public class InventoryRefreshTask  implements Runnable {
@@ -21,7 +21,7 @@ public class InventoryRefreshTask  implements Runnable {
 	private InventoryServiceClient invClient;
 		
 	@Autowired
-	private ElasticSearch elasticSearch;
+	private CatalogItemRepository catalogRepo;
 		
 	public void run() {
 		while (true) {
@@ -29,13 +29,9 @@ public class InventoryRefreshTask  implements Runnable {
 				logger.debug("Querying Inventory Service for all items ...");
 				final List<Item> allItems = invClient.getAllItems();
 				
-				final List<catalog.models.Item> modelItems = new ArrayList<catalog.models.Item>(allItems.size());
-				
 				for (final Item item : allItems) {
-					modelItems.add(item.toModel());
+					catalogRepo.save(item.toModel());
 				}
-				
-				elasticSearch.loadRows(modelItems);
 			} catch (Exception e) {
 				logger.warn("Caught exception, ignoring", e);
 			}

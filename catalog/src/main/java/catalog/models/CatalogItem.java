@@ -1,6 +1,9 @@
 package catalog.models;
 
-public class Item {
+import org.springframework.data.elasticsearch.annotations.Document;
+
+@Document(indexName="micro", type = "items")
+public class CatalogItem {
 
     // Use generated ID
     private long id;
@@ -23,14 +26,14 @@ public class Item {
     // Item stock
     private int stock;
 
-    public Item() {
+    public CatalogItem() {
     }
 
-    public Item(long id) {
+    public CatalogItem(long id) {
         this.id = id;
     }
 
-    public Item(String name, String description, int price, String imgAlt, String img, int stock) {
+    public CatalogItem(String name, String description, int price, String imgAlt, String img, int stock) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -96,11 +99,11 @@ public class Item {
     }
     
     public boolean equals(Object otherObj) {
-    	if (otherObj.getClass() != Item.class) {
+    	if (otherObj.getClass() != CatalogItem.class) {
     		return false;
     	}
     	
-    	final Item otherItem = (Item)otherObj;
+    	final CatalogItem otherItem = (CatalogItem)otherObj;
     	
     	if (otherItem.getId() != this.id) {
     		return false;

@@ -95,8 +95,8 @@ public class Item {
         this.stock = value;
     }
     
-    public catalog.models.Item toModel() {
-    	final catalog.models.Item newItem = new catalog.models.Item();
+    public catalog.models.CatalogItem toModel() {
+    	final catalog.models.CatalogItem newItem = new catalog.models.CatalogItem();
     	
     	newItem.setId(this.id);
     	newItem.setName(this.name);

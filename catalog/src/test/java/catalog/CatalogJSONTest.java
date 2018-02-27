@@ -7,13 +7,13 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import catalog.models.Item;
+import catalog.models.CatalogItem;
 
-public class CatalogControllerTest {
+public class CatalogJSONTest {
 
     @Test
     public void testMarshalToJson() throws Exception {
-        final Item inv = new Item();
+        final CatalogItem inv = new CatalogItem();
         final Random rnd = new Random();
 
         long id = rnd.nextLong();
@@ -86,7 +86,7 @@ public class CatalogControllerTest {
 
         // marshall json to Item object
 
-        final Item inv = mapper.readValue(myJson, Item.class);
+        final CatalogItem inv = mapper.readValue(myJson, CatalogItem.class);
 
         // make sure all the properties match up
         assert (inv.getId() == id);

@@ -2,19 +2,26 @@
 server:
   context-path: /micro
   port: 8081
-
-# Spring properties
-spring:
-  application:
-     name: catalog-microservice
+  
+eureka:
+  client:
+    enabled: false
+    registerWithEureka: false
+    fetchRegistry: false
 
 # Elasticsearch
-elasticsearch:
-  url: http://localhost:9200
-  user:
-  password:
-  index: micro
-  doc_type: items
+spring:
+  data:
+    jest: 
+      uri: http://localhost:9200
+    elasticsearch:
+      properties:
+        path:
+          home: /tmp/elastic
+        transport:
+          tcp:
+            connect_timeout: 120s
+      
 
 inventoryService:
   url: http://inventory-service:8080
