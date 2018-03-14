@@ -153,7 +153,7 @@ public class InventoryDAOImpl {
 		Connection connection = jdbcConnection.getConnection();
 		try
 	    {
-	      String query = " insert into users (id,stock,price,img_alt,img,name,description)"
+	      String query = " insert into inventorydb.items (id,stock,price,img_alt,img,name,description)"
 	        + " values (?, ?, ?, ?, ?, ?, ?)";
 
 	      // create the mysql insert preparedstatement
@@ -187,7 +187,32 @@ public class InventoryDAOImpl {
 		long id = item.getId();
 		try
 	    {
-	      String query = "update users SET stock = ? " + " WHERE id = ?";
+	      String query = "update inventorydb.items SET stock = ? " + " WHERE id = ?";
+
+	      // create the mysql insert preparedstatement
+	      PreparedStatement preparedStmt = connection.prepareStatement(query);
+	      preparedStmt.setInt(1, stock);
+	      preparedStmt.setLong(2, id);
+	      // execute the preparedstatement
+	      preparedStmt.execute();
+	      
+	      connection.close();
+	    }
+	    catch (Exception e)
+	    {
+	      System.err.println("Got an exception!");
+	      System.err.println(e.getMessage());
+	    }
+	}
+	public void updateStock(int stock, long id){
+
+		JDBCConnection jdbcConnection = new JDBCConnection();
+		
+		Connection connection = jdbcConnection.getConnection();
+		
+		try
+	    {
+	      String query = "update inventorydb.items SET stock = stock - ? " + " WHERE id = ?";
 
 	      // create the mysql insert preparedstatement
 	      PreparedStatement preparedStmt = connection.prepareStatement(query);

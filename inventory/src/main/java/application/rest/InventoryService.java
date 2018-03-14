@@ -9,6 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -24,30 +25,12 @@ import utils.InventoryDAOImpl;
 @Path("/inv")
 public class InventoryService {
 	
-	private final static String QUEUE_NAME = "hello";
+	private final static String QUEUE_NAME = "stock";
 	
 	@GET
 	 @Path("/check")
 	 @Produces("application/json")
-	 public String check() throws IOException, TimeoutException {
-		
-		ConnectionFactory factory = new ConnectionFactory();
-	    factory.setHost("localhost");
-	    Connection connection = factory.newConnection();
-	    Channel channel = connection.createChannel();
-
-	    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-	    System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
-	    
-	    DefaultConsumer consumer = new DefaultConsumer(channel) {
-	        @Override
-	        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-	            throws IOException {
-	          String message = new String(body, "UTF-8");
-	          System.out.println(" [x] Received '" + message + "'");
-	        }
-	      };
-	      channel.basicConsume(QUEUE_NAME, true, consumer);
+	 public String check(){
 	 return "it works!";
 	}
 	
@@ -89,7 +72,6 @@ public class InventoryService {
 	 @Path("inventory/price/{price}")
 	 @Produces("application/json")
 	public String findByPriceLessThanEqual(@PathParam("price") double price) {
-		 //System.out.println(price);
 		 String invDetails = null;
 		 List invlist = null;
 		 InventoryDAOImpl inv = new InventoryDAOImpl();
@@ -100,6 +82,44 @@ public class InventoryService {
 		 invDetails = gson.toJson(invlist);
 		 return invDetails;
 		}
+	
+	// Order service uese this API to update stock 
+	@GET
+	 @Path("/stock")
+	 @Produces("application/json")
+	 public String stock() throws IOException, TimeoutException {
+	 consumer();
+	 return "Stock updated";
+	}
+	
+	public void consumer() throws IOException, TimeoutException{
+		ConnectionFactory factory = new ConnectionFactory();
+	    factory.setHost("localhost");
+	    Connection connection = factory.newConnection();
+	    Channel channel = connection.createChannel();
+
+	    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+	    System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+	   
+	    Consumer consumer = new DefaultConsumer(channel) {
+	        @Override
+	        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+	            throws IOException {
+	          String message = new String(body, "UTF-8");
+	          System.out.println(" [x] Received '" + message + "'");
+	          String[] splited = message.split(" ");
+	          
+	          InventoryDAOImpl inv = new InventoryDAOImpl();
+	          
+	          long id = Long.parseLong(splited[0]);
+	          int stock = Integer.parseInt(splited[1]);
+	          
+	 		  inv.updateStock(stock, id);
+	          
+	        }
+	      };
+	      channel.basicConsume(QUEUE_NAME, true, consumer);
+	}
 
 }
 
