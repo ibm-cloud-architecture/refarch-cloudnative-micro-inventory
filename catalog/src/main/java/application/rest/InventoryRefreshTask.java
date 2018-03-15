@@ -11,7 +11,7 @@ import client.Item;
 
 public class InventoryRefreshTask extends Thread {
 
-	private static final int INVENTORY_REFRESH_SLEEP_TIME_MS = 2500;
+	private static final int INVENTORY_REFRESH_SLEEP_TIME_MS = 60000;
 
 	private InventoryServiceClient invClient = new InventoryServiceClient();
 
