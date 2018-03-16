@@ -227,6 +227,15 @@ export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
 export dbuser=root
 export dbpassword=password
 ```
+**Set up RabbitMQ on Docker locally**
+
+1. Build the docker image
+
+`docker pull rabbitmq`
+
+2. Run the container.
+
+`docker run -d -p 5672:5672 -p 15672:15672  --name rabbitmq rabbitmq`
 
 ### Locally in JVM
 
