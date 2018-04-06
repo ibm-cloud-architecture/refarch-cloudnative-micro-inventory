@@ -153,10 +153,6 @@ To build the application, we used maven build. Maven is a project management too
 
 ### Pre-requisites
 
-1. Locally in JVM
-
-To run the Inventory microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
-
 **Set Up MYSQL on IBM Cloud**
 
 1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-mysql) and instance of MySQL into your Bluemix space.
@@ -200,6 +196,7 @@ export jdbcURL=jdbc:mysql://{HOST}:{PORT}/inventorydb?useSSL=false
 export dbuser={USER}
 export dbpassword={PASSWORD}
 ```
+or alternatively you can run it in a container as well.
 
 **Set Up MYSQL on Docker locally**
 
@@ -208,15 +205,15 @@ export dbpassword={PASSWORD}
     # cd mysql
 ```
 
-1. Build the docker image
+- Build the docker image
 
 `docker build -t mysql .`
 
-2. Run the container.
+- Run the container.
 
 `docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password mysql`
 
-3. Create `items` table and load sample data
+- Create `items` table and load sample data
 
 `docker exec mysql ./load-data.sh root password 0.0.0.0 3306`
 
@@ -229,13 +226,21 @@ export dbpassword=password
 ```
 **Set up RabbitMQ on Docker locally**
 
-1. Build the docker image
+- Build the docker image
 
 `docker pull rabbitmq`
 
-2. Run the container.
+- Run the container.
 
 `docker run -d -p 5672:5672 -p 15672:15672  --name rabbitmq rabbitmq`
+
+1. Locally in JVM
+
+To run the Inventory microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
+
+2. Locally in Containers
+
+To run Inventory microservice locally in container, you need [Docker](https://www.docker.com/) to be locally present in your system.
 
 ### Locally in JVM
 
@@ -285,6 +290,193 @@ Once you do this, you see the below messages.
 [INFO] Final Memory: 12M/245M
 [INFO] ------------------------------------------------------------------------
 ```
+
+### Locally in Containers
+
+To run the application in docker, we first need to define a Docker file.
+
+#### Docker file
+
+We are using Docker to containerize the application. With Docker, you can pack, ship, and run applications on a portable, lightweight container that can run anywhere virtually.
+
+```
+FROM websphere-liberty:microProfile
+
+MAINTAINER IBM Java engineering at IBM Cloud
+
+COPY /target/liberty/wlp/usr/servers/defaultServer /config/
+COPY target/liberty/wlp/usr/shared /opt/ibm/wlp/usr/shared/
+
+# Install required features if not present
+RUN installUtility install --acceptLicense defaultServer
+
+CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
+
+# Upgrade to production license if URL to JAR provided
+ARG LICENSE_JAR_URL
+RUN \
+  if [ $LICENSE_JAR_URL ]; then \
+    wget $LICENSE_JAR_URL -O /tmp/license.jar \
+    && java -jar /tmp/license.jar -acceptLicense /opt/ibm \
+    && rm /tmp/license.jar; \
+  fi
+```
+
+- The `FROM` instruction sets the base image. You're setting the base image to `websphere-liberty:microProfile`.
+- The `MAINTAINER` instruction sets the Author field. Here it is `IBM Java engineering at IBM Cloud`.
+- The `COPY` instruction copies directories and files from a specified source to a destination in the container file system.
+  - You're copying the `/target/liberty/wlp/usr/servers/defaultServer` to the `config` directory in the container.
+  - You're replacing the contents of `/opt/ibm/wlp/usr/shared/` with the contents of `target/liberty/wlp/usr/shared`.
+- The `RUN` instruction runs the commands.
+  - The first instruction gets the Opentracing Zipkin feature and installs it in your server.
+  - The second instruction is a precondition to install all the utilities in the server.xml file. You can use the RUN command to install the utilities on the base image.
+- The `CMD` instruction provides defaults for an executing container.
+
+#### Running the application locally in a docker container
+
+1. Build the docker image.
+
+`docker build -t inventory:microprofile .`
+
+Once this is done, you will see something similar to the below messages.
+```
+Successfully built 02a2348107d9
+Successfully tagged inventory:microprofile
+```
+You can see the docker images by using this command.
+
+`docker images`
+
+```
+REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
+inventory                      microprofile        02a2348107d9        36 seconds ago      413MB
+```
+
+2. Run the docker image.
+
+`docker run -p 9180:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password inventory:microprofile`
+
+When it is done, you will see the following output.
+```
+[AUDIT   ] CWWKE0001I: The server defaultServer has been launched.
+[AUDIT   ] CWWKE0100I: This product is licensed for development, and limited production use. The full license terms can be viewed here: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/base_ilan/ilan/17.0.0.3/lafiles/en.html
+[AUDIT   ] CWWKZ0058I: Monitoring dropins for applications. 
+[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/health/
+[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/jwt/
+[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/ibm/api/
+[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/metrics/
+[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/inventory/
+[AUDIT   ] CWWKZ0001I: Application inventory-1.0-SNAPSHOT started in 9.675 seconds.
+[AUDIT   ] CWWKF0012I: The server installed the following features: [microProfile-1.2, mpFaultTolerance-1.0, servlet-3.1, ssl-1.0, jndi-1.0, mpHealth-1.0, appSecurity-2.0, jsonp-1.0, mpConfig-1.1, jaxrs-2.0, jaxrsClient-2.0, concurrent-1.0, jwt-1.0, mpMetrics-1.0, mpJwt-1.0, json-1.0, cdi-1.2, distributedMap-1.0].
+[AUDIT   ] CWWKF0011I: The server defaultServer is ready to run a smarter planet.
+```
+4. Once you are done accessing the application, you can come out of the process. You can do this by pressing Ctrl+C on the command line where the server was started.
+
+5. You can also remove the container if desired. This can be done in the following way.
+
+`docker ps`
+
+```
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS                              NAMES
+f0d52b900623        inventory:microprofile   "/opt/ibm/wlp/bin/se…"   4 minutes ago       Up 4 minutes        9443/tcp, 0.0.0.0:9180->9080/tcp   inventory
+```
+
+Grab the container id.
+
+- Do `docker stop <CONTAINER ID>`
+In this case it will be, `docker stop f0d52b900623`
+- Do `docker rm <CONTAINER ID>`
+In this case it will be, `docker rm f0d52b900623`
+
+### Locally in Minikube
+
+#### Setting up your environment
+
+1. Start your minikube. Run the below command.
+
+`minikube start`
+
+You will see output similar to this.
+
+```
+Setting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+```
+2. To install Tiller which is a server side component of Helm, initialize helm. Run the below command.
+
+`helm init`
+
+If it is successful, you will see the below output.
+
+```
+$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
+
+Tiller (the helm server side component) has been installed into your Kubernetes Cluster.
+Happy Helming!
+```
+3. Check if your tiller is available. Run the below command.
+
+`kubectl get deployment tiller-deploy --namespace kube-system`
+
+If it available, you can see the availability as below.
+
+```
+NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+tiller-deploy   1         1         1            1           1m
+```
+
+4. Verify your helm before proceeding like below.
+
+`helm version`
+
+You will see the below output.
+
+```
+Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
+Server: &version.Version{SemVer:"v2.5.0", GitCommit:"012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6", GitTreeState:"clean"}
+```
+#### Running the application on Minikube
+
+1. Build the docker image.
+
+Before building the docker image, set the docker environment.
+
+- Run the below command.
+
+`minikube docker-env`
+
+You will see the output similar to this.
+
+```
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.100:2376"
+export DOCKER_CERT_PATH="/Users/user@ibm.com/.minikube/certs"
+export DOCKER_API_VERSION="1.23"
+# Run this command to configure your shell:
+# eval $(minikube docker-env)
+```
+- For configuring your shell, run the below command.
+
+`eval $(minikube docker-env)`
+
+- Now run the docker build.
+
+`docker build -t inventory:v1.0.0 .`
+
+If it is a success, you will see the below output.
+
+```
+Successfully built 36d1cf24d7ad
+Successfully tagged inventory:v1.0.0
+```
+2. Run the helm chart as below.
+
+`helm install --name=inventory chart/inventory`
+
+Yow will see message like below.
 
 
 
