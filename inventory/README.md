@@ -217,7 +217,7 @@ or alternatively you can run it in a container as well.
 
 `docker exec mysql ./load-data.sh root password 0.0.0.0 3306`
 
-In this case, your jdbcURL will be 
+In this case to run locally in JVM, your jdbcURL will be 
 
 ```
 export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
@@ -472,8 +472,7 @@ RUN \
   - You're copying the `/target/liberty/wlp/usr/servers/defaultServer` to the `config` directory in the container.
   - You're replacing the contents of `/opt/ibm/wlp/usr/shared/` with the contents of `target/liberty/wlp/usr/shared`.
 - The `RUN` instruction runs the commands.
-  - The first instruction gets the Opentracing Zipkin feature and installs it in your server.
-  - The second instruction is a precondition to install all the utilities in the server.xml file. You can use the RUN command to install the utilities on the base image.
+  - The instruction is a precondition to install all the utilities in the server.xml file. You can use the RUN command to install the utilities on the base image.
 - The `CMD` instruction provides defaults for an executing container.
 
 #### Running the application locally in a docker container
@@ -498,22 +497,20 @@ inventory                      microprofile        02a2348107d9        36 second
 
 2. Run the docker image.
 
-`docker run -p 9180:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password inventory:microprofile`
+`docker run -d -p 9180:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password inventory:microprofile`
 
-When it is done, you will see the following output.
+When it is done, you can verify it using the below command.
+
+`docker ps`
+
+You will see something like below.
+
 ```
-[AUDIT   ] CWWKE0001I: The server defaultServer has been launched.
-[AUDIT   ] CWWKE0100I: This product is licensed for development, and limited production use. The full license terms can be viewed here: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/license/base_ilan/ilan/17.0.0.3/lafiles/en.html
-[AUDIT   ] CWWKZ0058I: Monitoring dropins for applications. 
-[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/health/
-[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/jwt/
-[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/ibm/api/
-[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/metrics/
-[AUDIT   ] CWWKT0016I: Web application available (default_host): http://f0d52b900623:9080/inventory/
-[AUDIT   ] CWWKZ0001I: Application inventory-1.0-SNAPSHOT started in 9.675 seconds.
-[AUDIT   ] CWWKF0012I: The server installed the following features: [microProfile-1.2, mpFaultTolerance-1.0, servlet-3.1, ssl-1.0, jndi-1.0, mpHealth-1.0, appSecurity-2.0, jsonp-1.0, mpConfig-1.1, jaxrs-2.0, jaxrsClient-2.0, concurrent-1.0, jwt-1.0, mpMetrics-1.0, mpJwt-1.0, json-1.0, cdi-1.2, distributedMap-1.0].
-[AUDIT   ] CWWKF0011I: The server defaultServer is ready to run a smarter planet.
+CONTAINER ID        IMAGE                               COMMAND                  CREATED             STATUS              PORTS                              NAMES
+f0d52b900623        inventory:microprofile              "/opt/ibm/wlp/bin/se…"   2 days ago          Up 2 days           9443/tcp, 0.0.0.0:9180->9080/tcp   inventory
+736f27b676de        mysql                               "docker-entrypoint.s…"   2 days ago          Up 2 days           0.0.0.0:9041->3306/tcp             mysql
 ```
+
 4. Once you are done accessing the application, you can come out of the process. You can do this by pressing Ctrl+C on the command line where the server was started.
 
 5. You can also remove the container if desired. This can be done in the following way.
