@@ -161,10 +161,6 @@ To build the application, we used maven build. Maven is a project management too
 
 As Catalog service serves as cache to the Inventory service, make sure the inventory service is up and running before running the Catalog.
 
-1. Locally in JVM
-
-To run the Catalog microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
-
 **Set Up Elasticsearch on IBM Cloud**
 
 1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-elasticsearch) and instance of Elasticsearch into your Bluemix space.
@@ -201,13 +197,21 @@ export inventory_health=http://localhost:9081/inventory/rest/inv/check/
 
 `docker run -d -p 9200:9200 --name elasticsearch ibmcase/bluecompute-elasticsearch`
 
-In this case, your environment variables will be 
+In this case to run locally in JVM, your environment variables will be 
 
 ```
 export elasticsearch_url=http://localhost:9200
 export inventory_url=http://localhost:9081/inventory/rest/inv/inventory/
 export inventory_health=http://localhost:9081/inventory/rest/inv/check/
 ```
+
+#### Locally in JVM
+
+To run the Catalog microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
+
+#### Locally in Containers
+
+To run Catalog microservice locally in container, you need [Docker](https://www.docker.com/) to be locally present in your system.
 
 ### Locally in JVM
 
@@ -267,3 +271,107 @@ Once you do this, you see the below messages.
 [INFO] Final Memory: 13M/309M
 [INFO] ------------------------------------------------------------------------
 ```
+#### Docker file
+
+We are using Docker to containerize the application. With Docker, you can pack, ship, and run applications on a portable, lightweight container that can run anywhere virtually.
+
+```
+FROM websphere-liberty:microProfile
+
+MAINTAINER IBM Java engineering at IBM Cloud
+
+COPY /target/liberty/wlp/usr/servers/defaultServer /config/
+COPY target/liberty/wlp/usr/shared /opt/ibm/wlp/usr/shared/
+
+# Install required features if not present
+RUN installUtility install --acceptLicense defaultServer
+
+CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
+
+# Upgrade to production license if URL to JAR provided
+ARG LICENSE_JAR_URL
+RUN \
+  if [ $LICENSE_JAR_URL ]; then \
+    wget $LICENSE_JAR_URL -O /tmp/license.jar \
+    && java -jar /tmp/license.jar -acceptLicense /opt/ibm \
+    && rm /tmp/license.jar; \
+  fi
+```
+
+- The `FROM` instruction sets the base image. You're setting the base image to `websphere-liberty:microProfile`.
+- The `MAINTAINER` instruction sets the Author field. Here it is `IBM Java engineering at IBM Cloud`.
+- The `COPY` instruction copies directories and files from a specified source to a destination in the container file system.
+  - You're copying the `/target/liberty/wlp/usr/servers/defaultServer` to the `config` directory in the container.
+  - You're replacing the contents of `/opt/ibm/wlp/usr/shared/` with the contents of `target/liberty/wlp/usr/shared`.
+- The `RUN` instruction runs the commands.
+  - The instruction is a precondition to install all the utilities in the server.xml file. You can use the RUN command to install the utilities on the base image.
+- The `CMD` instruction provides defaults for an executing container.
+
+#### Running the application locally in a docker container
+
+1. Build the docker image.
+
+`docker build -t catalog:microprofile .`
+
+Once this is done, you will see something similar to the below messages.
+```
+Successfully built d626e09a941d
+Successfully tagged catalog:microprofile
+```
+You can see the docker images by using this command.
+
+`docker images`
+
+```
+REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
+catalog                                         microprofile        d626e09a941d        22 seconds ago      390MB
+```
+
+2. Run the docker image.
+
+`docker run -d -p 9280:9080 --name catalog -t --link inventory:inventory --link elasticsearch:elasticsearch --env-file catalog.env catalog:microprofile`
+
+When it is done, you can verify it using the below command.
+
+`docker ps`
+
+You will see something like below.
+
+```
+CONTAINER ID        IMAGE                               COMMAND                  CREATED             STATUS              PORTS                              NAMES
+8916b347e5dd        catalog:microprofile                "/opt/ibm/wlp/bin/se…"   1 second ago        Up 2 seconds        9443/tcp, 0.0.0.0:9280->9080/tcp   catalog
+7ad59d6b0a59        ibmcase/bluecompute-elasticsearch   "/run.sh"                12 minutes ago      Up 12 minutes       0.0.0.0:9200->9200/tcp, 9300/tcp   elasticsearch
+f0d52b900623        inventory:microprofile              "/opt/ibm/wlp/bin/se…"   2 days ago          Up 2 days           9443/tcp, 0.0.0.0:9180->9080/tcp   inventory
+736f27b676de        mysql                               "docker-entrypoint.s…"   2 days ago          Up 2 days           0.0.0.0:9041->3306/tcp             mysql
+```
+
+4. Validate the catalog in the following way.
+
+`curl -X GET http://localhost:9280/catalog/rest/items`
+
+You should now see a list of inventory items in your terminal.
+
+```
+[{"id":13405,"name":"Electric Card Collator","description":"The IBM 77 electric punched card collator performed many card filing and pulling operations. As a filing machine, the Type 77 fed and compared simultaneously two groups of punched cards: records already in file and records to be filed. These two groups were merged in correct numerical or alphabetical sequence. When operated for the purpose of pulling cards, the Type 77 made it possible for one group of cards to pull corresponding cards from another group. Introduced in 1937, the IBM 77 collator rented for 0 a month. It was capable of handling 240 cards a minute, and was 40.5 inches long and 51 inches high. IBM withdrew the Type 77 from marketing on November 27, 1957.","price":3899,"imgAlt":"IBM 77 Electric Punched Card Collator","img":"electric-card-punch.jpg","stock":1000}, _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  _ _ _ ]
+```
+
+5. Once you are done accessing the application, you can come out of the process. You can do this by pressing Ctrl+C on the command line where the server was started.
+
+6. You can also remove the container if desired. This can be done in the following way.
+
+`docker ps`
+
+```
+CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS                              NAMES
+8916b347e5dd        catalog:microprofile         "/opt/ibm/wlp/bin/se…"   1 second ago        Up 2 seconds        9443/tcp, 0.0.0.0:9280->9080/tcp   catalog
+```
+
+Grab the container id.
+
+- Do `docker stop <CONTAINER ID>`
+In this case it will be, `docker stop 8916b347e5dd`
+- Do `docker rm <CONTAINER ID>`
+In this case it will be, `docker rm 8916b347e5dd`
+
+
+
