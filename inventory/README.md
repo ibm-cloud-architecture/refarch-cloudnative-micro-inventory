@@ -224,6 +224,7 @@ export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
 export dbuser=root
 export dbpassword=password
 ```
+
 **Set up RabbitMQ on Docker locally**
 
 - Build the docker image
@@ -234,13 +235,156 @@ export dbpassword=password
 
 `docker run -d -p 5672:5672 -p 15672:15672  --name rabbitmq rabbitmq`
 
-1. Locally in JVM
+#### Locally in JVM
 
 To run the Inventory microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
 
-2. Locally in Containers
+#### Locally in Containers
 
 To run Inventory microservice locally in container, you need [Docker](https://www.docker.com/) to be locally present in your system.
+
+#### Locally in Minikube
+
+To run the Inventory application locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment) we first need to get few tools installed:
+
+- [Kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
+- [Helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
+
+Finally, we must create a Kubernetes Cluster. As already said before, we are going to use Minikube:
+
+- [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
+
+We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
+
+**Set Up MYSQL on Minikube**
+
+1. Start your minikube. Run the below command.
+
+`minikube start`
+
+You will see output similar to this.
+
+```
+Setting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+```
+2. To install Tiller which is a server side component of Helm, initialize helm. Run the below command.
+
+`helm init`
+
+If it is successful, you will see the below output.
+
+```
+$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
+
+Tiller (the helm server side component) has been installed into your Kubernetes Cluster.
+Happy Helming!
+```
+3. Check if your tiller is available. Run the below command.
+
+`kubectl get deployment tiller-deploy --namespace kube-system`
+
+If it available, you can see the availability as below.
+
+```
+NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+tiller-deploy   1         1         1            1           1m
+```
+
+4. Verify your helm before proceeding like below.
+
+`helm version`
+
+If your helm server version is below 2.5.0, please run the below command.
+
+`helm init --upgrade --tiller-image gcr.io/kubernetes-helm/tiller:v2.5.0`
+
+Make sure your versions by testing the versions.
+
+You will see the below output.
+
+```
+Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
+Server: &version.Version{SemVer:"v2.5.0", GitCommit:"012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6", GitTreeState:"clean"}
+```
+
+5. Run the helm chart as below.
+
+`helm install --name=bc stable/mysql`
+
+6. Make sure your deployment is ready. To verify run this command and you should see the availability.
+
+`kubectl get deployments`
+
+Yow will see message like below.
+
+```
+NAME                      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+bc-mysql                  1         1         1            1           2m
+```
+
+7. Grab your root password run:
+
+`kubectl get secret --namespace default bc-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo`
+
+8. Run an Ubuntu pod that you can use as a client:
+
+`kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il`
+
+You will enter the shell and see something like below.
+
+```
+root@ubuntu:/#
+```
+
+9. Install the mysql client:
+
+`apt-get update && apt-get install mysql-client -y`
+
+Youw will see something like below once done.
+
+```
+Setting up mysql-client-5.7 (5.7.21-0ubuntu0.16.04.1) ...
+Setting up mysql-client (5.7.21-0ubuntu0.16.04.1) ...
+Processing triggers for libc-bin (2.23-0ubuntu10) ...
+```
+10. Connect using the mysql cli, then provide your password you obtained previously in step 3.
+    
+`$ mysql -h bc-mysql -p`
+
+You will see something like below.
+
+```
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 252
+Server version: 5.7.14 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+```
+
+11. Copy the contents of the script [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/mysql/scripts/load-data.sql) and paste it in your console.
+
+Your database is already now.
+
+12. Enter `exit` to come out of mysql and enter `exit` to come out the ubuntu shell.
+
+```
+mysql> exit
+Bye
+root@ubuntu:/# exit
+logout
+```
 
 ### Locally in JVM
 
@@ -477,6 +621,25 @@ Successfully tagged inventory:v1.0.0
 `helm install --name=inventory chart/inventory`
 
 Yow will see message like below.
+
+```
+==> v1beta1/Deployment
+NAME                  DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+inventory-deployment  1        1        1           0          0s
+```
+Please wait till your deployment is ready. To verify run the below command and you should see the availability.
+
+`kubectl get deployments`
+
+You will see something like below.
+
+```
+==> v1beta1/Deployment
+NAME                     DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+inventory-deployment      1         1         1            1           8m
+```
+
+
 
 
 
