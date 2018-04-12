@@ -23,7 +23,14 @@ spec:
           httpGet:
             path: /inventory/rest/health
             port: 9080
-          initialDelaySeconds: 20
+          initialDelaySeconds: 60
+          timeoutSeconds: 60
+        livenessProbe:
+          httpGet:
+            path: /inventory/rest/health
+            port: 9080
+          initialDelaySeconds: 1500
+          timeoutSeconds: 500
 {{ end }}
         resources:
           requests:
