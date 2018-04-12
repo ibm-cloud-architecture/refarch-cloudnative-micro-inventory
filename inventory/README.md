@@ -395,6 +395,13 @@ logout
    export dbuser=<DB_USER_NAME>
    export dbpassword=<PASSWORD>
    ```
+   
+Go to the below path.
+
+```
+cd ..
+cd inventory/
+```
 
 2. Start your server.
 
