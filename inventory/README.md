@@ -17,14 +17,20 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
     2. [Microprofile](#microprofile)
 4. [Features and App details](#features)
 5. [Building the app](#building-the-app)
-6. [Running the app and stopping it](#running-the-app-and-stopping-it)
+6. [Setting up MYSQL](#setting-up-mysql)
+    1. [Set Up MYSQL on IBM Cloud](#set-up-mysql-on-ibm-cloud)
+    2. [Set Up MYSQL on Docker locally](#set-up-mysql-on-docker-locally)
+    3. [Set Up MYSQL on Minikube](#set-up-mysql-on-minikube)
+7. [Setting up RabbitMQ](#setting-up-rabbitmq)
+    1. [Set up RabbitMQ on Docker locally](#set-up-rabbitmq-on-docker-locally)
+8. [Running the app and stopping it](#running-the-app-and-stopping-it)
     1. [Pre-requisites](#pre-requisites)
     2. [Locally in JVM](#locally-in-jvm)
     3. [Locally in Containers](#locally-in-containers)
     4. [Locally in Minikube](#locally-in-minikube)
     5. [Remotely in ICP](#remotely-in-icp)
-7. [DevOps Strategy](#devops-strategy)
-8. [References](#references)
+9. [DevOps Strategy](#devops-strategy)
+10. [References](#references)
 
 ### Introduction
 
@@ -148,12 +154,46 @@ To build the application, we used maven build. Maven is a project management too
 [INFO] Final Memory: 22M/307M
 [INFO] ------------------------------------------------------------------------
 ```
+### Setting up MYSQL
 
-### Running the app and stopping it
+#### Pre-requisites
 
-### Pre-requisites
+1. Set Up MYSQL on IBM Cloud
 
-**Set Up MYSQL on IBM Cloud**
+To set up MYSQL on IBM Cloud, you need access to [IBM Cloud](https://www.ibm.com/cloud/) and login into it. You can always [SignUp](https://console.bluemix.net/registration/?cm_mc_uid=55280557319115235569308&cm_mc_sid_50200000=33188011523646965797&cm_mc_sid_52640000=68119761523646965807) to checkout the latest features of IBM Cloud.
+
+2. Set Up MYSQL on Docker locally
+
+To set up MYSQL on Docker as a container, you need [Docker](https://www.docker.com/) to be locally present in your system.
+
+3. Set Up MYSQL on Minikube
+
+To set up MYSQL locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment), we first need to get few tools installed:
+
+- [Kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
+- [Helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
+
+Finally, we must create a Kubernetes Cluster. As already said before, we are going to use Minikube:
+
+- [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
+
+We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
+
+4. Set Up MYSQL on IBM Cloud Private
+
+To set up MYSQL on IBM Cloud Private, you need to have the following.
+
+[IBM Cloud Private Cluster](https://www.ibm.com/cloud/private)
+
+Create a Kubernetes cluster in an on-premise datacenter. The community edition (IBM Cloud private-ce) is free of charge.
+Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html) to install IBM Cloud private-ce.
+
+[Helm](https://github.com/kubernetes/helm) (Kubernetes package manager)
+
+Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
+If using IBM Cloud Private version 2.1.0.2 or newer, we recommend you follow these [instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html) to install helm.
+
+#### Set Up MYSQL on IBM Cloud
 
 1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-mysql) and instance of MySQL into your Bluemix space.
     - Select name for your instance.
@@ -198,7 +238,7 @@ export dbpassword={PASSWORD}
 ```
 or alternatively you can run it in a container as well.
 
-**Set Up MYSQL on Docker locally**
+#### Set Up MYSQL on Docker locally
 
 ```
     # cd ..
@@ -225,38 +265,7 @@ export dbuser=root
 export dbpassword=password
 ```
 
-**Set up RabbitMQ on Docker locally**
-
-- Build the docker image
-
-`docker pull rabbitmq`
-
-- Run the container.
-
-`docker run -d -p 5672:5672 -p 15672:15672  --name rabbitmq rabbitmq`
-
-#### Locally in JVM
-
-To run the Inventory microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
-
-#### Locally in Containers
-
-To run Inventory microservice locally in container, you need [Docker](https://www.docker.com/) to be locally present in your system.
-
-#### Locally in Minikube
-
-To run the Inventory application locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment) we first need to get few tools installed:
-
-- [Kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
-- [Helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
-
-Finally, we must create a Kubernetes Cluster. As already said before, we are going to use Minikube:
-
-- [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
-
-We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
-
-**Set Up MYSQL on Minikube**
+#### Set Up MYSQL on Minikube
 
 1. Start your minikube. Run the below command.
 
@@ -385,6 +394,47 @@ Bye
 root@ubuntu:/# exit
 logout
 ```
+#### Set Up MYSQL on IBM Cloud Private
+
+**TBD**
+
+### Setting up RabbitMQ
+
+#### Set up RabbitMQ on Docker locally
+
+- Build the docker image
+
+`docker pull rabbitmq`
+
+- Run the container.
+
+`docker run -d -p 5672:5672 -p 15672:15672  --name rabbitmq rabbitmq`
+
+
+### Running the app and stopping it
+
+#### Pre-requisites
+
+1. Locally in JVM
+
+To run the Inventory microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
+
+2. Locally in Containers
+
+To run Inventory microservice locally in container, you need [Docker](https://www.docker.com/) to be locally present in your system.
+
+3. Locally in Minikube
+
+To run the Inventory application locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment) we first need to get few tools installed:
+
+- [Kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
+- [Helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
+
+Finally, we must create a Kubernetes Cluster. As already said before, we are going to use Minikube:
+
+- [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
+
+We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
 
 ### Locally in JVM
 
