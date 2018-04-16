@@ -356,7 +356,7 @@ root@ubuntu:/#
 
 `apt-get update && apt-get install mysql-client -y`
 
-Youw will see something like below once done.
+You will see something like below once done.
 
 ```
 Setting up mysql-client-5.7 (5.7.21-0ubuntu0.16.04.1) ...
@@ -399,7 +399,131 @@ logout
 ```
 #### Set Up MYSQL on IBM Cloud Private
 
-**TBD**
+1. Your [IBM Cloud Private Cluster](https://www.ibm.com/cloud/private) should be up and running.
+
+2. Log in to the IBM Cloud Private. 
+
+<p align="center">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/icp_dashboard.png">
+</p>
+
+3. Go to `admin > Configure Client`.
+
+<p align="center">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/client_config.png">
+</p>
+
+4. Grab the kubectl configuration commands.
+
+<p align="center">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/kube_cmds.png">
+</p>
+
+5. Run those commands in your terminal.
+
+6. If successful, you should see something like below.
+```
+Switched to context "xxx-cluster.icp-context".
+```
+7. Run the below command.
+
+`helm init --client-only`
+
+You will see the below
+
+```
+$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
+Not installing Tiller due to 'client-only' flag having been set
+Happy Helming!
+```
+
+8. Verify the helm version
+
+`helm version --tls`
+
+You will see something like below.
+
+```
+Client: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
+Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
+```
+
+9. Run the helm chart as below.
+
+`helm install --name=bc stable/mysql --tls`
+
+10. Make sure your deployment is ready. To verify run this command and you should see the availability.
+
+`kubectl get deployments`
+
+Yow will see message like below.
+
+```
+NAME                      DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+bc-mysql                  1         1         1            1           2m
+```
+
+11. Grab your root password run:
+
+`kubectl get secret --namespace default bc-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo`
+
+12. Run an Ubuntu pod that you can use as a client:
+
+`kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il`
+
+You will enter the shell and see something like below.
+
+```
+root@ubuntu:/#
+```
+
+13. Install the mysql client:
+
+`apt-get update && apt-get install mysql-client -y`
+
+You will see something like below once done.
+
+```
+Setting up mysql-client-5.7 (5.7.21-0ubuntu0.16.04.1) ...
+Setting up mysql-client (5.7.21-0ubuntu0.16.04.1) ...
+Processing triggers for libc-bin (2.23-0ubuntu10) ...
+```
+14. Connect using the mysql cli, then provide your password you obtained previously in step 3.
+    
+`$ mysql -h bc-mysql -p`
+
+You will see something like below.
+
+```
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 252
+Server version: 5.7.14 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+```
+
+15. Copy the contents of the script [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/mysql/scripts/load-data.sql) and paste it in your console.
+
+Your database is already now.
+
+16. Enter `exit` to come out of mysql and enter `exit` to come out the ubuntu shell.
+
+```
+mysql> exit
+Bye
+root@ubuntu:/# exit
+logout
+```
+
+**NOTE**: If you are using a version of ICP older than 2.1.0.2, you don't need to add the --tls at the end of the helm command.
 
 ### Setting up RabbitMQ
 
@@ -507,6 +631,18 @@ Finally, we must create a Kubernetes Cluster. As already said before, we are goi
 - [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
 
 We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
+
+4. Remotely in ICP
+
+[IBM Cloud Private Cluster](https://www.ibm.com/cloud/private)
+
+Create a Kubernetes cluster in an on-premise datacenter. The community edition (IBM Cloud private-ce) is free of charge.
+Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html) to install IBM Cloud private-ce.
+
+[Helm](https://github.com/kubernetes/helm) (Kubernetes package manager)
+
+Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
+If using IBM Cloud Private version 2.1.0.2 or newer, we recommend you follow these [instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html) to install helm.
 
 ### Locally in JVM
 
@@ -770,7 +906,131 @@ You will see something like below.
 NAME                     DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
 inventory-deployment      1         1         1            1           8m
 ```
+### Remotely in ICP
 
+[IBM Cloud Private](https://www.ibm.com/cloud/private)
+
+IBM Private Cloud has all the advantages of public cloud but is dedicated to single organization. You can have your own security requirements and customize the environment as well. Basically it has tight security and gives you more control along with scalability and easy to deploy options. You can run it externally or behind the firewall of your organization.
+
+Basically this is an on-premise platform.
+
+Includes docker container manager
+Kubernetes based container orchestrator
+Graphical user interface
+You can find the detailed installation instructions for IBM Cloud Private [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html)
+
+#### Pushing the image to Private Registry
+
+1. Now run the docker build.
+
+`docker build -t inventory:v1.0.0 .`
+
+If it is a success, you will see the below output.
+
+```
+Successfully built 36d1cf24d7ad
+Successfully tagged inventory:v1.0.0
+```
+
+2. Tag the image to your private registry.
+
+`docker tag inventory:v1.0.0 <Your ICP registry>/inventory:v1.0.0`
+
+3. Push the image to your private registry.
+
+`docker push <Your ICP registry>/inventory:v1.0.0`
+
+You should see something like below.
+
+```
+v1.0.0: digest: sha256:7f3deb2c43854df725efde5b0a3e6977cc7b6e8e26865b484d8cb20c2e4a6dd0 size: 3873
+```
+
+#### Running the application on ICP
+
+1. Your [IBM Cloud Private Cluster](https://www.ibm.com/cloud/private) should be up and running.
+
+2. Log in to the IBM Cloud Private. 
+
+<p align="center">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/icp_dashboard.png">
+</p>
+
+3. Go to `admin > Configure Client`.
+
+<p align="center">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/client_config.png">
+</p>
+
+4. Grab the kubectl configuration commands.
+
+<p align="center">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/kube_cmds.png">
+</p>
+
+5. Run those commands in your terminal.
+
+6. If successful, you should see something like below.
+
+```
+Switched to context "xxx-cluster.icp-context".
+```
+7. Run the below command.
+
+`helm init --client-only`
+
+You will see the below
+
+```
+$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
+Not installing Tiller due to 'client-only' flag having been set
+Happy Helming!
+```
+
+8. Verify the helm version
+
+`helm version --tls`
+
+You will see something like below.
+
+```
+Client: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
+Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
+```
+9. Run the helm chart as below.
+
+`helm install --name=inventory chart/inventory --tls`
+
+You will see message like below.
+
+```
+==> v1beta1/Deployment
+NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+inventory-deployment               1         1         1            0           1s
+```
+Please wait till your deployment is ready. To verify run the below command and you should see the availability.
+
+`kubectl get deployments`
+
+You will see something like below.
+
+```
+==> v1beta1/Deployment
+NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+inventory-deployment               1         1         1            1           2m      
+```
+
+### DevOps Strategy
+
+TBD
+
+### References
+
+1. [Developer Tools CLI](https://console.bluemix.net/docs/cloudnative/dev_cli.html#developercli)
+2. [IBM Cloud Private](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/kc_welcome_containers.html)
+3. [IBM Cloud Private Installation](https://github.com/ibm-cloud-architecture/refarch-privatecloud)
+4. [IBM Cloud Private version 2.1.0.2 Helm instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html)
+5. [Microprofile](https://microprofile.io/)
 
 
 
