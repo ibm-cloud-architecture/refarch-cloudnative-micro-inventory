@@ -25,6 +25,7 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
     5. [Set Up MYSQL on IBM Cloud Private](#set-up-mysql-on-ibm-cloud-private)
 7. [Setting up RabbitMQ](#setting-up-rabbitmq)
     1. [Set up RabbitMQ on Docker locally](#set-up-rabbitmq-on-docker-locally)
+    2. [Set Up RabbitMQ on Minikube](#set-up-rabbitmq-on-minikube)
 8. [Running the app and stopping it](#running-the-app-and-stopping-it)
     1. [Pre-requisites](#pre-requisites)
     2. [Locally in JVM](#locally-in-jvm)
@@ -412,6 +413,75 @@ logout
 
 `docker run -d -p 5672:5672 -p 15672:15672  --name rabbitmq rabbitmq`
 
+#### Set Up RabbitMQ on Minikube
+
+1. Start your minikube. Run the below command.
+
+`minikube start`
+
+You will see output similar to this.
+
+```
+Setting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+```
+2. To install Tiller which is a server side component of Helm, initialize helm. Run the below command.
+
+`helm init`
+
+If it is successful, you will see the below output.
+
+```
+$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
+
+Tiller (the helm server side component) has been installed into your Kubernetes Cluster.
+Happy Helming!
+```
+3. Check if your tiller is available. Run the below command.
+
+`kubectl get deployment tiller-deploy --namespace kube-system`
+
+If it available, you can see the availability as below.
+
+```
+NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+tiller-deploy   1         1         1            1           1m
+```
+
+4. Verify your helm before proceeding like below.
+
+`helm version`
+
+If your helm server version is below 2.5.0, please run the below command.
+
+`helm init --upgrade --tiller-image gcr.io/kubernetes-helm/tiller:v2.5.0`
+
+Make sure your versions by testing the versions.
+
+You will see the below output.
+
+```
+Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
+Server: &version.Version{SemVer:"v2.5.0", GitCommit:"012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6", GitTreeState:"clean"}
+```
+
+5. Run the helm chart as below.
+
+`helm install --name rmq stable/rabbitmq`
+
+6. Make sure your deployment is ready. To verify run this command and you should see the availability.
+
+`kubectl get deployments`
+
+Yow will see message like below.
+
+```
+NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+rmq-rabbitmq                       1         1         1            1           6m
+```
 
 ### Running the app and stopping it
 
