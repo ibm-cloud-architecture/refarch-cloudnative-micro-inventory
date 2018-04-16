@@ -10,12 +10,6 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
   </a>
 </p>
 
-1. [Introduction](#introduction)
-2. [How it works](#how-it-works)
-3. [API Endpoints](#api-endpoints)
-4. [Implementation](#implementation)
-5. [References](#references)
-
 ### Introduction
 
 This project is built to demonstrate how to build two Microservices applications using Microprofile. The first application [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) uses MySQL database as its datasource. The second application [Catalog](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/catalog) serves as a cache to [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) by leveraging Elasticsearch as its datasource.
