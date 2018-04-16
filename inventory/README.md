@@ -18,9 +18,10 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 4. [Features and App details](#features)
 5. [Building the app](#building-the-app)
 6. [Setting up MYSQL](#setting-up-mysql)
-    1. [Set Up MYSQL on IBM Cloud](#set-up-mysql-on-ibm-cloud)
-    2. [Set Up MYSQL on Docker locally](#set-up-mysql-on-docker-locally)
-    3. [Set Up MYSQL on Minikube](#set-up-mysql-on-minikube)
+    1. [MYSQL Pre-requisites](#mysql-pre-requisites)
+    2. [Set Up MYSQL on IBM Cloud](#set-up-mysql-on-ibm-cloud)
+    3. [Set Up MYSQL on Docker locally](#set-up-mysql-on-docker-locally)
+    4. [Set Up MYSQL on Minikube](#set-up-mysql-on-minikube)
 7. [Setting up RabbitMQ](#setting-up-rabbitmq)
     1. [Set up RabbitMQ on Docker locally](#set-up-rabbitmq-on-docker-locally)
 8. [Running the app and stopping it](#running-the-app-and-stopping-it)
@@ -156,7 +157,7 @@ To build the application, we used maven build. Maven is a project management too
 ```
 ### Setting up MYSQL
 
-#### Pre-requisites
+#### MYSQL Pre-requisites
 
 1. Set Up MYSQL on IBM Cloud
 
