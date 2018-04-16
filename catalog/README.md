@@ -784,11 +784,11 @@ Successfully tagged catalog:v1.0.0
 
 2. Tag the image to your private registry.
 
-`docker tag catalog:v1.0.0 registry.csplab.cloudns.cx/hema/catalog:v1.0.0`
+`docker tag catalog:v1.0.0 <Your ICP registry>/catalog:v1.0.0`
 
 3. Push the image to your private registry.
 
-`docker push registry.csplab.cloudns.cx/hema/catalog:v1.0.0`
+`docker push <Your ICP registry>/catalog:v1.0.0`
 
 You should see something like below.
 
