@@ -3,7 +3,7 @@
 replicaCount: 1
 revisionHistoryLimit: 1
 image:
-  repository: inventory
+  repository: registry.csplab.cloudns.cx/hema/inventory
   tag: v1.0.0
   pullPolicy: IfNotPresent
   resources:

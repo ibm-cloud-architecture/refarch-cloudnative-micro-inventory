@@ -3,7 +3,7 @@
 replicaCount: 1
 revisionHistoryLimit: 1
 image:
-  repository: catalog
+  repository: registry.csplab.cloudns.cx/hema/catalog
   tag: v1.0.0
   pullPolicy: IfNotPresent
   resources:
