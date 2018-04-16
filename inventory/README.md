@@ -22,6 +22,7 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
     2. [Set Up MYSQL on IBM Cloud](#set-up-mysql-on-ibm-cloud)
     3. [Set Up MYSQL on Docker locally](#set-up-mysql-on-docker-locally)
     4. [Set Up MYSQL on Minikube](#set-up-mysql-on-minikube)
+    5. [Set Up MYSQL on IBM Cloud Private](#set-up-mysql-on-ibm-cloud-private)
 7. [Setting up RabbitMQ](#setting-up-rabbitmq)
     1. [Set up RabbitMQ on Docker locally](#set-up-rabbitmq-on-docker-locally)
 8. [Running the app and stopping it](#running-the-app-and-stopping-it)
@@ -673,9 +674,15 @@ Successfully tagged inventory:v1.0.0
 ```
 2. Run the helm chart as below.
 
+Before running the helm chart in minikube, access [values.yaml](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/inventory/chart/inventory/values.yaml) and replace the repository with the below.
+
+`repository: inventory`
+
+Then run the helm chart 
+
 `helm install --name=inventory chart/inventory`
 
-Yow will see message like below.
+You will see message like below.
 
 ```
 ==> v1beta1/Deployment
