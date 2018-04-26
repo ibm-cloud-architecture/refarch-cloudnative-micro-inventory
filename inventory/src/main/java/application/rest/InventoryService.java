@@ -9,6 +9,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
@@ -94,19 +96,22 @@ public class InventoryService {
 	
 	public void consumer() throws IOException, TimeoutException{
 		ConnectionFactory factory = new ConnectionFactory();
-	    factory.setHost("localhost");
+		Config config = ConfigProvider.getConfig();
+		String rabbit_host = config.getValue("rabbit", String.class);
+	    factory.setHost(rabbit_host);
 	    Connection connection = factory.newConnection();
 	    Channel channel = connection.createChannel();
 
 	    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-	    System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+	    System.out.println(" Waiting ... Waiting ... Waiting for the messages");
+	    System.out.println(". To exit press CTRL+C");
 	   
 	    Consumer consumer = new DefaultConsumer(channel) {
 	        @Override
 	        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
 	            throws IOException {
 	          String message = new String(body, "UTF-8");
-	          System.out.println(" [x] Received '" + message + "'");
+	          System.out.println("Received the message '" + message + "'");
 	          String[] splited = message.split(" ");
 	          
 	          InventoryDAOImpl inv = new InventoryDAOImpl();
