@@ -2,8 +2,8 @@
   {{- .Release.Name }}-{{ .Values.service.name -}}
 {{- end -}}
 
-{{- define "elasticsearchBindingName" -}}
-  {{- .Values.elasticsearch.binding.name -}}
+{{- define "catalogElasticSearchBindingName" -}}
+  {{- .Values.catalogelasticsearch.secretName -}}
 {{- end -}}
 
 {{- define "inventoryServiceUrl" -}}

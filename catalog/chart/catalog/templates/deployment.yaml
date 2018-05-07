@@ -28,7 +28,7 @@ spec:
               "name": "elastic",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ template "elasticsearchBindingName" . }}",
+                  "name": "{{ template "catalogElasticSearchBindingName" . }}",
                   "key": "binding"
                 }
               }
@@ -56,7 +56,7 @@ spec:
         - name: elastic
           valueFrom:
             secretKeyRef:
-              name: {{ template "elasticsearchBindingName" . }}
+              name: {{ template "catalogElasticSearchBindingName" . }}
               key: binding
         - name: INVENTORYSERVICE_URL
           value: {{ template "inventoryServiceUrl" . }}

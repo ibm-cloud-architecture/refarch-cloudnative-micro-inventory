@@ -8,6 +8,6 @@
   {{- end -}}
 {{- end -}}
 
-{{- define "mysqlBindingName" -}}
-  {{- .Values.mysql.binding.name -}}
+{{- define "inventoryMySQLBindingName" -}}
+  {{- .Values.inventorymysql.binding.name -}}
 {{- end -}}
