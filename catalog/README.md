@@ -350,7 +350,7 @@ Finally, we must create a Kubernetes Cluster. As already said before, we are goi
 
 We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
 
-4. Remotely in ICP
+2. Remotely in ICP
 
 [IBM Cloud Private Cluster](https://www.ibm.com/cloud/private)
 
@@ -629,7 +629,7 @@ NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   
 catalog-deployment                 1         1         1            1           2m       
 ```
 
-3. You can access the application at `http://<YourClusterIP>:<PORT>/<WAR_CONTEXT>/<APPLICATION_PATH>/<ENDPOINT>`. To get the access url.
+10. You can access the application at `http://<YourClusterIP>:<PORT>/<WAR_CONTEXT>/<APPLICATION_PATH>/<ENDPOINT>`. To get the access url.
 
 - To get the IP, Run this command.
 
