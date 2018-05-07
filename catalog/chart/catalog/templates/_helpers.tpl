@@ -1,3 +1,7 @@
+{{- define "catalogServiceName" -}}
+  {{- .Release.Name }}-{{ .Values.service.name -}}
+{{- end -}}
+
 {{- define "elasticsearchBindingName" -}}
   {{- .Values.elasticsearch.binding.name -}}
 {{- end -}}
