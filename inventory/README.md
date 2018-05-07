@@ -649,6 +649,8 @@ NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   
 inventory-deployment               1         1         1            1           2m      
 ```
 
+**NOTE**: If you are using a version of ICP older than 2.1.0.2, you don't need to add the --tls at the end of the helm command.
+
 ### References
 
 1. [Developer Tools CLI](https://console.bluemix.net/docs/cloudnative/dev_cli.html#developercli)
