@@ -18,7 +18,7 @@ resources:
   requests:
     memory: 350Mi
 
-secretName: binding-refarch-compose-for-elasticsearch
+secretName: binding-catalog-elasticsearch
 
 persistence:
   enabled: false

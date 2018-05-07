@@ -11,6 +11,17 @@ service:
   externalPort: 8081
   internalPort: 8081
 
+ingress:
+  enabled: false
+  hostname: catalog.bluecompute.com
+  path: /micro/items
+
+tls:
+  enabled: false
+  secretName:
+  crt: ENTER_BASE64_ENCODED_CERTIFICATE
+  key: ENTER_BASE64_ENCODED_KEY
+
 dataloader:
   image:
     repository: ibmcase/bluecompute-dataloader
@@ -20,9 +31,8 @@ inventory:
   service:
     url:
 
-elasticsearch:
-  binding:
-    name: binding-catalog-elasticsearch
+catalogelasticsearch:
+  secretName: binding-catalog-elasticsearch
 
 resources:
   limits:

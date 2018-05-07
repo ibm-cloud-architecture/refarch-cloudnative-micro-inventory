@@ -5,27 +5,38 @@ image:
   pullPolicy: Always
   tag: latest
 
-resources:
-  limits:
-    memory: 128Mi
-  requests:
-    memory: 64Mi
-
-dataloader:
-  image:
-    repository: ibmcase/bluecompute-dataloader
-    tag: latest
-
 service:
   name: inventory
   type: ClusterIP
   externalPort: 8080
   internalPort: 8080
 
-mysql:
+ingress:
+  enabled: false
+  hostname: inventory.bluecompute.com
+  path: /micro/inventory
+
+tls:
+  enabled: false
+  secretName:
+  crt: ENTER_BASE64_ENCODED_CERTIFICATE
+  key: ENTER_BASE64_ENCODED_KEY
+
+dataloader:
+  image:
+    repository: ibmcase/bluecompute-dataloader
+    tag: latest
+
+inventorymysql:
   binding:
     name: binding-inventorydb-mysql
 
 messagehub:
   binding:
     name:
+
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    memory: 64Mi
