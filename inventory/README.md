@@ -33,7 +33,7 @@ This project demonstrates the implementation of Inventory Microservice. The inve
 - Based on [MicroProfile](https://microprofile.io/).
 - Uses MySQL as the inventory database.
 - Devops - TBD
-- Deployment options for local, Docker Container-based runtimes, Minikube environment and ICP/BMX.
+- Deployment options for Minikube environment and ICP.
 
 ### How it works
 
