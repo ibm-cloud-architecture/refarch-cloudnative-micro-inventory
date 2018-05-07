@@ -3,7 +3,7 @@
 replicaCount: 1
 revisionHistoryLimit: 1
 image:
-  repository: registry.csplab.cloudns.cx/hema/inventory
+  repository: registry.csplab.cloudns.cx/microprofile/inventory-mp
   tag: v1.0.0
   pullPolicy: IfNotPresent
   resources:
@@ -12,7 +12,7 @@ image:
       memory: 300Mi
 service:
   name: Node
-  type: NodePort
+  type: ClusterIP
   servicePort: 9080
   servicePortHttps: 9443
 hpa:
