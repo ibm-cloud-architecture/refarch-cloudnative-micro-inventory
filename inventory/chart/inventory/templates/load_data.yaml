@@ -30,7 +30,7 @@ spec:
               "name": "mysql",
               "valueFrom": {
                 "secretKeyRef": {
-                  "name": "{{ .Values.mysql.binding.name }}",
+                  "name": "{{ template "inventoryMySQLBindingName" . }}",
                   "key": "binding"
                 }
               }
@@ -47,5 +47,5 @@ spec:
         - name: mysql
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.mysql.binding.name }}
+              name: {{ template "inventoryMySQLBindingName" . }}
               key: binding
