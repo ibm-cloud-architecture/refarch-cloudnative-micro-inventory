@@ -1,6 +1,6 @@
 # Cloudnative MicroProfile Microservice Integration with Elasticsearch
 
-## Inventory Service - MicroProfile
+## Catalog Service - MicroProfile
 
 This repository contains the **MicroProfile** implementation of the **Catalog Service** which is a part of 'IBM Cloud Native Reference Architecture' suite, available at https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes
 
@@ -13,24 +13,18 @@ This repository contains the **MicroProfile** implementation of the **Catalog Se
 1. [Introduction](#introduction)
 2. [How it works](#how-it-works)
 3. [Implementation](#implementation)
-    1. [Liberty app accelerator](#liberty-app-accelerator)
-    2. [Microprofile](#microprofile)
+    1. [Microprofile](#microprofile)
 4. [Features and App details](#features)
 5. [Building the app](#building-the-app)
 6. [Setting up Elasticsearch](#setting-up-elasticsearch)
     1. [Elasticsearch Pre-requisites](#elasticsearch-pre-requisites)
-    2. [Set Up Elasticsearch on IBM Cloud](#set-up-elasticsearch-on-ibm-cloud)
-    3. [Set Up Elasticsearch on Docker locally](#set-up-elasticsearch-on-docker-locally)
-    4. [Set Up Elasticsearch on Minikube](#set-up-elasticsearch-on-minikube)
-    5. [Set Up Elasticsearch on IBM Cloud Private](#set-up-elasticsearch-on-ibm-cloud-private)
+    2. [Set Up Elasticsearch on Minikube](#set-up-elasticsearch-on-minikube)
+    3. [Set Up Elasticsearch on IBM Cloud Private](#set-up-elasticsearch-on-ibm-cloud-private)
 7. [Running the app and stopping it](#running-the-app-and-stopping-it)
     1. [Pre-requisites](#pre-requisites)
-    2. [Locally in JVM](#locally-in-jvm)
-    3. [Locally in Containers](#locally-in-containers)
-    4. [Locally in Minikube](#locally-in-minikube)
-    5. [Remotely in ICP](#remotely-in-icp)
-8. [DevOps Strategy](#devops-strategy)
-9. [References](#references)
+    2. [Locally in Minikube](#locally-in-minikube)
+    3. [Remotely in ICP](#remotely-in-icp)
+8. [References](#references)
 
 ### Introduction
 
@@ -39,7 +33,7 @@ This project demonstrates the implementation of Catalog Microservice. The catalo
 - Based on [MicroProfile](https://microprofile.io/).
 - Uses Elasticsearch.
 - Devops - TBD
-- Deployment options for local, Docker Container-based runtimes, Minikube environment and ICP/BMX.
+- Deployment options for Minikube environment and ICP.
 
 ### How it works
 
@@ -52,24 +46,6 @@ GET     /catalog/rest/items/              # Returns all items in inventory
 GET     /catalog/rest/items/{id}          # Returns item by id 
 ```
 ### Implementation
-
-#### [Liberty app accelerator](https://liberty-app-accelerator.wasdev.developer.ibm.com/start/)
-
-For Liberty, there is nice tool called [Liberty Accelerator](https://liberty-app-accelerator.wasdev.developer.ibm.com/start/) that generates a simple project based upon your configuration. Using this, you can build and deploy to Liberty either using the Maven or Gradle build.
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/LibertyAcc_Home.png">
-</p>
-
-Just check the options of your choice and click Generate project. You can either Download it as a zip or you can create git project.
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/LibertyAcc_PrjGen.png">
-</p>
-
-Once you are done with this, you will have a sample microprofile based application that you can deploy on Liberty.
-
-Using Liberty Accelerator is your choice. You can also create the entire project manually, but using Liberty Accelerator will make things easier.
 
 #### [MicroProfile](https://microprofile.io/)
 
@@ -164,15 +140,7 @@ To build the application, we used maven build. Maven is a project management too
 
 #### Elasticsearch Pre-requisites
 
-1. Set Up Elasticsearch on IBM Cloud
-
-To set up Elasticsearch on IBM Cloud, you need access to [IBM Cloud](https://www.ibm.com/cloud/) and login into it. You can always [SignUp](https://console.bluemix.net/registration/?cm_mc_uid=55280557319115235569308&cm_mc_sid_50200000=33188011523646965797&cm_mc_sid_52640000=68119761523646965807) to checkout the latest features of IBM Cloud.
-
-2. Set Up Elasticsearch on Docker locally
-
-To set up Elasticsearch on Docker as a container, you need [Docker](https://www.docker.com/) to be locally present in your system.
-
-3. Set Up Elasticsearch on Minikube
+1. Set Up Elasticsearch on Minikube
 
 To set up Elasticsearch locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment), we first need to get few tools installed:
 
@@ -185,7 +153,7 @@ Finally, we must create a Kubernetes Cluster. As already said before, we are goi
 
 We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
 
-4. Set Up Elasticsearch on IBM Cloud Private
+2. Set Up Elasticsearch on IBM Cloud Private
 
 To set up Elasticsearch on IBM Cloud Private, you need to have the following.
 
@@ -198,50 +166,6 @@ Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SS
 
 Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
 If using IBM Cloud Private version 2.1.0.2 or newer, we recommend you follow these [instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html) to install helm.
-
-#### Set Up Elasticsearch on IBM Cloud
-
-1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-elasticsearch) and instance of Elasticsearch into your Bluemix space.
-    - Select name for your instance.
-    - Click the `Create` button.
-2. Refresh the page until you see `Status: Ready`.
-3. Now obtain `Elasticsearch` service credentials.
-    - Click on `Service Credentials` tab.
-    - Then click on the `View Credentials` dropdown next to the credentials.
-4. See the `uri` field, which has the format `https://user:password@host:port/`, and extract the following:
-    - **user:** Elasticsearch user.
-    - **password:** Elasticsearch password.
-    - **host**: Elasticsearch host.
-    - **port:** Elasticsearch port.
-5. Keep those credential handy for when deploying the Inventory and Catalog services in the following sections.
-
-Elasticsearch database is now setup in Compose.
-
-In this case, your env variables will be
-
-```
-export elasticsearch_url=http://<Elasticsearch host>:<Elasticsearch port>
-export inventory_url=http://localhost:9081/inventory/rest/inv/inventory/
-export inventory_health=http://localhost:9081/inventory/rest/inv/check/
-```
-
-#### Set Up Elasticsearch on Docker locally
-
-1. Build the docker image
-
-`docker pull ibmcase/bluecompute-elasticsearch`
-
-2. Run the container.
-
-`docker run -d -p 9200:9200 --name elasticsearch ibmcase/bluecompute-elasticsearch`
-
-In this case to run locally in JVM, your environment variables will be 
-
-```
-export elasticsearch_url=http://localhost:9200
-export inventory_url=http://localhost:9081/inventory/rest/inv/inventory/
-export inventory_health=http://localhost:9081/inventory/rest/inv/check/
-```
 
 #### Set Up Elasticsearch on Minikube 
 
@@ -411,15 +335,9 @@ es-default-cluster-elasticsearch   1         1         1            1           
 
 As Catalog service serves as cache to the Inventory service, make sure the inventory service is up and running before running the Catalog.
 
-1. Locally in JVM
+To run the Catalog microservice, please complete the [Building the app](#building-the-app) section before proceeding to the following steps.
 
-To run the Catalog microservice locally in JVM, please complete the [Building the app](#building-the-app) section.
-
-2. Locally in Containers
-
-To run Catalog microservice locally in container, you need [Docker](https://www.docker.com/) to be locally present in your system.
-
-3. Locally in Minikube
+1. Locally in Minikube
 
 To run the Catalog application locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment) we first need to get few tools installed:
 
@@ -443,170 +361,6 @@ Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SS
 
 Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
 If using IBM Cloud Private version 2.1.0.2 or newer, we recommend you follow these [instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html) to install helm.
-
-### Locally in JVM
-
-1. Set the environment variables before you start your application. The host and port depends on the service you use. You can run the Elastic Search locally on your system using the Elastic Search docker container or use the [Elasticsearch Compose](https://www.ibm.com/cloud/compose/elasticsearch) available in [IBM Cloud](https://www.ibm.com/cloud/).
-
-   ```
-   export elasticsearch_url=http://<Your host>:<Port>
-   export inventory_url=http://localhost:9081/inventory/rest/inv/inventory/
-   export inventory_health=http://localhost:9081/inventory/rest/inv/check/
-   ```
-
-2. Start your server.
-
-   `mvn liberty:start-server -DtestServerHttpPort=9082`
-
-   You will see the below.
-```
-[INFO] Starting server defaultServer.
-[INFO] Server defaultServer started with process ID 68974.
-[INFO] Waiting up to 30 seconds for server confirmation:  CWWKF0011I to be found in /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/catalog/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log
-[INFO] CWWKM2010I: Searching for CWWKF0011I in /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/catalog/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log. This search will timeout after 30 seconds.
-[INFO] CWWKM2015I: Match number: 1 is [23/2/18 12:43:03:391 CST] 00000019 com.ibm.ws.kernel.feature.internal.FeatureManager            A CWWKF0011I: The server defaultServer is ready to run a smarter planet..
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 18.987 s
-[INFO] Finished at: 2018-02-23T12:43:03-06:00
-[INFO] Final Memory: 13M/309M
-[INFO] ------------------------------------------------------------------------
-```
-
-3. Validate the catalog in the following way.
-
-`curl -X GET http://localhost:9082/catalog/rest/items`
-
-You should now see a list of inventory items in your terminal.
-
-```
-[{"id":13405,"name":"Electric Card Collator","description":"The IBM 77 electric punched card collator performed many card filing and pulling operations. As a filing machine, the Type 77 fed and compared simultaneously two groups of punched cards: records already in file and records to be filed. These two groups were merged in correct numerical or alphabetical sequence. When operated for the purpose of pulling cards, the Type 77 made it possible for one group of cards to pull corresponding cards from another group. Introduced in 1937, the IBM 77 collator rented for 0 a month. It was capable of handling 240 cards a minute, and was 40.5 inches long and 51 inches high. IBM withdrew the Type 77 from marketing on November 27, 1957.","price":3899,"imgAlt":"IBM 77 Electric Punched Card Collator","img":"electric-card-punch.jpg","stock":1000}, _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  _ _ _ ]
-```
-4. If you are done accessing the application, you can stop your server using the following command.
-
-   `mvn liberty:stop-server -DtestServerHttpPort=9082`
-
-Once you do this, you see the below messages.
-
-```
-[INFO] CWWKM2001I: Invoke command is [/Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/catalog/target/liberty/wlp/bin/server, stop, defaultServer].
-[INFO] objc[69022]: Class JavaLaunchHelper is implemented in both /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/bin/java (0x1038944c0) and /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/lib/libinstrument.dylib (0x10398e4e0). One of the two will be used. Which one is undefined.
-[INFO] Stopping server defaultServer.
-[INFO] Server defaultServer stopped.
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 2.126 s
-[INFO] Finished at: 2018-02-23T12:49:35-06:00
-[INFO] Final Memory: 13M/309M
-[INFO] ------------------------------------------------------------------------
-```
-### Locally in Containers
-
-To run the application in docker, we first need to define a Docker file.
-
-#### Docker file
-
-We are using Docker to containerize the application. With Docker, you can pack, ship, and run applications on a portable, lightweight container that can run anywhere virtually.
-
-```
-FROM websphere-liberty:microProfile
-
-MAINTAINER IBM Java engineering at IBM Cloud
-
-COPY /target/liberty/wlp/usr/servers/defaultServer /config/
-COPY target/liberty/wlp/usr/shared /opt/ibm/wlp/usr/shared/
-
-# Install required features if not present
-RUN installUtility install --acceptLicense defaultServer
-
-CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
-
-# Upgrade to production license if URL to JAR provided
-ARG LICENSE_JAR_URL
-RUN \
-  if [ $LICENSE_JAR_URL ]; then \
-    wget $LICENSE_JAR_URL -O /tmp/license.jar \
-    && java -jar /tmp/license.jar -acceptLicense /opt/ibm \
-    && rm /tmp/license.jar; \
-  fi
-```
-
-- The `FROM` instruction sets the base image. You're setting the base image to `websphere-liberty:microProfile`.
-- The `MAINTAINER` instruction sets the Author field. Here it is `IBM Java engineering at IBM Cloud`.
-- The `COPY` instruction copies directories and files from a specified source to a destination in the container file system.
-  - You're copying the `/target/liberty/wlp/usr/servers/defaultServer` to the `config` directory in the container.
-  - You're replacing the contents of `/opt/ibm/wlp/usr/shared/` with the contents of `target/liberty/wlp/usr/shared`.
-- The `RUN` instruction runs the commands.
-  - The instruction is a precondition to install all the utilities in the server.xml file. You can use the RUN command to install the utilities on the base image.
-- The `CMD` instruction provides defaults for an executing container.
-
-#### Running the application locally in a docker container
-
-1. Build the docker image.
-
-`docker build -t catalog:microprofile .`
-
-Once this is done, you will see something similar to the below messages.
-```
-Successfully built d626e09a941d
-Successfully tagged catalog:microprofile
-```
-You can see the docker images by using this command.
-
-`docker images`
-
-```
-REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
-catalog                                         microprofile        d626e09a941d        22 seconds ago      390MB
-```
-
-2. Run the docker image.
-
-`docker run -d -p 9280:9080 --name catalog -t --link inventory:inventory --link elasticsearch:elasticsearch --env-file catalog.env catalog:microprofile`
-
-When it is done, you can verify it using the below command.
-
-`docker ps`
-
-You will see something like below.
-
-```
-CONTAINER ID        IMAGE                               COMMAND                  CREATED             STATUS              PORTS                              NAMES
-8916b347e5dd        catalog:microprofile                "/opt/ibm/wlp/bin/se…"   1 second ago        Up 2 seconds        9443/tcp, 0.0.0.0:9280->9080/tcp   catalog
-7ad59d6b0a59        ibmcase/bluecompute-elasticsearch   "/run.sh"                12 minutes ago      Up 12 minutes       0.0.0.0:9200->9200/tcp, 9300/tcp   elasticsearch
-f0d52b900623        inventory:microprofile              "/opt/ibm/wlp/bin/se…"   2 days ago          Up 2 days           9443/tcp, 0.0.0.0:9180->9080/tcp   inventory
-736f27b676de        mysql                               "docker-entrypoint.s…"   2 days ago          Up 2 days           0.0.0.0:9041->3306/tcp             mysql
-```
-
-4. Validate the catalog in the following way.
-
-`curl -X GET http://localhost:9280/catalog/rest/items`
-
-You should now see a list of inventory items in your terminal.
-
-```
-[{"id":13405,"name":"Electric Card Collator","description":"The IBM 77 electric punched card collator performed many card filing and pulling operations. As a filing machine, the Type 77 fed and compared simultaneously two groups of punched cards: records already in file and records to be filed. These two groups were merged in correct numerical or alphabetical sequence. When operated for the purpose of pulling cards, the Type 77 made it possible for one group of cards to pull corresponding cards from another group. Introduced in 1937, the IBM 77 collator rented for 0 a month. It was capable of handling 240 cards a minute, and was 40.5 inches long and 51 inches high. IBM withdrew the Type 77 from marketing on November 27, 1957.","price":3899,"imgAlt":"IBM 77 Electric Punched Card Collator","img":"electric-card-punch.jpg","stock":1000}, _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  _ _ _ ]
-```
-
-5. Once you are done accessing the application, you can come out of the process. You can do this by pressing Ctrl+C on the command line where the server was started.
-
-6. You can also remove the container if desired. This can be done in the following way.
-
-`docker ps`
-
-```
-CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS                              NAMES
-8916b347e5dd        catalog:microprofile         "/opt/ibm/wlp/bin/se…"   1 second ago        Up 2 seconds        9443/tcp, 0.0.0.0:9280->9080/tcp   catalog
-```
-
-Grab the container id.
-
-- Do `docker stop <CONTAINER ID>`
-In this case it will be, `docker stop 8916b347e5dd`
-- Do `docker rm <CONTAINER ID>`
-In this case it will be, `docker rm 8916b347e5dd`
 
 ### Locally in Minikube
 
@@ -848,7 +602,11 @@ Client: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca5
 Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
 ```
 
-9. Run the helm chart as below.
+9. Before running the helm chart in minikube, access [values.yaml](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/catalog/chart/catalog/values.yaml) and replace the repository with the below.
+
+`repository: <Your IBM Cloud Private Docker registry>`
+
+Then run the helm chart.
 
 `helm install --name=catalog chart/catalog --tls`
 
@@ -926,10 +684,6 @@ You can access the application by clicking on http link.
 </p>
 
 **NOTE**: If you are using a version of ICP older than 2.1.0.2, you don't need to add the --tls at the end of the helm command.
-
-### DevOps Strategy
-
-TBD
 
 ### References
 
