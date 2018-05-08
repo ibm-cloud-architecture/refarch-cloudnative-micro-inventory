@@ -1,7 +1,5 @@
-FROM mysql
+FROM mysql:5.7.14
 
-ADD scripts/load-data.sh load-data.sh
-ADD scripts/load-data.sql load-data.sql
-RUN chmod u+x load-data.sh
+ADD scripts/load-data.sql /docker-entrypoint-initdb.d/
 
 CMD ["mysqld"]
