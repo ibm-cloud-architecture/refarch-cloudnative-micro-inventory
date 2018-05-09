@@ -32,7 +32,6 @@ This project demonstrates the implementation of Inventory Microservice. The inve
 
 - Based on [MicroProfile](https://microprofile.io/).
 - Uses MySQL as the inventory database.
-- Devops - TBD
 - Deployment options for Minikube environment and ICP.
 
 ### How it works
@@ -145,7 +144,7 @@ Finally, we must create a Kubernetes Cluster. As already said before, we are goi
 
 - [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
 
-We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
+We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. 
 
 2. Set Up MYSQL on IBM Cloud Private
 
@@ -216,7 +215,46 @@ Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a919
 Server: &version.Version{SemVer:"v2.5.0", GitCommit:"012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6", GitTreeState:"clean"}
 ```
 
-5. Run the helm chart as below.
+5. Build the docker image.
+
+Before building the docker image, set the docker environment.
+
+- Run the below command.
+
+`minikube docker-env`
+
+You will see the output similar to this.
+
+```
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.100:2376"
+export DOCKER_CERT_PATH="/Users/user@ibm.com/.minikube/certs"
+export DOCKER_API_VERSION="1.23"
+# Run this command to configure your shell:
+# eval $(minikube docker-env)
+```
+- For configuring your shell, run the below command.
+
+`eval $(minikube docker-env)`
+
+- Now run the docker build.
+
+```
+cd ..
+cd mysql
+```
+
+`docker build -t bc-inventorydb:v1.0.0 .`
+
+If it is a success, you will see the below output.
+
+```
+Successfully built 68h2dy63j9bd
+Successfully tagged bc-inventorydb:v1.0.0
+```
+Then run ` cd ../inventory`
+
+Run the helm chart as below.
 
 `helm install --name=inventorydb chart/inventorydb`
 
@@ -231,50 +269,6 @@ NAME                                        DESIRED   CURRENT   UP-TO-DATE   AVA
 bluecompute-inventorydb                     1         1         1            1           2m
 ```
 
-7. Enter your pod to access the sql client.
-
-`kubectl exec -it $(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | grep "inventorydb") bash`
-
-You will enter the shell and see something like below.
-
-```
-root@bluecompute-inventorydb-544bdfcffb-mc6g6:/#
-```
-
-8. Connect using the mysql cli, then provide your password you obtained previously in step 3.
-    
-`$ mysql -uroot -ppassword`
-
-You will see something like below.
-
-```
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 252
-Server version: 5.7.14 MySQL Community Server (GPL)
-
-Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql>
-```
-
-9. Copy the contents of the script [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/mysql/scripts/load-data.sql) and paste it in your console.
-
-Your database is already now.
-
-10. Enter `exit` to come out of mysql and enter `exit` to come out the ubuntu shell.
-
-```
-mysql> exit
-Bye
-root@bluecompute-inventorydb-544bdfcffb-mc6g6:/# exit
-logout
-```
 #### Set Up MYSQL on IBM Cloud Private
 
 1. Your [IBM Cloud Private Cluster](https://www.ibm.com/cloud/private) should be up and running.
@@ -326,11 +320,43 @@ Client: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca5
 Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
 ```
 
-9. Run the helm chart as below.
+9. Now run the docker build.
+
+```
+cd ..
+cd mysql
+```
+
+`docker build -t bc-inventorydb:v1.0.0 .`
+
+If it is a success, you will see the below output.
+
+```
+Successfully built h9u2cf24d7ad
+Successfully tagged bc-inventorydb:v1.0.0
+```
+
+Then run ` cd ../inventory`
+
+10. Tag the image to your private registry.
+
+`docker tag bc-inventorydb:v1.0.0 <Your ICP registry>/bc-inventorydb:v1.0.0`
+
+11. Push the image to your private registry.
+
+`docker push <Your ICP registry>/bc-inventorydb:v1.0.0`
+
+You should see something like below.
+
+```
+v1.0.0: digest: sha256:7f3deb2c43854df725efde5b0a3e6977cc7b6e8e26865b484d8cb20c2e4a6dd0 size: 3873
+```
+
+12. Run the helm chart as below.
 
 `helm install --name=inventorydb chart/inventorydb`
 
-10. Make sure your deployment is ready. To verify run this command and you should see the availability.
+13. Make sure your deployment is ready. To verify run this command and you should see the availability.
 
 `kubectl get deployments`
 
@@ -339,51 +365,6 @@ Yow will see message like below.
 ```
 NAME                                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 bluecompute-inventorydb                     1         1         1            1           2m
-```
-
-11. Enter your pod to access the sql client.
-
-`kubectl exec -it $(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | grep "inventorydb") bash`
-
-You will enter the shell and see something like below.
-
-```
-root@bluecompute-inventorydb-544bdfcffb-mc6g6:/#
-```
-
-12. Connect using the mysql cli, then provide your password you obtained previously in step 3.
-    
-`$ mysql -uroot -ppassword`
-
-You will see something like below.
-
-```
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 252
-Server version: 5.7.14 MySQL Community Server (GPL)
-
-Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql>
-```
-
-13. Copy the contents of the script [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/mysql/scripts/load-data.sql) and paste it in your console.
-
-Your database is already now.
-
-14. Enter `exit` to come out of mysql and enter `exit` to come out the ubuntu shell.
-
-```
-mysql> exit
-Bye
-root@bluecompute-inventorydb-544bdfcffb-mc6g6:/# exit
-logout
 ```
 
 **NOTE**: If you are using a version of ICP older than 2.1.0.2, you don't need to add the --tls at the end of the helm command.
@@ -405,7 +386,7 @@ Finally, we must create a Kubernetes Cluster. As already said before, we are goi
 
 - [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
 
-We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. We can learn there interesting things such as reusing our Docker daemon, getting the Minikube's ip or opening the Minikube's dashboard for GUI interaction with out Kubernetes Cluster.
+We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube.
 
 2. Remotely in ICP
 
@@ -504,12 +485,6 @@ Successfully built 36d1cf24d7ad
 Successfully tagged inventory:v1.0.0
 ```
 2. Run the helm chart as below.
-
-Before running the helm chart in minikube, access [values.yaml](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/inventory/chart/inventory/values.yaml) and replace the repository with the below.
-
-`repository: inventory`
-
-Then run the helm chart 
 
 `helm install --name=inventory chart/inventory`
 
