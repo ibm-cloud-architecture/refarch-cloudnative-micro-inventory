@@ -4,6 +4,7 @@ metadata:
   name: "{{  .Chart.Name }}-deployment"
   labels:
     chart: '{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
+    implementation: microprofile
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
@@ -12,6 +13,7 @@ spec:
       labels:
         app: "{{  .Chart.Name }}-selector"
         version: "current"
+        implementation: microprofile
     spec:
       containers:
       - name: "{{  .Chart.Name  }}"

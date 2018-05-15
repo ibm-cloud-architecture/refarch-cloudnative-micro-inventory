@@ -10,10 +10,12 @@ spec:
   route:
   - labels:
       version: "current"
+      implementation: microprofile
     weight: {{ .Values.istio.weight }}
 {{ if .Values.base.enabled }}
   - labels:
       version: "base"
+      implementation: microprofile
     weight: {{ .Values.base.weight }}
 {{ end }}
 {{ end }}
