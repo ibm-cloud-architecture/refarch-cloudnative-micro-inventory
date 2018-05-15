@@ -4,6 +4,7 @@ metadata:
   name: "{{  .Chart.Name }}-service"
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    implementation: microprofile
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -13,3 +14,4 @@ spec:
     port: {{ .Values.service.servicePortHttps }}
   selector:
     app: "{{  .Chart.Name }}-selector"
+    implementation: microprofile

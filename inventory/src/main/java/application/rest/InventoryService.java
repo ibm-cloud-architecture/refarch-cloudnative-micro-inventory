@@ -124,9 +124,6 @@ public class InventoryService {
 	        }
 	      };
 	      channel.basicConsume(QUEUE_NAME, true, consumer);
-	}
+    }
 
 }
-
-
-
