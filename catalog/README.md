@@ -437,13 +437,13 @@ export DOCKER_API_VERSION="1.23"
 
 - Now run the docker build.
 
-`docker build -t catalog:v1.0.0 .`
+`docker build -t catalog-mp:v1.0.0 .`
 
 If it is a success, you will see the below output.
 
 ```
 Successfully built aee7ed946e93
-Successfully tagged catalog:v1.0.0
+Successfully tagged catalog-mp:v1.0.0
 ```
 
 2. Run the helm chart as below.
@@ -520,22 +520,22 @@ You can find the detailed installation instructions for IBM Cloud Private [here]
 
 1. Now run the docker build.
 
-`docker build -t catalog:v1.0.0 .`
+`docker build -t catalog-mp:v1.0.0 .`
 
 If it is a success, you will see the below output.
 
 ```
 Successfully built aee7ed946e93
-Successfully tagged catalog:v1.0.0
+Successfully tagged catalog-mp:v1.0.0
 ```
 
 2. Tag the image to your private registry.
 
-`docker tag catalog:v1.0.0 <Your ICP registry>/catalog:v1.0.0`
+`docker tag catalog-mp:v1.0.0 <Your ICP registry>/catalog-mp:v1.0.0`
 
 3. Push the image to your private registry.
 
-`docker push <Your ICP registry>/catalog:v1.0.0`
+`docker push <Your ICP registry>/catalog-mp:v1.0.0`
 
 You should see something like below.
 
