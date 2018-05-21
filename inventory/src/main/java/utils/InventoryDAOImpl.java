@@ -11,7 +11,8 @@ import models.Inventory;
 
 public class InventoryDAOImpl {
 
-	public List getInventoryDetails(){
+	public List getInventoryDetails()
+	{
 		
 		List invData = new ArrayList<>();
 		
@@ -43,8 +44,10 @@ public class InventoryDAOImpl {
 		 }
 
 		return invData;
-		 }
-	public List<Inventory> findByNameContaining(String name){
+	}
+	
+	public List<Inventory> findByNameContaining(String name)
+	{
 		
 		List invData = new ArrayList<>();
 		
@@ -77,8 +80,10 @@ public class InventoryDAOImpl {
 		 }
 		System.out.println(invData);
 		return invData;
-		 }
-	public List<Inventory> findByPriceLessThanEqual(double price){
+	}
+	
+	public List<Inventory> findByPriceLessThanEqual(double price)
+	{
 		
 		List invData = new ArrayList<>();
 		
@@ -111,8 +116,10 @@ public class InventoryDAOImpl {
 		 }
 	    System.out.println(invData);
 		return invData;
-		 }
-	public Inventory findOne(long id){
+	}
+	
+	public Inventory findOne(long id)
+	{
 		
 		Inventory inventory = new Inventory();
 		
@@ -145,8 +152,10 @@ public class InventoryDAOImpl {
 		 }
 	    System.out.println(inventory);
 		return inventory;
-		 }
-	public void putInventoryDetails(){
+	}
+	
+	public void putInventoryDetails()
+	{
 
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		
@@ -177,7 +186,9 @@ public class InventoryDAOImpl {
 	      System.err.println(e.getMessage());
 	    }
 	}
-	public void save(Inventory item){
+	
+	public void save(Inventory item)
+	{
 
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		
@@ -204,7 +215,9 @@ public class InventoryDAOImpl {
 	      System.err.println(e.getMessage());
 	    }
 	}
-	public void updateStock(int stock, long id){
+	
+	public void updateStock(int stock, long id)
+	{
 
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		
