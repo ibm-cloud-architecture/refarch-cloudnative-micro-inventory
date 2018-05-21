@@ -1,24 +1,43 @@
 package application.rest;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.enterprise.context.ApplicationScoped;
 
-@Path("health")
-public class HealthEndpoint {
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response healthcheck() {
-      /*
-      if (!healthy) {
-        return Response.status(503).entity("{\"status\":\"DOWN\"}").build();
-      }
-      */
-      return Response.ok("{\"status\":\"UP\"}").build();
-    }
+import org.eclipse.microprofile.health.Health;
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+
+@Health
+@ApplicationScoped
+
+public class HealthEndpoint implements HealthCheck {
+
+	public boolean isInventoryDbReady(){
+		//Check if db is available
+		return true;
+	}
+	
+	public boolean isRabbitMQReady() {
+	    // check if rabbit is available?
+		return true;
+	  }
+	
+	@Override
+	public HealthCheckResponse call() {
+		// TODO Auto-generated method stub
+		
+		if (!isInventoryDbReady()) {
+		      return HealthCheckResponse.named(InventoryService.class.getSimpleName())
+		                                .withData("Inventory Database", "DOWN").down()
+		                                .build();
+		    }
+		
+		if (!isRabbitMQReady()) {
+		      return HealthCheckResponse.named(InventoryService.class.getSimpleName())
+		                                .withData("RabbitMQ", "DOWN").down()
+		                                .build();
+		    }
+		return HealthCheckResponse.named(InventoryService.class.getSimpleName()).up().build();
+	}
 
 }
