@@ -301,7 +301,7 @@ Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca5
 
 9. Run the helm chart as below.
 
-`helm install --name=es chart/ibmcase-elasticsearch`
+`helm install --name=es chart/ibmcase-elasticsearch --tls`
 
 10. Make sure your deployment is ready. To verify run this command and you should see the availability.
 
