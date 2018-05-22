@@ -354,7 +354,7 @@ v1.0.0: digest: sha256:7f3deb2c43854df725efde5b0a3e6977cc7b6e8e26865b484d8cb20c2
 
 12. Run the helm chart as below.
 
-`helm install --name=inventorydb chart/inventorydb`
+`helm install --name=inventorydb chart/inventorydb --tls`
 
 13. Make sure your deployment is ready. To verify run this command and you should see the availability.
 
