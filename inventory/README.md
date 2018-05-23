@@ -92,6 +92,10 @@ The config values are sorted according to their ordinal. We can override the low
 
 In our sample application, we obtained the configuration programatically.
 
+5. MicroProfile Health Check 1.0 - For MicroProfile implementations, this feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
+
+In our sample application, we injected this `/health` endpoint in our liveness probes.
+
 ### Building the app
 
 To build the application, we used maven build. Maven is a project management tool that is based on the Project Object Model (POM). Typically, people use Maven for project builds, dependencies, and documentation. Maven simplifies the project build. In this task, you use Maven to build the project.
