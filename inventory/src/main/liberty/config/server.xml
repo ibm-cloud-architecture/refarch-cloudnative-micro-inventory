@@ -2,7 +2,6 @@
 
   <featureManager>
       <feature>microprofile-1.2</feature>
-      <feature>mpHealth-1.0</feature>
   </featureManager>
 
   <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
