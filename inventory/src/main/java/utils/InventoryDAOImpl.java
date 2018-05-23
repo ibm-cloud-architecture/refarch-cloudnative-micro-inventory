@@ -154,68 +154,6 @@ public class InventoryDAOImpl {
 		return inventory;
 	}
 	
-	public void putInventoryDetails()
-	{
-
-		JDBCConnection jdbcConnection = new JDBCConnection();
-		
-		Connection connection = jdbcConnection.getConnection();
-		try
-	    {
-	      String query = " insert into inventorydb.items (id,stock,price,img_alt,img,name,description)"
-	        + " values (?, ?, ?, ?, ?, ?, ?)";
-
-	      // create the mysql insert preparedstatement
-	      PreparedStatement preparedStmt = connection.prepareStatement(query);
-	      preparedStmt.setLong(1, 13413);
-	      preparedStmt.setInt (2, 1000);
-	      preparedStmt.setDouble(3,  5199.99);
-	      preparedStmt.setString(4, "Selectric Typewriter");
-	      preparedStmt.setString(5, "selectric.jpg");
-	      preparedStmt.setString(6, "Selectric Typewriter");
-	      preparedStmt.setString(7, "Unveiled in 1961, the revolutionary Selectric typewriter eliminated the need for conventional type bars and movable carriages by using an innovative typing element on a head-and-rocker assembly, which, in turn, was mounted on a small carrier to move from left to right while typing.");
-	     
-	      // execute the preparedstatement
-	      preparedStmt.execute();
-	      
-	      connection.close();
-	    }
-	    catch (Exception e)
-	    {
-	      System.err.println("Got an exception!");
-	      System.err.println(e.getMessage());
-	    }
-	}
-	
-	public void save(Inventory item)
-	{
-
-		JDBCConnection jdbcConnection = new JDBCConnection();
-		
-		Connection connection = jdbcConnection.getConnection();
-		
-		int stock = item.getStock();
-		long id = item.getId();
-		try
-	    {
-	      String query = "update inventorydb.items SET stock = ? " + " WHERE id = ?";
-
-	      // create the mysql insert preparedstatement
-	      PreparedStatement preparedStmt = connection.prepareStatement(query);
-	      preparedStmt.setInt(1, stock);
-	      preparedStmt.setLong(2, id);
-	      // execute the preparedstatement
-	      preparedStmt.execute();
-	      
-	      connection.close();
-	    }
-	    catch (Exception e)
-	    {
-	      System.err.println("Got an exception!");
-	      System.err.println(e.getMessage());
-	    }
-	}
-	
 	public void updateStock(int stock, long id)
 	{
 
