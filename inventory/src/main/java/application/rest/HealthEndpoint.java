@@ -16,6 +16,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.GetResponse;
 
+import utils.JDBCConnection;
+
 @Health
 @ApplicationScoped
 
@@ -25,11 +27,22 @@ public class HealthEndpoint implements HealthCheck {
 	String health = "health_check";
 
 	public boolean isInventoryDbReady(){
-		//Check if db is available
-		return true;
+		
+		//Checking if the Inventory database is UP
+		
+        JDBCConnection jdbcConnection = new JDBCConnection();
+		
+		java.sql.Connection connection = jdbcConnection.getConnection();
+		
+		if(connection!=null) 
+			return true;
+		else
+		return false;
 	}
 
 	public boolean isRabbitMQReady() throws IOException, TimeoutException {
+		
+		//Checking if RabbitMQ is UP
 
 		boolean msgStatus = sendMessage();
 
@@ -59,7 +72,7 @@ public class HealthEndpoint implements HealthCheck {
 			boolean autoAck = true;
 			GetResponse response = channel.basicGet(QUEUE_NAME, autoAck);
 			if (response == null) {
-				// No message retrieved.
+				// There are no messages to retrieve
 			}
 			else
 			{
@@ -105,6 +118,7 @@ public class HealthEndpoint implements HealthCheck {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return HealthCheckResponse.named(InventoryService.class.getSimpleName()).withData("Inventory Service", "UP").up().build();
 	}
 
