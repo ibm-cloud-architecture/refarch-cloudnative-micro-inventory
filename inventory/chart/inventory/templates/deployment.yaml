@@ -23,16 +23,16 @@ spec:
 {{ else }}
         readinessProbe:
           httpGet:
-            path: /inventory/rest/health
+            path: /
             port: 9080
           initialDelaySeconds: 60
           timeoutSeconds: 60
         livenessProbe:
           httpGet:
-            path: /inventory/rest/health
+            path: /health
             port: 9080
-          initialDelaySeconds: 1500
-          timeoutSeconds: 500
+          initialDelaySeconds: 60
+          timeoutSeconds: 60
 {{ end }}
         resources:
           requests:
