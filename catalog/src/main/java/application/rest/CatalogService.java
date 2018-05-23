@@ -14,14 +14,11 @@ import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
-import org.eclipse.microprofile.health.Health;
-import org.eclipse.microprofile.health.HealthCheckResponse;
 
 import models.Item;
 
 @Path("/items")
 @Produces(MediaType.APPLICATION_JSON)
-@Health
 public class CatalogService {
 
 	@Inject
@@ -59,10 +56,5 @@ public class CatalogService {
     public List<Item> getByName(@PathParam("name") String name) {
         return itemsRepo.findByNameContaining(name);
     }
-
-  
-    public HealthCheckResponse call() {
-	    return HealthCheckResponse.named(CatalogService.class.getSimpleName()).up().build();
-	}
 
 }
