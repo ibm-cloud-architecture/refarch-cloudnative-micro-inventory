@@ -36,7 +36,9 @@ public class HealthEndpoint implements HealthCheck {
 		
 		try {
 			Response response = client.newCall(request).execute();
-			if(response.isSuccessful())
+			boolean status = response.isSuccessful();
+			response.close();
+			if(status)
 				return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -55,7 +57,9 @@ public class HealthEndpoint implements HealthCheck {
 		
 		try {
 			Response response = client.newCall(request).execute();
-			if(response.isSuccessful())
+			boolean status = response.isSuccessful();
+			response.close();
+			if(status)
 				return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
