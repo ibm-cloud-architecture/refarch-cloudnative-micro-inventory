@@ -7,19 +7,25 @@ import javax.inject.Inject;
 
 import client.InventoryServiceClient;
 import client.Item;
-
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public class InventoryRefreshTask extends Thread {
 
-	private static final int INVENTORY_REFRESH_SLEEP_TIME_MS = 60000;
+    public InventoryRefreshTask(InventoryServiceClient invClient) {
+        this.invClient = invClient;
+    }
 
-	private InventoryServiceClient invClient = new InventoryServiceClient();
+    private InventoryServiceClient invClient;
+
+    private static final int INVENTORY_REFRESH_SLEEP_TIME_MS = 60000;
+
+//	private InventoryServiceClient invClient = new InventoryServiceClient();
 
 	private ElasticSearch elasticSearch = new ElasticSearch() ;
 	
 	@Inject
 	ItemService itemsRepo;
- 
+
 	public void run() {
 		while (true) {
 			try {
