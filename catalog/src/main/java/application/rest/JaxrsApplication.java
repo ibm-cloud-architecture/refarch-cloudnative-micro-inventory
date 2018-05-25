@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-
 @ApplicationPath("/rest")
 @Singleton
 @Startup
@@ -19,11 +18,10 @@ public class JaxrsApplication extends Application {
     @Inject
     @RestClient
     private InventoryServiceClient invClient;
-//    InventoryRefreshTask inv;
 
-	@PostConstruct
+    @PostConstruct
     public void init() {
-		InventoryRefreshTask inv = new InventoryRefreshTask(invClient);
+        InventoryRefreshTask inv = new InventoryRefreshTask(invClient);
         inv.start();
     }
 
