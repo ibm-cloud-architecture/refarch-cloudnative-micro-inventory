@@ -19,3 +19,7 @@
 
 src/main/liberty/config/server.env
 /.apt_generated/
+
+/target
+/.m2
+/bin/
