@@ -1,21 +1,11 @@
 <server description="Sample Liberty server">
 
-  <featureManager>
-      <feature>microprofile-1.2</feature>
-      <feature>ejbLite-3.2</feature>
-      <!--<feature>jndi-1.0</feature>-->
-      <feature>appSecurity-2.0</feature>
-      <feature>jaxrs-2.0</feature>
-      <!--<feature>jsonp-1.0</feature>-->
-      <!--<feature>json-1.0</feature>-->
-      <feature>mpRestClient-1.0</feature>
-      <!--<feature>mpOpenAPI-1.0</feature>-->
-      <!--<feature>jaxrsClient-2.0</feature>-->
-      <feature>cdi-1.2</feature>
-  </featureManager>
+    <featureManager>
+        <feature>microprofile-1.2</feature>
+    </featureManager>
 
-  <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
-      id="defaultHttpEndpoint" host="*" />
+    <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
+                  id="defaultHttpEndpoint" host="*"/>
 
 
 </server>

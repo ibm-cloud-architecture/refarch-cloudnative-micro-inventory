@@ -24,7 +24,6 @@ import com.rabbitmq.client.Envelope;
 
 import utils.InventoryDAOImpl;
 
-
 @Path("/inv")
 public class InventoryService {
 

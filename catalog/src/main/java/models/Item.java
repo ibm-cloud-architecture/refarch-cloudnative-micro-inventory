@@ -2,7 +2,7 @@ package models;
 
 public class Item {
 
-	// Use generated ID
+    // Use generated ID
     private long id;
 
     // Item name
@@ -96,42 +96,42 @@ public class Item {
     }
 
     public boolean equals(Object otherObj) {
-    	if (otherObj.getClass() != Item.class) {
-    		return false;
-    	}
+        if (otherObj.getClass() != Item.class) {
+            return false;
+        }
 
-    	final Item otherItem = (Item)otherObj;
+        final Item otherItem = (Item) otherObj;
 
-    	if (otherItem.getId() != this.id) {
-    		return false;
-    	}
+        if (otherItem.getId() != this.id) {
+            return false;
+        }
 
-    	if (!otherItem.getName().equals(this.name)) {
-    		return false;
-    	}
+        if (!otherItem.getName().equals(this.name)) {
+            return false;
+        }
 
-    	if (!otherItem.getDescription().equals(this.description)) {
-    		return false;
-    	}
+        if (!otherItem.getDescription().equals(this.description)) {
+            return false;
+        }
 
-    	if (otherItem.getPrice() != this.price) {
-    		return false;
-    	}
+        if (otherItem.getPrice() != this.price) {
+            return false;
+        }
 
-    	if (!otherItem.getImg().equals(this.img)) {
-    		return false;
-    	}
+        if (!otherItem.getImg().equals(this.img)) {
+            return false;
+        }
 
-    	if (!otherItem.getImgAlt().equals(this.imgAlt)) {
-    		return false;
-    	}
+        if (!otherItem.getImgAlt().equals(this.imgAlt)) {
+            return false;
+        }
 
 
-    	if (otherItem.getStock() != this.stock) {
-    		return false;
-    	}
+        if (otherItem.getStock() != this.stock) {
+            return false;
+        }
 
-    	return true;
+        return true;
 
     }
 
