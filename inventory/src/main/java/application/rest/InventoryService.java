@@ -85,7 +85,7 @@ public class InventoryService {
         return invDetails;
     }
 
-    // Order service uese this API to update stock
+    // Order service uses this API to update stock
     @GET
     @Path("/stock")
     @Produces("application/json")

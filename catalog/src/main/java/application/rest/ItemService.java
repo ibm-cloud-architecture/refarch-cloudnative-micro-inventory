@@ -30,7 +30,7 @@ public class ItemService {
     // Optional
     private String user;
 
-    //Optional
+    // Optional
     private String password;
 
     private String index = config.getValue("elasticsearch_index", String.class);

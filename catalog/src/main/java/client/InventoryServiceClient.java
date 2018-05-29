@@ -16,12 +16,6 @@ public interface InventoryServiceClient {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/inventory")
     List<Item> getAllItems();
-
-    @GET
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Path("/check")
-    String healthCheck();
 
 }
