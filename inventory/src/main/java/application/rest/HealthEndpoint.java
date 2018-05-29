@@ -23,103 +23,98 @@ import utils.JDBCConnection;
 
 public class HealthEndpoint implements HealthCheck {
 
-	private final static String QUEUE_NAME = "health";
-	String health = "health_check";
+    private final static String QUEUE_NAME = "health";
+    String health = "health_check";
 
-	public boolean isInventoryDbReady(){
-		
-		//Checking if the Inventory database is UP
-		
+    public boolean isInventoryDbReady() {
+
+        //Checking if the Inventory database is UP
+
         JDBCConnection jdbcConnection = new JDBCConnection();
-		
-		java.sql.Connection connection = jdbcConnection.getConnection();
-		
-		if(connection!=null) 
-			return true;
-		else
-		return false;
-	}
 
-	public boolean isRabbitMQReady() throws IOException, TimeoutException {
-		
-		//Checking if RabbitMQ is UP
+        java.sql.Connection connection = jdbcConnection.getConnection();
 
-		boolean msgStatus = sendMessage();
+        if (connection != null)
+            return true;
+        else
+            return false;
+    }
 
-		if(msgStatus == true){
-			return true;
-		}
-		return false;
+    public boolean isRabbitMQReady() throws IOException, TimeoutException {
 
-	}
+        //Checking if RabbitMQ is UP
 
-	public boolean sendMessage(){
-		try
-		{
-			ConnectionFactory factory = new ConnectionFactory();
-			Config config = ConfigProvider.getConfig();
-			String rabbit_host = config.getValue("rabbit", String.class);
-			String sentMsg = null;
-			factory.setHost(rabbit_host);
-			Connection connection = factory.newConnection();
-			Channel channel = connection.createChannel();
+        boolean msgStatus = sendMessage();
 
-			channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        if (msgStatus == true) {
+            return true;
+        }
+        return false;
 
-			channel.basicPublish("", QUEUE_NAME, null, health.getBytes());
-			System.out.println("Sent the message '" + health + "'");
+    }
 
-			boolean autoAck = true;
-			GetResponse response = channel.basicGet(QUEUE_NAME, autoAck);
-			if (response == null) {
-				// There are no messages to retrieve
-			}
-			else
-			{
-				byte[] body = response.getBody();
-				sentMsg = new String(body);
-			}
+    public boolean sendMessage() {
+        try {
+            ConnectionFactory factory = new ConnectionFactory();
+            Config config = ConfigProvider.getConfig();
+            String rabbit_host = config.getValue("rabbit", String.class);
+            String sentMsg = null;
+            factory.setHost(rabbit_host);
+            Connection connection = factory.newConnection();
+            Channel channel = connection.createChannel();
 
-			if(sentMsg.equals(health)){
-				return true;
-			}
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
-			channel.close();
-			connection.close();
-			return false;
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			return false;
-		}
-		catch(TimeoutException e){
-			e.printStackTrace();
-			return false;
-		}
-		}
+            channel.basicPublish("", QUEUE_NAME, null, health.getBytes());
+            System.out.println("Sent the message '" + health + "'");
 
-	@Override
-	public HealthCheckResponse call() {
-		// TODO Auto-generated method stub
+            boolean autoAck = true;
+            GetResponse response = channel.basicGet(QUEUE_NAME, autoAck);
+            if (response == null) {
+                // There are no messages to retrieve
+            } else {
+                byte[] body = response.getBody();
+                sentMsg = new String(body);
+            }
 
-		if (!isInventoryDbReady()) {
-		      return HealthCheckResponse.named(InventoryService.class.getSimpleName())
-		                                .withData("Inventory Database", "DOWN").down()
-		                                .build();
-		    }
+            if (sentMsg.equals(health)) {
+                return true;
+            }
 
-		try {
-			if (!isRabbitMQReady()) {
-			      return HealthCheckResponse.named(InventoryService.class.getSimpleName())
-			                                .withData("RabbitMQ", "DOWN").down()
-			                                .build();
-			    }
-		} catch (IOException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return HealthCheckResponse.named(InventoryService.class.getSimpleName()).withData("Inventory Service", "UP").up().build();
-	}
+            channel.close();
+            connection.close();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public HealthCheckResponse call() {
+        // TODO Auto-generated method stub
+
+        if (!isInventoryDbReady()) {
+            return HealthCheckResponse.named(InventoryService.class.getSimpleName())
+                    .withData("Inventory Database", "DOWN").down()
+                    .build();
+        }
+
+        try {
+            if (!isRabbitMQReady()) {
+                return HealthCheckResponse.named(InventoryService.class.getSimpleName())
+                        .withData("RabbitMQ", "DOWN").down()
+                        .build();
+            }
+        } catch (IOException | TimeoutException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return HealthCheckResponse.named(InventoryService.class.getSimpleName()).withData("Inventory Service", "UP").up().build();
+    }
 
 }

@@ -22,20 +22,20 @@ import okhttp3.Response;
 
 @ApplicationScoped
 public class ItemService {
-	
-	Config config = ConfigProvider.getConfig();
+
+    Config config = ConfigProvider.getConfig();
 
     private String url = config.getValue("elasticsearch_url", String.class);
 
     // Optional
     private String user;
 
-    //Optional
+    // Optional
     private String password;
 
-    private String index= config.getValue("elasticsearch_index", String.class);
+    private String index = config.getValue("elasticsearch_index", String.class);
 
-    private String doc_type= config.getValue("elasticsearch_doc_type", String.class);
+    private String doc_type = config.getValue("elasticsearch_doc_type", String.class);
 
     private OkHttpClient client;
 
@@ -47,9 +47,9 @@ public class ItemService {
     // Get all rows from database
     public List<Item> findAll() {
         List<Item> list;
-        final String req_url = url+"/"+index+"/"+doc_type+"/_search?size=1000&pretty=1";
+        final String req_url = url + "/" + index + "/" + doc_type + "/_search?size=1000&pretty=1";
         final Response response = perform_request(req_url);
-        
+
         try {
             list = getItemsFromResponse(response);
         } catch (IOException e) {
@@ -75,7 +75,7 @@ public class ItemService {
             }
 
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
         }
 
         return item;
@@ -112,8 +112,8 @@ public class ItemService {
             }
 
             Request request = builder.build();
-            
-            response = client.newCall(request).execute();    
+
+            response = client.newCall(request).execute();
 
         } catch (IOException e) {
             // Just to be safe
@@ -128,8 +128,8 @@ public class ItemService {
         List<Item> list = new ArrayList<Item>();
         JSONObject resp = new JSONObject(response.body().string());
         if (!resp.has("hits")) {
-        	    // empty cache
-        	    return list;
+            // empty cache
+            return list;
         }
 
         JSONArray hits = resp.getJSONObject("hits").getJSONArray("hits");

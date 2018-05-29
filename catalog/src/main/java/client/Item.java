@@ -1,8 +1,8 @@
 package client;
 
 public class Item {
-	
-	// Use generated ID
+
+    // Use generated ID
     private long id;
 
     // Item name
@@ -22,7 +22,7 @@ public class Item {
 
     // Item stock
     private int stock;
-    
+
     public Item() {
     }
 
@@ -39,77 +39,77 @@ public class Item {
         this.stock = stock;
     }
 
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public int getPrice() {
-		return price;
-	}
-
-	public void setPrice(int price) {
-		this.price = price;
-	}
-
-	public String getImg() {
-		return img;
-	}
-
-	public void setImg(String img) {
-		this.img = img;
-	}
-
-	public String getImg_alt() {
-		return img_alt;
-	}
-
-	public void setImg_alt(String img_alt) {
-		this.img_alt = img_alt;
-	}
-
-	public int getStock() {
-		return stock;
-	}
-
-	public void setStock(int stock) {
-		this.stock = stock;
-	}
-	
-	public models.Item toModel() {
-    	final models.Item newItem = new models.Item();
-    	
-    	newItem.setId(this.id);
-    	newItem.setName(this.name);
-    	newItem.setDescription(this.description);
-    	newItem.setImg(this.img);
-    	newItem.setImgAlt(this.img_alt);
-    	newItem.setPrice(this.price);
-    	newItem.setStock(this.stock);
-    	
-    	return newItem;
+    public long getId() {
+        return id;
     }
-	
-	public String toString() {
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
+
+    public String getImg_alt() {
+        return img_alt;
+    }
+
+    public void setImg_alt(String img_alt) {
+        this.img_alt = img_alt;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public models.Item toModel() {
+        final models.Item newItem = new models.Item();
+
+        newItem.setId(this.id);
+        newItem.setName(this.name);
+        newItem.setDescription(this.description);
+        newItem.setImg(this.img);
+        newItem.setImgAlt(this.img_alt);
+        newItem.setPrice(this.price);
+        newItem.setStock(this.stock);
+
+        return newItem;
+    }
+
+    public String toString() {
         StringBuilder string = new StringBuilder();
         string.append("{\n");
         string.append(String.format("\t\"id\": %s,\n", this.id));

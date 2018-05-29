@@ -8,6 +8,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -23,107 +24,106 @@ import com.rabbitmq.client.Envelope;
 
 import utils.InventoryDAOImpl;
 
-
 @Path("/inv")
 public class InventoryService {
-	
-	private final static String QUEUE_NAME = "stock";
-	
-	@GET
-	 @Path("/check")
-	 @Produces("application/json")
-	 public String check(){
-	 return "it works!";
-	}
-	
-	@GET
-	 @Path("/inventory")
-	 @Produces("application/json")
-	 public String getInvDetails() {
-	 
-	 String invDetails = null;
-	 List invlist = null;
-	 InventoryDAOImpl inv = new InventoryDAOImpl();
 
-	 invlist = inv.getInventoryDetails();
+    private final static String QUEUE_NAME = "stock";
 
-	 Gson gson = new Gson();
-	 invDetails = gson.toJson(invlist);
-	 return invDetails;
-	}
-	
-	// find all by naming like /inventory/name/{name}
-	@GET
-	 @Path("inventory/name/{name}")
-	 @Produces("application/json")
-	public String findByNameContaining(@PathParam("name") String name) {
-		 
-		 String invDetails = null;
-		 List invlist = null;
-		 InventoryDAOImpl inv = new InventoryDAOImpl();
+    @GET
+    @Path("/check")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String check() {
+        return "it works!";
+    }
 
-		 invlist = inv.findByNameContaining(name);
+    @GET
+    @Path("/inventory")
+    @Produces("application/json")
+    public String getInvDetails() {
 
-		 Gson gson = new Gson();
-		 invDetails = gson.toJson(invlist);
-		 return invDetails;
-		}
-	
-	// find all whose price is less than or equal to /inventory/price/{price}
-	@GET
-	 @Path("inventory/price/{price}")
-	 @Produces("application/json")
-	public String findByPriceLessThanEqual(@PathParam("price") double price) {
-		 String invDetails = null;
-		 List invlist = null;
-		 InventoryDAOImpl inv = new InventoryDAOImpl();
+        String invDetails = null;
+        List invlist = null;
+        InventoryDAOImpl inv = new InventoryDAOImpl();
 
-		 invlist = inv.findByPriceLessThanEqual(price);
+        invlist = inv.getInventoryDetails();
 
-		 Gson gson = new Gson();
-		 invDetails = gson.toJson(invlist);
-		 return invDetails;
-		}
-	
-	// Order service uese this API to update stock 
-	@GET
-	 @Path("/stock")
-	 @Produces("application/json")
-	 public String stock() throws IOException, TimeoutException {
-	 consumer();
-	 return "Stock updated";
-	}
-	
-	public void consumer() throws IOException, TimeoutException{
-		ConnectionFactory factory = new ConnectionFactory();
-		Config config = ConfigProvider.getConfig();
-		String rabbit_host = config.getValue("rabbit", String.class);
-	    factory.setHost(rabbit_host);
-	    Connection connection = factory.newConnection();
-	    Channel channel = connection.createChannel();
+        Gson gson = new Gson();
+        invDetails = gson.toJson(invlist);
+        return invDetails;
+    }
 
-	    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-	    System.out.println(" Waiting ... Waiting ... Waiting for the messages");
-	    System.out.println(". To exit press CTRL+C");
-	   
-	    Consumer consumer = new DefaultConsumer(channel) {
-	        @Override
-	        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-	            throws IOException {
-	          String message = new String(body, "UTF-8");
-	          System.out.println("Received the message '" + message + "'");
-	          String[] splited = message.split(" ");
-	          
-	          InventoryDAOImpl inv = new InventoryDAOImpl();
-	          
-	          long id = Long.parseLong(splited[0]);
-	          int stock = Integer.parseInt(splited[1]);
-	          
-	 		  inv.updateStock(stock, id);
-	          
-	        }
-	      };
-	      channel.basicConsume(QUEUE_NAME, true, consumer);
+    // find all by naming like /inventory/name/{name}
+    @GET
+    @Path("inventory/name/{name}")
+    @Produces("application/json")
+    public String findByNameContaining(@PathParam("name") String name) {
+
+        String invDetails = null;
+        List invlist = null;
+        InventoryDAOImpl inv = new InventoryDAOImpl();
+
+        invlist = inv.findByNameContaining(name);
+
+        Gson gson = new Gson();
+        invDetails = gson.toJson(invlist);
+        return invDetails;
+    }
+
+    // find all whose price is less than or equal to /inventory/price/{price}
+    @GET
+    @Path("inventory/price/{price}")
+    @Produces("application/json")
+    public String findByPriceLessThanEqual(@PathParam("price") double price) {
+        String invDetails = null;
+        List invlist = null;
+        InventoryDAOImpl inv = new InventoryDAOImpl();
+
+        invlist = inv.findByPriceLessThanEqual(price);
+
+        Gson gson = new Gson();
+        invDetails = gson.toJson(invlist);
+        return invDetails;
+    }
+
+    // Order service uses this API to update stock
+    @GET
+    @Path("/stock")
+    @Produces("application/json")
+    public String stock() throws IOException, TimeoutException {
+        consumer();
+        return "Stock updated";
+    }
+
+    public void consumer() throws IOException, TimeoutException {
+        ConnectionFactory factory = new ConnectionFactory();
+        Config config = ConfigProvider.getConfig();
+        String rabbit_host = config.getValue("rabbit", String.class);
+        factory.setHost(rabbit_host);
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        System.out.println(" Waiting ... Waiting ... Waiting for the messages");
+        System.out.println(". To exit press CTRL+C");
+
+        Consumer consumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+                    throws IOException {
+                String message = new String(body, "UTF-8");
+                System.out.println("Received the message '" + message + "'");
+                String[] splited = message.split(" ");
+
+                InventoryDAOImpl inv = new InventoryDAOImpl();
+
+                long id = Long.parseLong(splited[0]);
+                int stock = Integer.parseInt(splited[1]);
+
+                inv.updateStock(stock, id);
+
+            }
+        };
+        channel.basicConsume(QUEUE_NAME, true, consumer);
     }
 
 }
