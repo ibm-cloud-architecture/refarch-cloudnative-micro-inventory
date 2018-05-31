@@ -5,6 +5,3 @@ package client;
 public class BaseInventoryException extends Exception {
 //    Logger LOG;
 }
-
-
-
