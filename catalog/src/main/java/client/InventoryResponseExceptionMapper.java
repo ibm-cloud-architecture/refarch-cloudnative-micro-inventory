@@ -12,7 +12,7 @@ public class InventoryResponseExceptionMapper implements ResponseExceptionMapper
 
     @Override
     public boolean handles(int statusCode, MultivaluedMap<String, Object> headers) {
-        LOG.info("status = " + statusCode);
+        LOG.info("Inventory Response Status = " + statusCode);
         return statusCode == 404    // Not Found
             || statusCode == 500;   // Generic Server Error (Service Not Available)
     }

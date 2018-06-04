@@ -6,10 +6,4 @@ public class ServiceNotReadyException extends BaseInventoryException {
         super();
     }
 
-    /*
-    public ServiceNotReadyException(String message) {
-        super(message);
-    }
-    */
-
 }

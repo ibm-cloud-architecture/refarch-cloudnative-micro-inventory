@@ -6,11 +6,5 @@ public class UnknownUrlException extends BaseInventoryException {
         super();
     }
 
-    /*
-    public UnknownUrlException(String message) {
-        super(message);
-    }
-    */
-
 }
 
