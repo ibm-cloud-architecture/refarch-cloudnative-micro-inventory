@@ -7,4 +7,3 @@ public class UnknownUrlException extends BaseInventoryException {
     }
 
 }
-
