@@ -1,7 +1,10 @@
 package application.rest;
 
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
@@ -18,27 +20,32 @@ import org.eclipse.microprofile.faulttolerance.Timeout;
 import models.Item;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 
+@RequestScoped
 @Path("/items")
 @Produces(MediaType.APPLICATION_JSON)
 public class CatalogService {
 
     @Inject
-    ItemService itemsRepo;
+    ItemService itemsRepo; 
 
-    //time in ms
-    @Timeout(1000)
-    @Retry(maxRetries = 10, maxDuration = 2000)
-    @CircuitBreaker(successThreshold = 5, requestVolumeThreshold = 2, failureRatio = 0.375,
-            delay = 1000)
+    @Timeout(value = 2, unit = ChronoUnit.SECONDS)
+    @Retry(maxRetries = 2, maxDuration= 2000)
     @Fallback(fallbackMethod = "fallbackInventory")
     @GET
     public List<Item> getInventory() {
-        return itemsRepo.findAll();
+    	List<Item> items = null;
+    	try {
+            Thread.sleep(10000);
+            items = itemsRepo.findAll();
+            return items;
+        } catch (InterruptedException e) {
+            System.out.println("serviceA interrupted");
+        }
+		return items;
     }
 
     public List<Item> fallbackInventory() {
-        List<Item> items = null;
-        return items;
+    	return Collections.emptyList();
     }
 
     @GET

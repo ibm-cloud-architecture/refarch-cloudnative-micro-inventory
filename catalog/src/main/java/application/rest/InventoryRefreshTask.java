@@ -46,6 +46,4 @@ public class InventoryRefreshTask extends Thread {
             }
         }
     }
-
 }
-
