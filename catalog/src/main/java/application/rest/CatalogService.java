@@ -74,8 +74,4 @@ public class CatalogService {
         return itemsRepo.findByNameContaining(name);
     }
 
-    public HealthCheckResponse call() {
-        return HealthCheckResponse.named(CatalogService.class.getSimpleName()).up().build();
-    }
-
 }
