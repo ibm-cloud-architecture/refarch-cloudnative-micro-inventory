@@ -66,7 +66,6 @@ public class HealthEndpoint implements HealthCheck {
             channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
             channel.basicPublish("", QUEUE_NAME, null, health.getBytes());
-            System.out.println("Sent the message '" + health + "'");
 
             boolean autoAck = true;
             GetResponse response = channel.basicGet(QUEUE_NAME, autoAck);

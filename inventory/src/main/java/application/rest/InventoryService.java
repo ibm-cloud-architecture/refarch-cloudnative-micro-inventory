@@ -40,7 +40,7 @@ public class InventoryService {
     @Path("/inventory")
     @Produces("application/json")
     public String getInvDetails() {
-
+        
         String invDetails = null;
         List invlist = null;
         InventoryDAOImpl inv = new InventoryDAOImpl();
