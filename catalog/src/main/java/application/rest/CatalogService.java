@@ -1,10 +1,9 @@
 package application.rest;
 
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,9 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
@@ -32,9 +28,11 @@ public class CatalogService {
     @Inject
     ItemService itemsRepo; 
     
-    private Config config = ConfigProvider.getConfig();
+    List<Item> list = null;
+    
+    //private Config config = ConfigProvider.getConfig();
 
-    private boolean ft_enabled = config.getValue("fault_tolerance_enabled", Boolean.class);
+    //private boolean ft_enabled = config.getValue("fault_tolerance_enabled", Boolean.class);
 
     @Timeout(value = 2, unit = ChronoUnit.SECONDS)
     @Retry(maxRetries = 2, maxDuration= 2000)
@@ -42,24 +40,21 @@ public class CatalogService {
     @GET
     public List<Item> getInventory() {
     	List<Item> items = null;
-    	if(ft_enabled){
-    	try {
-            Thread.sleep(10000);
-            items = itemsRepo.findAll();
-            return items;
-        } catch (InterruptedException e) {
-            System.out.println("serviceA interrupted");
-        }
-    	}
-    	else{
-    		items = itemsRepo.findAll();
-            return items;
-    	}
+    	items = itemsRepo.findAll();
 		return items;
     }
 
     public List<Item> fallbackInventory() {
-    	return Collections.emptyList();
+    	
+    	//Returns a default fallback list
+    	List<Item> list = new ArrayList<Item>();
+        Item item = new Item("Standard fallback message","Standard fallback message",0,"Standard fallback message","Catalog-fallback.jpg",0);
+        list.add(item);
+
+        return list;
+    	
+        //Returns emptylist
+        //return Collections.emptyList();
     }
 
     @GET
