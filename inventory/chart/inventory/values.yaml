@@ -13,10 +13,12 @@ image:
       cpu: 200m
       memory: 300Mi
 service:
-  name: Node
+  name: inventory
   type: ClusterIP
   servicePort: 9080
   servicePortHttps: 9443
+  sqlport: 3306
+  dbname: inventorydb
 hpa:
   enabled: false
   minReplicas: 1

@@ -82,9 +82,9 @@ configurationFiles:
 service:
   ## Specify a service type
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services---service-types
+  name: inventorydb
   type: ClusterIP
   port: 3306
-  servicename: bc-mysql
   # nodePort: 32000
 
 mysqlRootPassword: password

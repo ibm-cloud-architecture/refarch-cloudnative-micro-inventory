@@ -8,7 +8,6 @@ clustername: default-cluster
 
 service:
   name: catalog-elasticsearch
-  servicename: es-catalog-elasticsearch
 
 labels:
   datastore: elasticsearch

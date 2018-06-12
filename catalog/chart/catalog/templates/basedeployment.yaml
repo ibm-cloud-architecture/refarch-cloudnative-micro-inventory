@@ -2,9 +2,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "{{  .Chart.Name }}-basedeployment"
+  name: {{ .Release.Name }}-{{ .Values.service.name }}
   labels:
-    chart: '{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
+    chart: '{{ .Release.Name }}-{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
     implementation: microprofile
 spec:
   replicas: {{ .Values.base.replicaCount }}
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: "{{  .Chart.Name }}-selector"
+        app: "{{ .Release.Name }}-{{  .Chart.Name }}-selector"
         version: "base"
         implementation: microprofile
     spec:

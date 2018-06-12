@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "{{  .Chart.Name }}-deployment"
+  name: {{ .Release.Name }}-{{ .Values.service.name }}
   labels:
-    chart: '{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
+    chart: '{{ .Release.Name }}-{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
     implementation: microprofile
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: "{{  .Chart.Name }}-selector"
+        app: "{{ .Release.Name }}-{{  .Chart.Name }}-selector"
         version: "current"
         implementation: microprofile
     spec:
@@ -39,6 +39,10 @@ spec:
             cpu: "{{ .Values.image.resources.requests.cpu }}"
             memory: "{{ .Values.image.resources.requests.memory }}"
         env:
+          - name: elasticsearch_url
+            value: "http://{{ .Release.Name }}-catalog-elasticsearch:9200"
+          - name: inventory_health
+            value: "http://{{ .Release.Name }}-inventory:9080/health"
           - name: PORT
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME
@@ -73,3 +77,10 @@ spec:
                 name: apm-server-config
                 key: ibm_apm_access_token
                 optional: true
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/ibm/wlp/usr/shared
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}-{{ .Chart.Name }}-config

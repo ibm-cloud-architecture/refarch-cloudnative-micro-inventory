@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "inventorydb.fullname" . }}
+  name: {{ .Release.Name }}-{{ .Values.service.name }}
   labels:
     app: {{ template "inventorydb.fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

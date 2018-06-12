@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "inventorydb.fullname" . }}
+  name: {{ .Release.Name }}-{{ .Values.service.name }}
 data:
 {{- range $key, $val := .Values.configurationFiles }}
   {{ $key }}: |-

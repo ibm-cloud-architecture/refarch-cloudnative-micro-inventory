@@ -13,7 +13,7 @@ image:
       cpu: 200m
       memory: 300Mi
 service:
-  name: Node
+  name: catalog
   type: ClusterIP
   servicePort: 9080
   servicePortHttps: 9443
