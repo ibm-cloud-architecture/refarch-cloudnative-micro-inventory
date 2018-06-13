@@ -1,5 +1,8 @@
 package models;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+@Schema(name="Inventory", description="POJO that represents the Inventory item")
 public class Inventory {
 	private long id;
 

@@ -38,7 +38,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 		info = @Info(
 				title = "Catalog Service", 
 				version = "0.0", 
-				description = "getInventory API",
+				description = "Catalog APIs",
 				contact = @Contact(url = "https://github.com/ibm-cloud-architecture", name = "IBM CASE"),
 				license = @License(name = "License", url = "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/catalog/LICENSE")
 				)

@@ -6,12 +6,19 @@ import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.info.Contact;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.info.License;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
@@ -22,9 +29,19 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
+import models.Inventory;
 import utils.InventoryDAOImpl;
 
 @Path("/inv")
+@OpenAPIDefinition(
+		info = @Info(
+				title = "Inventory Service", 
+				version = "0.0", 
+				description = "Inventory APIs",
+				contact = @Contact(url = "https://github.com/ibm-cloud-architecture", name = "IBM CASE"),
+				license = @License(name = "License", url = "https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/inventory/LICENSE")
+				)
+		)
 public class InventoryService {
 
     private final static String QUEUE_NAME = "stock";
@@ -32,6 +49,35 @@ public class InventoryService {
     @GET
     @Path("/inventory")
     @Produces("application/json")
+    @APIResponses(value = {
+            @APIResponse( 
+            		responseCode = "404", 
+            		description = "Inventory Not Found", 
+            		content = @Content( 
+            				mediaType = "text/plain"
+            				)
+            		),
+            @APIResponse( 
+            		responseCode = "500", 
+            		description = "Internal Server Error", 
+            		content = @Content( 
+            				mediaType = "text/plain"
+            				)
+            		),
+            @APIResponse( 
+            		responseCode = "200",
+            		description = "List of items from the Inventory", 
+            		content = @Content( 
+            				mediaType = "application/json", 
+            				schema = @Schema(implementation = Inventory.class)
+            				)
+            		)
+            }
+    )
+    @Operation( 
+    		summary = "Get Inventory Items", 
+    		description = "Retriving all the available items from the inventory database"
+    		)
     public String getInvDetails() {
         
         String invDetails = null;
@@ -48,10 +94,31 @@ public class InventoryService {
     // Order service uses this API to update stock
     @GET
     @Path("/stock")
-    @Produces("application/json")
+    @Produces("text/plain")
+    @APIResponses(value = {
+            @APIResponse( 
+            		responseCode = "500", 
+            		description = "Internal Server Error", 
+            		content = @Content( 
+            				mediaType = "text/plain"
+            				)
+            		),
+            @APIResponse( 
+            		responseCode = "200",
+            		description = "Stock Validation", 
+            		content = @Content( 
+            				mediaType = "text/plain"
+            				)
+            		)
+            }
+    )
+    @Operation( 
+    		summary = "Stock Validation", 
+    		description = "Validates the Inventory Stock"
+    		)
     public String stock() throws IOException, TimeoutException {
         consumer();
-        return "Stock updated";
+        return "Stock Validated";
     }
 
     public void consumer() throws IOException, TimeoutException {
