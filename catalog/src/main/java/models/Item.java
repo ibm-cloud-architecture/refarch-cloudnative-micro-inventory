@@ -1,5 +1,8 @@
 package models;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+@Schema(name="Item", description="POJO that represents the items of the catalog")
 public class Item {
 
     // Use generated ID
