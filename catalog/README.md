@@ -100,9 +100,13 @@ In our sample application, we obtained the configuration programatically.
 
 5. Microprofile Fault Tolerance - Helps to build faulttolerance microservices. In some situations, there may be some impact on the system and it may fail due to several reasons. To avoid such failures, we can design fault tolerant microservices using this feature.
 
+In our sample application, we used @Timeout, @Retry and @Fallback.
+
 6. MicroProfile Health Check 1.0 - For MicroProfile implementations, this feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
 
 In our sample application, we injected this `/health` endpoint in our liveness probes.
+
+7. MicroProfile Rest Client - This feature helps us to define typesafe rest clients. These are defined as Java interfaces. The available RESTful apis in our sample application are invoked in a type safe manner.
 
 ### Building the app
 
