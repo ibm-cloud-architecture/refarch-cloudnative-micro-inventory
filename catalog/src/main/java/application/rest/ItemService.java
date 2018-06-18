@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,11 +46,16 @@ public class ItemService {
         client = new OkHttpClient();
     }
 
-    // Get all rows from database
     @Timed(name = "Inventory.timer", 
-    		absolute = true,
-    		displayName="Inventory",
-    	    description = "Time taken by the inventory")
+    	   absolute = true,
+    	   displayName="Inventory Timer",
+    	   description = "Time taken by the Inventory")
+    @Counted(name="Inventory",
+    		 absolute = true,
+             displayName="Inventory Call count", 
+             description="Number of times the Inventory call happened.", 
+             monotonic=true)
+    // Get all rows from database
     public List<Item> findAll() {
         List<Item> list;
         final String req_url = url + "/" + index + "/" + doc_type + "/_search?size=1000&pretty=1";
