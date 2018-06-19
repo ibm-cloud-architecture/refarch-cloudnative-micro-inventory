@@ -41,6 +41,8 @@ spec:
         env:
           - name: jdbcURL
             value: "jdbc:mysql://{{ .Release.Name }}-{{ .Values.service.dbname }}:{{ .Values.service.sqlport }}/inventorydb?useSSL=false"
+          - name: rabbit
+            value: "{{ .Release.Name }}-{{ .Values.service.rabbitmq }}"
           - name: PORT
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME

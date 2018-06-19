@@ -19,6 +19,7 @@ service:
   servicePortHttps: 9443
   sqlport: 3306
   dbname: inventorydb
+  rabbitmq: rabbitmq
 hpa:
   enabled: false
   minReplicas: 1
