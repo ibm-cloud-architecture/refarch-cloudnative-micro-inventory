@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Metered;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.info.Contact;
@@ -32,7 +36,8 @@ import com.rabbitmq.client.Envelope;
 import models.Inventory;
 import utils.InventoryDAOImpl;
 
-@Path("/inv")
+@ApplicationScoped
+@Path("/inventory")
 @OpenAPIDefinition(
 		info = @Info(
 				title = "Inventory Service", 
@@ -47,7 +52,6 @@ public class InventoryService {
     private final static String QUEUE_NAME = "stock";
 
     @GET
-    @Path("/inventory")
     @Produces("application/json")
     @APIResponses(value = {
             @APIResponse( 
@@ -78,6 +82,21 @@ public class InventoryService {
     		summary = "Get Inventory Items", 
     		description = "Retriving all the available items from the inventory database"
     		)
+    @Timed(name = "Inventory.timer", 
+	   	   absolute = true,
+	   	   displayName="Inventory Timer",
+	   	   description = "Time taken by the Inventory",
+	   	   reusable=true)
+    @Counted(name="Inventory",
+		     absolute = true,
+		     displayName="Inventory Call count", 
+		     description="Number of times the Inventory call happened.", 
+		     monotonic=true,
+		     reusable=true)
+    @Metered(name="InventoryMeter",
+		     displayName="Inventory Call Frequency", 
+		     description="Rate of the calls made to Inventory",
+		     reusable=true)
     public String getInvDetails() {
         
         String invDetails = null;

@@ -4,4 +4,4 @@ metadata:
   name: {{ .Release.Name }}-{{ .Chart.Name }}-config
 data:
   jvm.options: |
-    -Dclient.InventoryServiceClient/mp-rest/url=http://{{ .Release.Name }}-inventory:9080/inventory/rest/inv/inventory
+    -Dclient.InventoryServiceClient/mp-rest/url=http://{{ .Release.Name }}-inventory:9080/inventory/rest/inventory
