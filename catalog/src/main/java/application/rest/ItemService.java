@@ -9,6 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Metered;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -49,12 +50,18 @@ public class ItemService {
     @Timed(name = "Inventory.timer", 
     	   absolute = true,
     	   displayName="Inventory Timer",
-    	   description = "Time taken by the Inventory")
+    	   description = "Time taken by the Inventory",
+    	   reusable=true)
     @Counted(name="Inventory",
     		 absolute = true,
              displayName="Inventory Call count", 
              description="Number of times the Inventory call happened.", 
-             monotonic=true)
+             monotonic=true,
+             reusable=true)
+    @Metered(name="InventoryMeter",
+    		 displayName="Inventory Call Frequency", 
+             description="Rate of the calls made to Inventory",
+             reusable=true)
     // Get all rows from database
     public List<Item> findAll() {
         List<Item> list;
