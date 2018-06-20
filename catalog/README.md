@@ -113,6 +113,10 @@ In our sample application, we injected this `/health` endpoint in our liveness p
 
 In our sample application we used @OpenAPIDefinition, @Info, @Contact, @License, @APIResponses, @APIResponse, @Content, @Schema, @Operation and @Parameter annotations.
 
+9. MicroProfile Metrics - This feature allows us to expose telemetry data. Using this, developers can monitor their services with the help of metrics.
+
+In our sample application, we used @Timed, @Counted and @Metered annotations. These metrics are reused using reuse functionality. We also integrated Microprofile metrics with Prometheus.
+
 ### Building the app
 
 To build the application, we used maven build. Maven is a project management tool that is based on the Project Object Model (POM). Typically, people use Maven for project builds, dependencies, and documentation. Maven simplifies the project build. In this task, you use Maven to build the project.
