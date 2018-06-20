@@ -83,7 +83,7 @@ You should also include a feature in [server.xml](https://github.com/ibm-cloud-a
 
 3. JAX-RS 2.0.1 - JAX-RS is used for providing both standard client and server APIs for RESTful communication by MicroProfile applications.
 
-4. Eclipse MicroProfile Config 1.1 - Configuration data comes from different sources like system properties, system environment variables, .properties etc. These values may change dynamically. Using this feature, helps us to pick up configured values immediately after they got changed.
+4. Eclipse MicroProfile Config - Configuration data comes from different sources like system properties, system environment variables, .properties etc. These values may change dynamically. Using this feature, helps us to pick up configured values immediately after they got changed.
 
 The config values are sorted according to their ordinal. We can override the lower importance values from outside. The config sources by default, below is the order of importance.
 
@@ -93,13 +93,17 @@ The config values are sorted according to their ordinal. We can override the low
 
 In our sample application, we obtained the configuration programatically.
 
-5. MicroProfile Health Check 1.0 - For MicroProfile implementations, this feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
+5. MicroProfile Health Check - For MicroProfile implementations, this feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
 
 In our sample application, we injected this `/health` endpoint in our liveness probes.
 
-6. MicroProfile OpenAPI 1.0 - This feature helps us to expose the API documentation for the RESTful services. It allows the developers to produce OpenAPI v3 documents for their JAX-RS applications.
+6. MicroProfile OpenAPI - This feature helps us to expose the API documentation for the RESTful services. It allows the developers to produce OpenAPI v3 documents for their JAX-RS applications.
 
-In our sample application we used @OpenAPIDefinition, @Info, @Contact, @License, @APIResponses, @APIResponse, @Content, @Schema and @Operation annotations.
+In our sample application, we used @OpenAPIDefinition, @Info, @Contact, @License, @APIResponses, @APIResponse, @Content, @Schema and @Operation annotations.
+
+7. MicroProfile Metrics - This feature allows us to expose telemetry data. Using this, developers can monitor their services with the help of metrics.
+
+In our sample application, we used @Timed, @Counted and @Metered annotations. These metrics are reused using `reuse` functionality. We also integrated them with Prometheus.
 
 ### Building the app
 
