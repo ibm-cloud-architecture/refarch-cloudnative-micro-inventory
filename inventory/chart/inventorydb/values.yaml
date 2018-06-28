@@ -1,10 +1,10 @@
 ## mysql image version
 ## ref: https://hub.docker.com/r/library/mysql/tags/
 ##
-#image: "ibmcase/bc-inventorydb"
+image: "ibmcase/bc-inventorydb"
 #image: "registry.csplab.cloudns.cx/microprofile/bc-inventorydb"
-image: "bc-inventorydb"
-imageTag: "v1.0.0"
+#image: "bc-inventorydb"
+imageTag: "v2.0.0"
 
 ## Specify password for root user
 ##
