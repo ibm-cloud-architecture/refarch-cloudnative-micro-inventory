@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: {{ template "inventorydb.fullname" . }}
+        release: {{ .Release.Name }}
         implementation: microprofile
     spec:
       initContainers:
