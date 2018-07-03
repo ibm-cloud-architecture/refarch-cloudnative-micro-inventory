@@ -4,6 +4,7 @@ metadata:
   name: {{ .Release.Name }}-{{ .Values.service.name }}
   labels:
     chart: '{{ .Release.Name }}-{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
+    release: {{ .Release.Name }}
     implementation: microprofile
 spec:
   replicas: {{ .Values.replicaCount }}
@@ -13,6 +14,7 @@ spec:
       labels:
         app: "{{ .Release.Name }}-{{  .Chart.Name }}-selector"
         version: "current"
+        release: {{ .Release.Name }}
         implementation: microprofile
     spec:
       containers:
@@ -31,8 +33,8 @@ spec:
           httpGet:
             path: /health
             port: 9080
-          initialDelaySeconds: 60
-          timeoutSeconds: 60
+          initialDelaySeconds: 1500
+          timeoutSeconds: 500
 {{ end }}
         resources:
           requests:

@@ -14,7 +14,7 @@ image:
       memory: 300Mi
 service:
   name: catalog
-  type: ClusterIP
+  type: NodePort
   servicePort: 9080
   servicePortHttps: 9443
 hpa:

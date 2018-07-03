@@ -14,7 +14,7 @@ image:
       memory: 300Mi
 service:
   name: inventory
-  type: ClusterIP
+  type: NodePort
   servicePort: 9080
   servicePortHttps: 9443
   sqlport: 3306
