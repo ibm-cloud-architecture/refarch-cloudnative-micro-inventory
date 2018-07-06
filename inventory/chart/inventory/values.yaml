@@ -20,6 +20,8 @@ service:
   sqlport: 3306
   dbname: inventorydb
   rabbitmq: rabbitmq
+  zipkinPort: 9411
+  zipkinName: zipkin
 hpa:
   enabled: false
   minReplicas: 1

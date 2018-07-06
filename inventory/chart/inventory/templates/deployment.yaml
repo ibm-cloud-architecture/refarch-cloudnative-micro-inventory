@@ -49,3 +49,7 @@ spec:
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME
             value: "{{ .Release.Name }}"
+          - name: zipkinHost
+            value: "{{ .Release.Name }}-{{ .Values.service.zipkinName }}"
+          - name: zipkinPort
+            value: "{{ .Values.service.zipkinPort }}"
