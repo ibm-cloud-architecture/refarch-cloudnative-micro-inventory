@@ -20,6 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <version.download-maven-plugin>1.4.0</version.download-maven-plugin>
 
         <app.name>catalog</app.name>
         <testServerHttpPort>9080</testServerHttpPort>
@@ -129,9 +130,7 @@
                 <artifactId>liberty-maven-plugin</artifactId>
                 <configuration>
                     <install>
-                        <runtimeUrl>
-                            https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.5.0.0.zip
-                        </runtimeUrl>
+                        <runtimeUrl>https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/wlp-beta-2018.5.0.0.zip</runtimeUrl>
                     </install>
                     <configFile>${basedir}/src/main/liberty/config/server.xml</configFile>
                     <serverEnv>${basedir}/src/main/liberty/config/server.env</serverEnv>
@@ -145,9 +144,31 @@
                     </bootstrapProperties>
                     <features>
                         <acceptLicense>true</acceptLicense>
+                        <feature>microprofile-1.3</feature>
+                        <feature>ejbLite-3.2</feature>
                     </features>
                     <looseApplication>false</looseApplication>
                 </configuration>
+            </plugin>
+            <!-- Plugin to install opentracing zipkin tracer -->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>${version.download-maven-plugin}</version>
+                <executions>
+                  <execution>
+                    <id>install-tracer</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                      <goal>wget</goal>
+                    </goals>
+                    <configuration>
+                      <url>https://repo1.maven.org/maven2/net/wasdev/wlp/tracer/liberty-opentracing-zipkintracer/1.0/liberty-opentracing-zipkintracer-1.0-sample.zip</url>
+                      <unpack>true</unpack>
+                      <outputDirectory>${project.build.directory}/liberty/wlp/usr</outputDirectory>
+                    </configuration>
+                  </execution>
+                </executions>
             </plugin>
             <!-- Plugin to run functional tests -->
             <plugin>

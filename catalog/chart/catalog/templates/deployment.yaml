@@ -45,6 +45,10 @@ spec:
             value: "http://{{ .Release.Name }}-catalog-elasticsearch:9200"
           - name: inventory_health
             value: "http://{{ .Release.Name }}-inventory:9080/health"
+          - name: zipkinHost
+            value: "{{ .Release.Name }}-{{ .Values.service.zipkinName }}"
+          - name: zipkinPort
+            value: "{{ .Values.service.zipkinPort }}"
           - name: PORT
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME
