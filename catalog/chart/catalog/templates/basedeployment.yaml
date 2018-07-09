@@ -44,4 +44,8 @@ spec:
         env:
           - name: PORT
             value: "{{ .Values.service.servicePort }}"
+          - name: zipkinHost
+            value: "{{ .Release.Name }}-{{ .Values.service.zipkinName }}"
+          - name: zipkinPort
+            value: "{{ .Values.service.zipkinPort }}"
 {{ end }}

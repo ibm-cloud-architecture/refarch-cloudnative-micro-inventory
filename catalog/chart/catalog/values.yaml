@@ -17,6 +17,8 @@ service:
   type: NodePort
   servicePort: 9080
   servicePortHttps: 9443
+  zipkinPort: 9411
+  zipkinName: zipkin
 hpa:
   enabled: false
   minReplicas: 1
