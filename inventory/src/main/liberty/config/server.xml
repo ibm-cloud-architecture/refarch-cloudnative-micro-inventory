@@ -11,5 +11,10 @@
     <quickStartSecurity userName="admin" userPassword="password"/>
 
     <opentracingZipkin host="${env.zipkinHost}" port="${env.zipkinPort}"/>
+    
+    <webApplication name="inventory" location="${app.location}">
+    	<!-- enable visibility to third party apis -->
+    	<classloader apiTypeVisibility="api,ibm-api,spec,stable,third-party"/>
+  	</webApplication>
 
 </server>

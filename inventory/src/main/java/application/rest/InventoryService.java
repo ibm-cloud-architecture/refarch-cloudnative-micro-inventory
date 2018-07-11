@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -23,6 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.opentracing.Traced;
 
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
@@ -33,6 +35,8 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
+import io.opentracing.Tracer;
+import io.opentracing.ActiveSpan;
 import models.Inventory;
 import utils.InventoryDAOImpl;
 
@@ -51,6 +55,9 @@ import utils.InventoryDAOImpl;
 public class InventoryService {
 
     private final static String QUEUE_NAME = "stock";
+    
+    @Inject
+    Tracer tracer;
 
     @GET
     @Produces("application/json")
@@ -98,6 +105,7 @@ public class InventoryService {
             displayName = "Inventory Call Frequency",
             description = "Rate of the calls made to Inventory",
             reusable = true)
+    @Traced(value = true, operationName = "getInvDetails.list")
     public String getInvDetails() {
         String invDetails = null;
         List invlist = null;
@@ -135,12 +143,14 @@ public class InventoryService {
             summary = "Stock Validation",
             description = "Validates the Inventory Stock"
     )
+    @Traced(value = true, operationName = "StockValidation")
     public String stock() throws IOException, TimeoutException {
         consumer();
         return "Stock Validated";
     }
 
     public void consumer() throws IOException, TimeoutException {
+      try (ActiveSpan childSpan = tracer.buildSpan("Grabbing messages from Messaging System").startActive()) {
         ConnectionFactory factory = new ConnectionFactory();
         Config config = ConfigProvider.getConfig();
         String rabbit_host = config.getValue("rabbit", String.class);
@@ -170,6 +180,7 @@ public class InventoryService {
             }
         };
         channel.basicConsume(QUEUE_NAME, true, consumer);
+      }
     }
 
 }

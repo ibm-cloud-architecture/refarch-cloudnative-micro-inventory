@@ -28,6 +28,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.opentracing.Traced;
+
+import io.opentracing.ActiveSpan;
+import io.opentracing.Tracer;
+
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 
 
@@ -47,6 +52,9 @@ public class CatalogService {
 
     @Inject
     ItemService itemsRepo;
+    
+    @Inject
+    Tracer tracer;
 
     List<Item> list = null;
 
@@ -87,6 +95,7 @@ public class CatalogService {
             summary = "Get Inventory Items",
             description = "Retrieving all the available items from the cache"
     )
+    @Traced(value = true, operationName = "getCatalog.list")
     public List<Item> getInventory() {
         List<Item> items = null;
         items = itemsRepo.findAll();
@@ -95,12 +104,14 @@ public class CatalogService {
 
     public List<Item> fallbackInventory() {
 
+    	try (ActiveSpan childSpan = tracer.buildSpan("Grabbing messages from Messaging System").startActive()) {
         //Returns a default fallback list
         List<Item> list = new ArrayList<Item>();
         Item item = new Item("Standard fallback message", "Standard fallback message", 0, "Standard fallback message", "Catalog-fallback.jpg", 0);
         list.add(item);
 
         return list;
+    	}
 
         //Returns emptylist
         //return Collections.emptyList();
@@ -133,6 +144,7 @@ public class CatalogService {
             summary = "Get Inventory Items by Id",
             description = "Retrieving the item from cache based on id"
     )
+    @Traced(value = true, operationName = "getCatalogById")
     public Response getById(@Parameter(description = "The id of the item that needs to be fetched. For testing, use 13401", required = true) @PathParam("id") long id) {
         final Item item = itemsRepo.findById(id);
         if (item == null) {
