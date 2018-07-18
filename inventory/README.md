@@ -17,13 +17,13 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 * [Implementation](#implementation)
     + [Microprofile](#microprofile)
 * [Features](#features)
-* [App details](#app-details)
 * [Deploying the App](#deploying-the-app)
     + [Minikube](#minikube)
     + [IBM Cloud Private](#ibm-cloud-private)
 * [Run Inventory Service locally](#run-inventory-service-locally)
     + [Building the app](#building-the-app)
     + [Setting up MYSQL](#setting-up-mysql)
+    + [Setting up Zipkin](#setting-up-zipkin)
     + [Running the app and stopping it](#running-the-app-and-stopping-it)
 * [References](#references)
 
@@ -79,11 +79,11 @@ You should also include a feature in [server.xml](https://github.com/ibm-cloud-a
 
 1. Java SE 8 - Used Java Programming language
 
-2. CDI 1.2 - Used CDI for typesafe dependency injection
+2. [CDI 1.2](https://jcp.org/en/jsr/detail?id=346) - Used CDI for typesafe dependency injection
 
-3. JAX-RS 2.0.1 - JAX-RS is used for providing both standard client and server APIs for RESTful communication by MicroProfile applications.
+3. [JAX-RS 2.0](https://jcp.org/en/jsr/detail?id=339) - JAX-RS is used for providing both standard client and server APIs for RESTful communication by MicroProfile applications.
 
-4. Eclipse MicroProfile Config - Configuration data comes from different sources like system properties, system environment variables, .properties etc. These values may change dynamically. Using this feature, helps us to pick up configured values immediately after they got changed.
+4. [Eclipse MicroProfile Config](https://github.com/eclipse/microprofile-config) - Configuration data comes from different sources like system properties, system environment variables, .properties etc. These values may change dynamically. Using this feature, helps us to pick up configured values immediately after they got changed.
 
 The config values are sorted according to their ordinal. We can override the lower importance values from outside. The config sources by default, below is the order of importance.
 
@@ -93,37 +93,36 @@ The config values are sorted according to their ordinal. We can override the low
 
 In our sample application, we obtained the configuration programatically.
 
-5. MicroProfile Health Check - This feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
+5. [MicroProfile Health Check](https://github.com/eclipse/microprofile-health) - This feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
 
 In our sample application, we injected this `/health` endpoint in our liveness probes.
 
-6. MicroProfile OpenAPI - This feature helps us to expose the API documentation for the RESTful services. It allows the developers to produce OpenAPI v3 documents for their JAX-RS applications.
+6. [MicroProfile OpenAPI](https://github.com/eclipse/microprofile-open-api) - This feature helps us to expose the API documentation for the RESTful services. It allows the developers to produce OpenAPI v3 documents for their JAX-RS applications.
 
 In our sample application, we used @OpenAPIDefinition, @Info, @Contact, @License, @APIResponses, @APIResponse, @Content, @Schema and @Operation annotations.
 
-7. MicroProfile Metrics - This feature allows us to expose telemetry data. Using this, developers can monitor their services with the help of metrics.
+7. [MicroProfile Metrics](https://github.com/eclipse/microprofile-metrics) - This feature allows us to expose telemetry data. Using this, developers can monitor their services with the help of metrics.
 
 In our sample application, we used @Timed, @Counted and @Metered annotations. These metrics are reused using `reuse` functionality. We also integrated them with Prometheus.
 
-8. MicroProfile OpenTracing - This feature enables distributed tracing. It helps us to analyze the transcation flow so that the we can easily debug the problematic services and fix them.
+8. [MicroProfile OpenTracing](https://github.com/eclipse/microprofile-opentracing) - This feature enables distributed tracing. It helps us to analyze the transcation flow so that the we can easily debug the problematic services and fix them. It enables and allows for custom tracing of JAX-RS and non-JAX-RS methods. 
 
-In our sample application, we used [Zipkin](https://zipkin.io/) as our distributed tracing system.
-
-## App details
-
-TBD
+In our sample application, we used [Zipkin](https://zipkin.io/) as our distributed tracing system. We used @Traced and an ActiveSpan object to retrieve messages.
 
 ## Deploying the App
 
-TBD
+To build and run the entire BlueCompute demo application, each MicroService must be spun up together. This is due to how we
+set up our Helm charts structure and how we dynamically produce our endpoints and URLs.  
+
+Further instructions are provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile).
 
 ### Minikube
 
-TBD
+To deploy it on Minikube, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile#locally-in-minikube).
 
 ### IBM Cloud Private
 
-TBD
+To deploy it on IBM Cloud Private, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile#remotely-on-ibm-cloud-private).
 
 ## Run Inventory Service locally
 
@@ -152,16 +151,16 @@ To build the application, we used maven build. Maven is a project management too
 ```
 [INFO] --- maven-failsafe-plugin:2.18.1:verify (verify-results) @ inventory ---
 [INFO] Failsafe report directory: /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/test-reports/it
-[INFO] 
+[INFO]
 [INFO] --- maven-install-plugin:2.4:install (default-install) @ inventory ---
 [INFO] Installing /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/inventory-1.0-SNAPSHOT.war to /Users/user@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.war
 [INFO] Installing /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/pom.xml to /Users/user@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.pom
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 39.004 s
-[INFO] Finished at: 2018-02-22T15:14:59-06:00
-[INFO] Final Memory: 22M/307M
+[INFO] Total time: 22.516 s
+[INFO] Finished at: 2018-07-18T14:24:10-05:00
+[INFO] Final Memory: 32M/467M
 [INFO] ------------------------------------------------------------------------
 ```
 ### Setting up MYSQL
@@ -183,9 +182,12 @@ cd mysql
 
 `docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password mysql`
 
-3. Create `items` table and load sample data.
+3. It creates `items` table and loads the sample data.
 
-`docker exec mysql ./load-data.sh root password 0.0.0.0 3306`
+```
+cd ..
+cd inventory
+```
 
 In this case, your jdbcURL will be 
 
@@ -193,6 +195,23 @@ In this case, your jdbcURL will be
 export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
 export dbuser=root
 export dbpassword=password
+```
+
+### Setting up Zipkin
+
+To set up Zipkin locally, we are running it as a docker container. You need [Docker](https://www.docker.com/) as a prerequisite.
+
+To run Zipkin on docker locally, run the below commands.
+
+`docker run -d -p 9411:9411 openzipkin/zipkin`
+
+You can find the detailed instructions [here](https://zipkin.io/pages/quickstart).
+
+Set the required environment variables as follows.
+
+```
+export zipkinHost=localhost
+export zipkinPort=9411
 ```
 
 ### Running the app and stopping it
@@ -213,16 +232,16 @@ You will see something similar to the below messages.
 
 ```
 [INFO] Starting server defaultServer.
-[INFO] Server defaultServer started with process ID 62300.
+[INFO] Server defaultServer started with process ID 13980.
 [INFO] Waiting up to 30 seconds for server confirmation:  CWWKF0011I to be found in /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log
-[INFO] CWWKM2010I: Searching for CWWKF0011I in /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log. This search will timeout after 30 seconds.
-[INFO] CWWKM2015I: Match number: 1 is [22/2/18 15:19:34:512 CST] 00000019 com.ibm.ws.kernel.feature.internal.FeatureManager            A CWWKF0011I: The server defaultServer is ready to run a smarter planet..
+[INFO] CWWKM2010I: Searching for CWWKF0011I in /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log. This search will timeout after 30 seconds.
+[INFO] CWWKM2015I: Match number: 1 is [18/7/18 14:42:32:751 CDT] 0000001a com.ibm.ws.kernel.feature.internal.FeatureManager            A CWWKF0011I: The server defaultServer is ready to run a smarter planet..
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 23.456 s
-[INFO] Finished at: 2018-02-22T15:19:34-06:00
-[INFO] Final Memory: 13M/309M
+[INFO] Total time: 9.889 s
+[INFO] Finished at: 2018-07-18T14:42:32-05:00
+[INFO] Final Memory: 14M/309M
 [INFO] ------------------------------------------------------------------------
 ```
 
@@ -238,19 +257,25 @@ curl http://localhost:9081/inventory/rest/inventory
 Once you do this, you see the below messages.
 
 ```
-[INFO] CWWKM2001I: Invoke command is [/Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/bin/server, stop, defaultServer].
-[INFO] objc[62340]: Class JavaLaunchHelper is implemented in both /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/bin/java (0x10db7e4c0) and /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/lib/libinstrument.dylib (0x10dc784e0). One of the two will be used. Which one is undefined.
+[INFO] CWWKM2001I: Invoke command is [/Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/bin/server, stop, defaultServer].
+[INFO] objc[14896]: Class JavaLaunchHelper is implemented in both /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/bin/java (0x101bdd4c0) and /Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/lib/libinstrument.dylib (0x101c9b4e0). One of the two will be used. Which one is undefined.
 [INFO] Stopping server defaultServer.
 [INFO] Server defaultServer stopped.
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 2.088 s
-[INFO] Finished at: 2018-02-22T15:20:44-06:00
-[INFO] Final Memory: 12M/245M
+[INFO] Total time: 3.146 s
+[INFO] Finished at: 2018-07-18T15:59:32-05:00
+[INFO] Final Memory: 13M/245M
 [INFO] ------------------------------------------------------------------------
 ```
 
 ### References
 
 1. [Microprofile](https://microprofile.io/)
+2. [MicroProfile Config on Liberty](https://www.ibm.com/support/knowledgecenter/en/SSAW57_liberty/com.ibm.websphere.wlp.nd.multiplatform.doc/ae/twlp_microprofile_appconfig.html)
+3. [MicroProfile Health Checks on Liberty](https://www.ibm.com/support/knowledgecenter/en/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_microprofile_healthcheck.html)
+4. [MicroProfile OpenAPI](https://www.ibm.com/support/knowledgecenter/en/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_mpopenapi.html)
+5. [MicroProfile Metrics](https://www.ibm.com/support/knowledgecenter/en/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/cwlp_mp_metrics_api.html)
+6. [MicroProfile OpenTracing](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.liberty.autogen.base.doc/ae/rwlp_feature_mpOpenTracing-1.0.html)
+
