@@ -17,7 +17,6 @@ This project is built to demonstrate how to build two Microservices applications
 - Based on [MicroProfile](https://microprofile.io/).
 - Uses MySQL as the [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) database.
 - Elasticsearch is used as the [Catalog](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/catalog) microservice's data source.
-- Deployment options for Minikube environment and ICP.
 
 ### How it works
 
