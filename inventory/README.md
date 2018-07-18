@@ -10,37 +10,37 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
   </a>
 </p>
 
-1. [Introduction](#introduction)
-2. [How it works](#how-it-works)
-3. [Implementation](#implementation)
-    1. [Microprofile](#microprofile)
-4. [Features and App details](#features)
-5. [Building the app](#building-the-app)
-6. [Setting up MYSQL](#setting-up-mysql)
-    1. [MYSQL Pre-requisites](#mysql-pre-requisites)
-    2. [Set Up MYSQL on Minikube](#set-up-mysql-on-minikube)
-    3. [Set Up MYSQL on IBM Cloud Private](#set-up-mysql-on-ibm-cloud-private)
-7. [Running the app and stopping it](#running-the-app-and-stopping-it)
-    1. [Pre-requisites](#pre-requisites)
-    2. [Locally in Minikube](#locally-in-minikube)
-    3. [Remotely in ICP](#remotely-in-icp)
-8. [References](#references)
+## Table of Contents
 
-### Introduction
+* [Introduction](#introduction)
+* [How it works](#how-it-works)
+* [Implementation](#implementation)
+    + [Microprofile](#microprofile)
+* [Features](#features)
+* [App details](#app-details)
+* [Deploying the App](#deploying-the-app)
+    + [Minikube](#minikube)
+    + [IBM Cloud Private](#ibm-cloud-private)
+* [Run Inventory Service locally](#run-inventory-service-locally)
+    + [Building the app](#building-the-app)
+    + [Setting up MYSQL](#setting-up-mysql)
+    + [Running the app and stopping it](#running-the-app-and-stopping-it)
+* [References](#references)
+
+## Introduction
 
 This project demonstrates the implementation of Inventory Microservice. The inventory microservice uses MySQL database as its datasource. It has the complete list of items of our store front. 
 
 - Based on [MicroProfile](https://microprofile.io/).
 - Uses MySQL as the inventory database.
-- Deployment options for Minikube environment and ICP.
 
-### How it works
+## How it works
 
 Inventory Microservice serves 'IBM Cloud Native Reference Architecture' suite, available at https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes, Microservice-based reference application. Though it is a part of a bigger application, Inventory service is itself an application in turn that manages the data from data store. Catalog Microservice serves as the cache to the Inventory.
 
-### Implementation
+## Implementation
 
-#### [MicroProfile](https://microprofile.io/)
+### [MicroProfile](https://microprofile.io/)
 
 MicroProfile is an open platform that optimizes the Enterprise Java for microservices architecture. In this application, we are using [**MicroProfile 1.3**](https://github.com/eclipse/microprofile-bom). This includes
 
@@ -75,7 +75,7 @@ You should also include a feature in [server.xml](https://github.com/ibm-cloud-a
 
 </server>
 ```
-### Features
+## Features
 
 1. Java SE 8 - Used Java Programming language
 
@@ -93,7 +93,7 @@ The config values are sorted according to their ordinal. We can override the low
 
 In our sample application, we obtained the configuration programatically.
 
-5. MicroProfile Health Check - For MicroProfile implementations, this feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
+5. MicroProfile Health Check - This feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
 
 In our sample application, we injected this `/health` endpoint in our liveness probes.
 
@@ -104,6 +104,28 @@ In our sample application, we used @OpenAPIDefinition, @Info, @Contact, @License
 7. MicroProfile Metrics - This feature allows us to expose telemetry data. Using this, developers can monitor their services with the help of metrics.
 
 In our sample application, we used @Timed, @Counted and @Metered annotations. These metrics are reused using `reuse` functionality. We also integrated them with Prometheus.
+
+8. MicroProfile OpenTracing - This feature enables distributed tracing. It helps us to analyze the transcation flow so that the we can easily debug the problematic services and fix them.
+
+In our sample application, we used [Zipkin](https://zipkin.io/) as our distributed tracing system.
+
+## App details
+
+TBD
+
+## Deploying the App
+
+TBD
+
+### Minikube
+
+TBD
+
+### IBM Cloud Private
+
+TBD
+
+## Run Inventory Service locally
 
 ### Building the app
 
@@ -144,509 +166,91 @@ To build the application, we used maven build. Maven is a project management too
 ```
 ### Setting up MYSQL
 
-#### MYSQL Pre-requisites
+To set up MYSQL locally, we are running it as a docker container. You need [Docker](https://www.docker.com/) as a prerequisite.
 
-1. Set Up MYSQL on Minikube
-
-To set up MYSQL locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment), we first need to get few tools installed:
-
-- [Kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
-- [Helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
-
-Finally, we must create a Kubernetes Cluster. As already said before, we are going to use Minikube:
-
-- [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
-
-We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube. 
-
-2. Set Up MYSQL on IBM Cloud Private
-
-To set up MYSQL on IBM Cloud Private, you need to have the following.
-
-[IBM Cloud Private Cluster](https://www.ibm.com/cloud/private)
-
-Create a Kubernetes cluster in an on-premise datacenter. The community edition (IBM Cloud private-ce) is free of charge.
-Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html) to install IBM Cloud private-ce.
-
-[Helm](https://github.com/kubernetes/helm) (Kubernetes package manager)
-
-Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
-If using IBM Cloud Private version 2.1.0.2 or newer, we recommend you follow these [instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html) to install helm.
-
-#### Set Up MYSQL on Minikube
-
-1. Start your minikube. Run the below command.
-
-`minikube start`
-
-You will see output similar to this.
-
-```
-Setting up certs...
-Connecting to cluster...
-Setting up kubeconfig...
-Starting cluster components...
-Kubectl is now configured to use the cluster.
-```
-2. To install Tiller which is a server side component of Helm, initialize helm. Run the below command.
-
-`helm init`
-
-If it is successful, you will see the below output.
-
-```
-$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
-
-Tiller (the helm server side component) has been installed into your Kubernetes Cluster.
-Happy Helming!
-```
-3. Check if your tiller is available. Run the below command.
-
-`kubectl get deployment tiller-deploy --namespace kube-system`
-
-If it available, you can see the availability as below.
-
-```
-NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-tiller-deploy   1         1         1            1           1m
-```
-
-4. Verify your helm before proceeding like below.
-
-`helm version`
-
-If your helm server version is below 2.5.0, please run the below command.
-
-`helm init --upgrade --tiller-image gcr.io/kubernetes-helm/tiller:v2.5.0`
-
-Make sure your versions by testing the versions.
-
-You will see the below output.
-
-```
-Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
-Server: &version.Version{SemVer:"v2.5.0", GitCommit:"012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6", GitTreeState:"clean"}
-```
-
-5. Build the docker image.
-
-Before building the docker image, set the docker environment.
-
-- Run the below command.
-
-`minikube docker-env`
-
-You will see the output similar to this.
-
-```
-export DOCKER_TLS_VERIFY="1"
-export DOCKER_HOST="tcp://192.168.99.100:2376"
-export DOCKER_CERT_PATH="/Users/user@ibm.com/.minikube/certs"
-export DOCKER_API_VERSION="1.23"
-# Run this command to configure your shell:
-# eval $(minikube docker-env)
-```
-- For configuring your shell, run the below command.
-
-`eval $(minikube docker-env)`
-
-- Now run the docker build.
+To run MYSQL on docker locally, run the below commands.
 
 ```
 cd ..
 cd mysql
 ```
-
-`docker build -t bc-inventorydb:v1.0.0 .`
-
-If it is a success, you will see the below output.
-
-```
-Successfully built 68h2dy63j9bd
-Successfully tagged bc-inventorydb:v1.0.0
-```
-Then run ` cd ../inventory`
-
-Run the helm chart as below.
-
-`helm install --name=inventorydb chart/inventorydb`
-
-6. Make sure your deployment is ready. To verify run this command and you should see the availability.
-
-`kubectl get deployments`
-
-Yow will see message like below.
-
-```
-NAME                                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-bluecompute-inventorydb                     1         1         1            1           2m
-```
-
-#### Set Up MYSQL on IBM Cloud Private
-
-1. Your [IBM Cloud Private Cluster](https://www.ibm.com/cloud/private) should be up and running.
-
-2. Log in to the IBM Cloud Private. 
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/icp_dashboard.png">
-</p>
-
-3. Go to `admin > Configure Client`.
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/client_config.png">
-</p>
-
-4. Grab the kubectl configuration commands.
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/kube_cmds.png">
-</p>
-
-5. Run those commands in your terminal.
-
-6. If successful, you should see something like below.
-```
-Switched to context "xxx-cluster.icp-context".
-```
-7. Run the below command.
-
-`helm init --client-only`
-
-You will see the below
-
-```
-$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
-Not installing Tiller due to 'client-only' flag having been set
-Happy Helming!
-```
-
-8. Verify the helm version
-
-`helm version --tls`
-
-You will see something like below.
-
-```
-Client: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
-Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
-```
-
-9. Now run the docker build.
-
-```
-cd ..
-cd mysql
-```
-
-`docker build -t bc-inventorydb:v1.0.0 .`
-
-If it is a success, you will see the below output.
-
-```
-Successfully built h9u2cf24d7ad
-Successfully tagged bc-inventorydb:v1.0.0
-```
-
-Then run ` cd ../inventory`
-
-10. Tag the image to your private registry.
-
-`docker tag bc-inventorydb:v1.0.0 <Your ICP registry>/bc-inventorydb:v1.0.0`
-
-11. Push the image to your private registry.
-
-`docker push <Your ICP registry>/bc-inventorydb:v1.0.0`
-
-You should see something like below.
-
-```
-v1.0.0: digest: sha256:7f3deb2c43854df725efde5b0a3e6977cc7b6e8e26865b484d8cb20c2e4a6dd0 size: 3873
-```
-
-12. Run the helm chart as below.
-
-`helm install --name=inventorydb chart/inventorydb --tls`
-
-13. Make sure your deployment is ready. To verify run this command and you should see the availability.
-
-`kubectl get deployments`
-
-Yow will see message like below.
-
-```
-NAME                                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-bluecompute-inventorydb                     1         1         1            1           2m
-```
-
-**NOTE**: If you are using a version of ICP older than 2.1.0.2, you don't need to add the --tls at the end of the helm command.
-
-### Running the app and stopping it
-
-#### Pre-requisites
-
-To run the Inventory microservice, please complete the [Building the app](#building-the-app) section before proceeding to any of the following steps.
-
-1. Locally in Minikube
-
-To run the Inventory application locally on your laptop on a Kubernetes-based environment such as Minikube (which is meant to be a small development environment) we first need to get few tools installed:
-
-- [Kubectl](https://kubernetes.io/docs/user-guide/kubectl-overview/) (Kubernetes CLI) - Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install it on your platform.
-- [Helm](https://github.com/kubernetes/helm) (Kubernetes package manager) - Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
-
-Finally, we must create a Kubernetes Cluster. As already said before, we are going to use Minikube:
-
-- [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) - Create a single node virtual cluster on your workstation. Follow the instructions [here](https://kubernetes.io/docs/tasks/tools/install-minikube/) to get Minikube installed on your workstation.
-
-We not only recommend to complete the three Minikube installation steps on the link above but also read the [Running Kubernetes Locally via Minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) page for getting more familiar with Minikube.
-
-2. Remotely in ICP
-
-[IBM Cloud Private Cluster](https://www.ibm.com/cloud/private)
-
-Create a Kubernetes cluster in an on-premise datacenter. The community edition (IBM Cloud private-ce) is free of charge.
-Follow the instructions [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html) to install IBM Cloud private-ce.
-
-[Helm](https://github.com/kubernetes/helm) (Kubernetes package manager)
-
-Follow the instructions [here](https://github.com/kubernetes/helm/blob/master/docs/install.md) to install it on your platform.
-If using IBM Cloud Private version 2.1.0.2 or newer, we recommend you follow these [instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html) to install helm.
-
-### Locally in Minikube
-
-#### Setting up your environment
-
-1. Start your minikube. Run the below command.
-
-`minikube start`
-
-You will see output similar to this.
-
-```
-Setting up certs...
-Connecting to cluster...
-Setting up kubeconfig...
-Starting cluster components...
-Kubectl is now configured to use the cluster.
-```
-2. To install Tiller which is a server side component of Helm, initialize helm. Run the below command.
-
-`helm init`
-
-If it is successful, you will see the below output.
-
-```
-$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
-
-Tiller (the helm server side component) has been installed into your Kubernetes Cluster.
-Happy Helming!
-```
-3. Check if your tiller is available. Run the below command.
-
-`kubectl get deployment tiller-deploy --namespace kube-system`
-
-If it available, you can see the availability as below.
-
-```
-NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-tiller-deploy   1         1         1            1           1m
-```
-
-4. Verify your helm before proceeding like below.
-
-`helm version`
-
-You will see the below output.
-
-```
-Client: &version.Version{SemVer:"v2.4.2", GitCommit:"82d8e9498d96535cc6787a6a9194a76161d29b4c", GitTreeState:"clean"}
-Server: &version.Version{SemVer:"v2.5.0", GitCommit:"012cb0ac1a1b2f888144ef5a67b8dab6c2d45be6", GitTreeState:"clean"}
-```
-#### Running the application on Minikube
 
 1. Build the docker image.
 
-Before building the docker image, set the docker environment.
+`docker build -t mysql .`
 
-- Run the below command.
+2. Run the container.
 
-`minikube docker-env`
+`docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password mysql`
 
-You will see the output similar to this.
+3. Create `items` table and load sample data.
 
-```
-export DOCKER_TLS_VERIFY="1"
-export DOCKER_HOST="tcp://192.168.99.100:2376"
-export DOCKER_CERT_PATH="/Users/user@ibm.com/.minikube/certs"
-export DOCKER_API_VERSION="1.23"
-# Run this command to configure your shell:
-# eval $(minikube docker-env)
-```
-- For configuring your shell, run the below command.
+`docker exec mysql ./load-data.sh root password 0.0.0.0 3306`
 
-`eval $(minikube docker-env)`
-
-- Now run the docker build.
-
-`docker build -t inventory-mp:v1.0.0 .`
-
-If it is a success, you will see the below output.
+In this case, your jdbcURL will be 
 
 ```
-Successfully built 36d1cf24d7ad
-Successfully tagged inventory-mp:v1.0.0
-```
-2. Run the helm chart as below.
-
-`helm install --name=inventory chart/inventory`
-
-You will see message like below.
-
-```
-==> v1beta1/Deployment
-NAME                  DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
-inventory-deployment  1        1        1           0          0s
-```
-Please wait till your deployment is ready. To verify run the below command and you should see the availability.
-
-`kubectl get deployments`
-
-You will see something like below.
-
-```
-==> v1beta1/Deployment
-NAME                     DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
-inventory-deployment      1         1         1            1           8m
-```
-### Remotely in ICP
-
-[IBM Cloud Private](https://www.ibm.com/cloud/private)
-
-IBM Private Cloud has all the advantages of public cloud but is dedicated to single organization. You can have your own security requirements and customize the environment as well. Basically it has tight security and gives you more control along with scalability and easy to deploy options. You can run it externally or behind the firewall of your organization.
-
-Basically this is an on-premise platform.
-
-Includes docker container manager
-Kubernetes based container orchestrator
-Graphical user interface
-You can find the detailed installation instructions for IBM Cloud Private [here](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.2/installing/install_containers_CE.html)
-
-#### Pushing the image to Private Registry
-
-1. Now run the docker build.
-
-`docker build -t inventory-mp:v1.0.0 .`
-
-If it is a success, you will see the below output.
-
-```
-Successfully built 36d1cf24d7ad
-Successfully tagged inventory-mp:v1.0.0
+export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
+export dbuser=root
+export dbpassword=password
 ```
 
-2. Tag the image to your private registry.
+### Running the app and stopping it
 
-`docker tag inventory-mp:v1.0.0 <Your ICP registry>/inventory-mp:v1.0.0`
-
-3. Push the image to your private registry.
-
-`docker push <Your ICP registry>/inventory-mp:v1.0.0`
-
-You should see something like below.
+1. Set the JDBC URL before you start your application. The host and port depends on the service you use. You can run the MYSQL server locally on your system using the MYSQL docker container or use the [MYSQL Compose](https://www.ibm.com/cloud/compose/mysql) available in [IBM Cloud](https://www.ibm.com/cloud/).
 
 ```
-v1.0.0: digest: sha256:7f3deb2c43854df725efde5b0a3e6977cc7b6e8e26865b484d8cb20c2e4a6dd0 size: 3873
+export jdbcURL=jdbc:mysql://<Your host>:<Port>/inventorydb?useSSL=false
+export dbuser=<DB_USER_NAME>
+export dbpassword=<PASSWORD>
 ```
 
-#### Running the application on ICP
+2. Start your server.
 
-1. Your [IBM Cloud Private Cluster](https://www.ibm.com/cloud/private) should be up and running.
+`mvn liberty:start-server -DtestServerHttpPort=9081`
 
-2. Log in to the IBM Cloud Private. 
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/icp_dashboard.png">
-</p>
-
-3. Go to `admin > Configure Client`.
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/client_config.png">
-</p>
-
-4. Grab the kubectl configuration commands.
-
-<p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/kube_cmds.png">
-</p>
-
-5. Run those commands in your terminal.
-
-6. If successful, you should see something like below.
+You will see something similar to the below messages.
 
 ```
-Switched to context "xxx-cluster.icp-context".
-```
-7. Run the below command.
-
-`helm init --client-only`
-
-You will see the below
-
-```
-$HELM_HOME has been configured at /Users/user@ibm.com/.helm.
-Not installing Tiller due to 'client-only' flag having been set
-Happy Helming!
-```
-
-8. Verify the helm version
-
-`helm version --tls`
-
-You will see something like below.
-
-```
-Client: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
-Server: &version.Version{SemVer:"v2.7.2+icp", GitCommit:"d41a5c2da480efc555ddca57d3972bcad3351801", GitTreeState:"dirty"}
-```
-9. Before running the helm chart in minikube, access [values.yaml](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/inventory/chart/inventory/values.yaml) and replace the repository with the your IBM Cloud Private .
-
-`repository: <Your IBM Cloud Private Docker registry>`
-
-Then run the helm chart 
-
-`helm install --name=inventory chart/inventory --tls`
-
-You will see message like below.
-
-```
-==> v1beta1/Deployment
-NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-inventory-deployment               1         1         1            0           1s
-```
-Please wait till your deployment is ready. To verify run the below command and you should see the availability.
-
-`kubectl get deployments`
-
-You will see something like below.
-
-```
-==> v1beta1/Deployment
-NAME                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-inventory-deployment               1         1         1            1           2m      
+[INFO] Starting server defaultServer.
+[INFO] Server defaultServer started with process ID 62300.
+[INFO] Waiting up to 30 seconds for server confirmation:  CWWKF0011I to be found in /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log
+[INFO] CWWKM2010I: Searching for CWWKF0011I in /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/usr/servers/defaultServer/logs/messages.log. This search will timeout after 30 seconds.
+[INFO] CWWKM2015I: Match number: 1 is [22/2/18 15:19:34:512 CST] 00000019 com.ibm.ws.kernel.feature.internal.FeatureManager            A CWWKF0011I: The server defaultServer is ready to run a smarter planet..
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 23.456 s
+[INFO] Finished at: 2018-02-22T15:19:34-06:00
+[INFO] Final Memory: 13M/309M
+[INFO] ------------------------------------------------------------------------
 ```
 
-**NOTE**: If you are using a version of ICP older than 2.1.0.2, you don't need to add the --tls at the end of the helm command.
+3. Validate the inventory service. You should get a list of all inventory items.
+```
+curl http://localhost:9081/inventory/rest/inventory
+```
+
+4. If you are done accessing the application, you can stop your server using the following command.
+
+`mvn liberty:stop-server -DtestServerHttpPort=9081`
+
+Once you do this, you see the below messages.
+
+```
+[INFO] CWWKM2001I: Invoke command is [/Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/liberty/wlp/bin/server, stop, defaultServer].
+[INFO] objc[62340]: Class JavaLaunchHelper is implemented in both /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/bin/java (0x10db7e4c0) and /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/lib/libinstrument.dylib (0x10dc784e0). One of the two will be used. Which one is undefined.
+[INFO] Stopping server defaultServer.
+[INFO] Server defaultServer stopped.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2.088 s
+[INFO] Finished at: 2018-02-22T15:20:44-06:00
+[INFO] Final Memory: 12M/245M
+[INFO] ------------------------------------------------------------------------
+```
 
 ### References
 
-1. [Developer Tools CLI](https://console.bluemix.net/docs/cloudnative/dev_cli.html#developercli)
-2. [IBM Cloud Private](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/kc_welcome_containers.html)
-3. [IBM Cloud Private Installation](https://github.com/ibm-cloud-architecture/refarch-privatecloud)
-4. [IBM Cloud Private version 2.1.0.2 Helm instructions](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html)
-5. [Microprofile](https://microprofile.io/)
-
-
-
-
+1. [Microprofile](https://microprofile.io/)
