@@ -2,7 +2,7 @@
 
 ## Inventory Service - MicroProfile
 
-This repository contains the **MicroProfile** implementation of the **Inventory Service** which is a part of 'IBM Cloud Native Reference Architecture' suite, available at https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes
+This repository contains the **MicroProfile** implementation of the **Inventory Service** which is a part of 'IBM Cloud Native Reference Architecture' suite, available [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile)
 
 <p align="center">
   <a href="https://microprofile.io/">
@@ -18,11 +18,11 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
     + [Microprofile](#microprofile)
 * [Features](#features)
 * [Deploying the App](#deploying-the-app)
-    + [Minikube](#minikube)
     + [IBM Cloud Private](#ibm-cloud-private)
+    + [Minikube](#minikube)
 * [Run Inventory Service locally](#run-inventory-service-locally)
     + [Building the app](#building-the-app)
-    + [Setting up MYSQL](#setting-up-mysql)
+    + [Setting up MySQL](#setting-up-mysql)
     + [Setting up Zipkin](#setting-up-zipkin)
     + [Running the app and stopping it](#running-the-app-and-stopping-it)
 * [References](#references)
@@ -36,7 +36,7 @@ This project demonstrates the implementation of Inventory Microservice. The inve
 
 ## How it works
 
-Inventory Microservice serves 'IBM Cloud Native Reference Architecture' suite, available at https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes, Microservice-based reference application. Though it is a part of a bigger application, Inventory service is itself an application in turn that manages the data from data store. Catalog Microservice serves as the cache to the Inventory.
+Inventory Microservice serves 'IBM Cloud Native Reference Architecture' suite, available [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile), Microservice-based reference application. Though it is a part of a bigger application, Inventory service is itself an application in turn that manages the data from data store. Catalog Microservice serves as the cache to the Inventory.
 
 ## Implementation
 
@@ -83,7 +83,7 @@ You should also include a feature in [server.xml](https://github.com/ibm-cloud-a
 
 3. [JAX-RS 2.0](https://jcp.org/en/jsr/detail?id=339) - JAX-RS is used for providing both standard client and server APIs for RESTful communication by MicroProfile applications.
 
-4. [Eclipse MicroProfile Config](https://github.com/eclipse/microprofile-config) - Configuration data comes from different sources like system properties, system environment variables, .properties etc. These values may change dynamically. Using this feature, helps us to pick up configured values immediately after they got changed.
+4. [Eclipse MicroProfile Config](https://github.com/eclipse/microprofile-config) - Configuration data comes from different sources like system properties, system environment variables, `.properties` file etc. These values may change dynamically. Using this feature helps us to pick up configured values immediately after they got changed.
 
 The config values are sorted according to their ordinal. We can override the lower importance values from outside. The config sources by default, below is the order of importance.
 
@@ -116,13 +116,13 @@ set up our Helm charts structure and how we dynamically produce our endpoints an
 
 Further instructions are provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile).
 
-### Minikube
-
-To deploy it on Minikube, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile#locally-in-minikube).
-
 ### IBM Cloud Private
 
 To deploy it on IBM Cloud Private, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile#remotely-on-ibm-cloud-private).
+
+### Minikube
+
+To deploy it on Minikube, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile#locally-in-minikube).
 
 ## Run Inventory Service locally
 
@@ -163,11 +163,11 @@ To build the application, we used maven build. Maven is a project management too
 [INFO] Final Memory: 32M/467M
 [INFO] ------------------------------------------------------------------------
 ```
-### Setting up MYSQL
+### Setting up MySQL
 
-To set up MYSQL locally, we are running it as a docker container. You need [Docker](https://www.docker.com/) as a prerequisite.
+To set up MySQL locally, we are running it as a docker container. You need [Docker](https://www.docker.com/) as a prerequisite.
 
-To run MYSQL on docker locally, run the below commands.
+To run MySQL on docker locally, run the below commands.
 
 ```
 cd ..
@@ -199,24 +199,12 @@ export dbpassword=password
 
 ### Setting up Zipkin
 
-To set up Zipkin locally, we are running it as a docker container. You need [Docker](https://www.docker.com/) as a prerequisite.
+Before running the application, make sure that the Zipkin is running as a docker container locally. If not, follow the instructions [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/Zipkin/README.md)
 
-To run Zipkin on docker locally, run the below commands.
-
-`docker run -d -p 9411:9411 openzipkin/zipkin`
-
-You can find the detailed instructions [here](https://zipkin.io/pages/quickstart).
-
-Set the required environment variables as follows.
-
-```
-export zipkinHost=localhost
-export zipkinPort=9411
-```
 
 ### Running the app and stopping it
 
-1. Set the JDBC URL before you start your application. The host and port depends on the service you use. You can run the MYSQL server locally on your system using the MYSQL docker container or use the [MYSQL Compose](https://www.ibm.com/cloud/compose/mysql) available in [IBM Cloud](https://www.ibm.com/cloud/).
+1. Set the JDBC URL before you start your application. The host and port depends on the service you use. You can run the MySQL server locally on your system using the MySQL docker container or use the [MySQL Compose](https://www.ibm.com/cloud/compose/mysql) available in [IBM Cloud](https://www.ibm.com/cloud/).
 
 ```
 export jdbcURL=jdbc:mysql://<Your host>:<Port>/inventorydb?useSSL=false
