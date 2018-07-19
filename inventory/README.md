@@ -189,7 +189,7 @@ cd ..
 cd inventory
 ```
 
-In this case, your jdbcURL will be 
+In this case, your environement variables will be 
 
 ```
 export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
