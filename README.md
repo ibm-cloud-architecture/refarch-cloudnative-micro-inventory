@@ -2,7 +2,7 @@
 
 ## Microprofile based Microservice Apps Integration with ElasticSearch and MySQL Database Server
 
-This repository contains the **MicroProfile** implementation of the **Inventory Service** and **Catalog Service** which are a part of the 'IBM Cloud Native Reference Architecture' suite, available at https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes
+This repository contains the **MicroProfile** implementation of the **Inventory Service** and **Catalog Service** which are a part of the 'IBM Cloud Native Reference Architecture' suite, available [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile)
 
 <p align="center">
   <a href="https://microprofile.io/">
@@ -20,8 +20,7 @@ This project is built to demonstrate how to build two Microservices applications
 
 ### How it works
 
-Inventory and Catalog Microservices serves 'IBM Cloud Native Reference Architecture' suite, available at
-https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes. Though it is a part of a bigger application, Inventory and Catalog services are themselves individual applications.
+Inventory and Catalog Microservices serves 'IBM Cloud Native Reference Architecture' suite, available [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile). Though it is a part of a bigger application, Inventory and Catalog services are themselves individual applications.
 
 <p align="center">
     <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/inventory-catalog.png">
