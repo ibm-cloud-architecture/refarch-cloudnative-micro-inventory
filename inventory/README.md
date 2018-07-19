@@ -23,7 +23,7 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 * [Run Inventory Service locally](#run-inventory-service-locally)
     + [Building the app](#building-the-app)
     + [Setting up MySQL](#setting-up-mysql)
-    + [Setting up Zipkin](#setting-up-zipkin)
+    + [Setting up Zipkin](#setting-up-zipkin) (Optional)
     + [Running the app and stopping it](#running-the-app-and-stopping-it)
 * [References](#references)
 
@@ -45,8 +45,8 @@ Inventory Microservice serves 'IBM Cloud Native Reference Architecture' suite, a
 MicroProfile is an open platform that optimizes the Enterprise Java for microservices architecture. In this application, we are using [**MicroProfile 1.3**](https://github.com/eclipse/microprofile-bom). This includes
 
 - MicroProfile 1.0 ([JAX-RS 2.0](https://jcp.org/en/jsr/detail?id=339), [CDI 1.2](https://jcp.org/en/jsr/detail?id=346), and [JSON-P 1.0](https://jcp.org/en/jsr/detail?id=353))
-- MicroProfile 1.1 (MicroProfile 1.0, [MicroProfile Config 1.0.](https://github.com/eclipse/microprofile-config))
-- MicroProfile 1.2 ([MicroProfile Config 1.1](https://github.com/eclipse/microprofile-config) (supercedes MicroProfile Config 1.0), [MicroProfile Fault Tolerance 1.0](https://github.com/eclipse/microprofile-fault-tolerance), [MicroProfile Health Check 1.0](https://github.com/eclipse/microprofile-health), [MicroProfile Metrics 1.0](https://github.com/eclipse/microprofile-metrics), [MicroProfile JWT Authentication 1.0](https://github.com/eclipse/microprofile-jwt-auth)).
+- MicroProfile 1.1 
+- MicroProfile 1.2 ([MicroProfile Fault Tolerance 1.0](https://github.com/eclipse/microprofile-fault-tolerance), [MicroProfile Health Check 1.0](https://github.com/eclipse/microprofile-health), [MicroProfile JWT Authentication 1.0](https://github.com/eclipse/microprofile-jwt-auth)).
 - [MicroProfile Config 1.2](https://github.com/eclipse/microprofile-config) (supercedes MicroProfile Config 1.1), [MicroProfile Metrics 1.1](https://github.com/eclipse/microprofile-metrics) (supercedes MicroProfile Metrics 1.0), [MicroProfile OpenAPI 1.0](https://github.com/eclipse/microprofile-open-api), [MicroProfile OpenTracing 1.0](https://github.com/eclipse/microprofile-opentracing), [MicroProfile Rest Client 1.0](https://github.com/eclipse/microprofile-rest-client).
 
 You can make use of this feature by including this dependency in Maven.
@@ -197,9 +197,13 @@ export dbuser=root
 export dbpassword=password
 ```
 
-### Setting up Zipkin
+### Setting up Zipkin 
 
-Before running the application, make sure that the Zipkin is running as a docker container locally. If not, follow the instructions [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/Zipkin/README.md)
+This is an optional step.
+
+In our sample application, we used Zipkin as our distributed tracing system.
+
+If you want to access the traces for inventory service, run Zipkin as a docker container locally. You can find the instructions and more details [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/Zipkin/README.md)
 
 
 ### Running the app and stopping it
@@ -210,6 +214,12 @@ Before running the application, make sure that the Zipkin is running as a docker
 export jdbcURL=jdbc:mysql://<Your host>:<Port>/inventorydb?useSSL=false
 export dbuser=<DB_USER_NAME>
 export dbpassword=<PASSWORD>
+```
+Also set the Zipkin host and port to defaults.
+
+```
+export zipkinHost=localhost
+export zipkinPort=9411
 ```
 
 2. Start your server.
