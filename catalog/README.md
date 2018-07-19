@@ -61,11 +61,11 @@ You can make use of this feature by including this dependency in Maven.
 
 ```
 <dependency>
-<groupId>org.eclipse.microprofile</groupId>
-<artifactId>microprofile</artifactId>
-<version>1.3</version>
-<type>pom</type>
-<scope>provided</scope>
+    <groupId>org.eclipse.microprofile</groupId>
+    <artifactId>microprofile</artifactId>
+    <version>1.3</version>
+    <scope>provided</scope>
+    <type>pom</type>
 </dependency>
 ```
 
