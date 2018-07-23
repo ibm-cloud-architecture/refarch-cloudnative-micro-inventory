@@ -3,7 +3,7 @@ kind: Service
 metadata:
   annotations:
     bluecompute: "true"
-    prometheus.io/scrape: "true"
+    #prometheus.io/scrape: "true"
   name: {{ .Release.Name }}-{{ .Values.service.name }}
   labels:
     chart: "{{ .Release.Name }}-{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
