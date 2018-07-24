@@ -4,12 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import models.Item;
 import okhttp3.Credentials;
@@ -57,7 +58,7 @@ public class ElasticSearch {
     public void loadRows(List<Item> items) {
 
         // convert Item to JSONArray
-        final ObjectMapper objMapper = new ObjectMapper();
+    	Jsonb jsonb = JsonbBuilder.create();
 
         final Map<Long, Item> allItemMap = getAllRowsFromCache();
         final StringBuilder sb = new StringBuilder();
@@ -73,14 +74,9 @@ public class ElasticSearch {
             }
 
             sb.append("{ \"index\": { \"_index\": \"" + index + "\", \"_type\": \"" + doc_type + "\", \"_id\": \"" + item.getId() + "\", \"_retry_on_conflict\": \"3\" } }\n");
+        
             String jsonString;
-
-            try {
-                jsonString = objMapper.writeValueAsString(item);
-            } catch (JsonProcessingException e1) {
-                System.err.println("Failed to convert object to JSON " + e1);
-                continue;
-            }
+            jsonString = jsonb.toJson(item);
 
             System.out.println("Adding/updating item: \n" + item.getId() + ": " + jsonString);
             sb.append(jsonString + "\n");
@@ -102,7 +98,6 @@ public class ElasticSearch {
             RequestBody body = RequestBody.create(mediaType, sb.toString());
 
             // Build URL
-            //String url = String.format("%s/%s/%s/%s", this.url, index, doc_type, item.getId());
             String url = String.format("%s/_bulk", this.url);
             Request.Builder builder = new Request.Builder().url(url)
                     .post(body)

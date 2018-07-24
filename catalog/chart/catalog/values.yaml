@@ -6,7 +6,7 @@ image:
   #repository: registry.csplab.cloudns.cx/microprofile/catalog-mp
   repository: ibmcase/catalog-mp
   #repository: catalog-mp
-  tag: v2.0.0
+  tag: v3.0.0
   pullPolicy: IfNotPresent
   resources:
     requests:
