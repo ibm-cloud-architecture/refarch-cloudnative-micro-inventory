@@ -37,8 +37,8 @@ dependencyManagement {
 }
 
 dependencies {
-    compile('org.springframework.cloud:spring-cloud-starter-eureka')
-    compile('org.springframework.cloud:spring-cloud-starter-hystrix')
+    compile('org.springframework.cloud:spring-cloud-starter-eureka') // TODO: Take out?
+    compile('org.springframework.cloud:spring-cloud-starter-hystrix') // TODO: Take out?
     compile("org.springframework.boot:spring-boot-starter-web") {
         exclude module: "spring-boot-starter-tomcat"
     }
@@ -49,13 +49,12 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-jdbc')
     compile("org.springframework.boot:spring-boot-configuration-processor")
     compile("mysql:mysql-connector-java:5.1.28")
-    compile("org.apache.kafka:kafka-clients:0.10.0.+")
+    compile("org.apache.kafka:kafka-clients:0.10.0.+") // TODO: Take out?
     compile("com.squareup.okhttp3:okhttp:3.5.0")
     compile("org.json:json:20160212")
     compile("org.yaml:snakeyaml:1.8")
 
     testCompile('junit:junit:[4,)')
-
 }
 
 test {
@@ -63,16 +62,6 @@ test {
     testLogging {
         events 'started', 'passed'
         showStandardStreams = true
-    }
-}
-
-task docker {
-    doLast {
-        copy {
-            from 'build/libs/micro-inventory-0.0.1.jar'
-            into 'docker'
-        }
-        file("docker/micro-inventory-0.0.1.jar").renameTo(file("docker/app.jar"))
     }
 }
 
