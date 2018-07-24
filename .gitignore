@@ -13,11 +13,31 @@ hs_err_pid*
 
 build
 .gradle
+/bin/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# swp files
+*.swp
+
 # Mac
 .DS_Store
-*.swp
-.settings/
-bin/
+
+# Maven
+log/
+target/
+
+# Chart related files
+chart/inventory/charts
+chart/inventory/requirements.lock
 
 # Ignore test YAML files
 *.yaml.test
