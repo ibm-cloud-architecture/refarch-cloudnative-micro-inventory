@@ -6,7 +6,7 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 
 <p align="center">
   <a href="https://microprofile.io/">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd/blob/microprofile/static/imgs/microprofile_small.png" width="300" height="100">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/static/microprofile_small.png" width="300" height="100">
   </a>
 </p>
 
@@ -23,7 +23,7 @@ This project is built to demonstrate how to build two Microservices applications
 Inventory and Catalog Microservices serves 'IBM Cloud Native Reference Architecture' suite, available [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile). Though it is a part of a bigger application, Inventory and Catalog services are themselves individual applications.
 
 <p align="center">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/static/imgs/inventory-catalog.png">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/static/inventory-catalog.png">
 </p>
 
 ### API Endpoints
