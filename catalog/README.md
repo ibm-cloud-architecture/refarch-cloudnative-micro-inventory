@@ -26,7 +26,7 @@ This repository contains the **MicroProfile** implementation of the **Catalog Se
 
 ## Introduction
 
-This project demonstrates the implementation of Catalog Microservice. The catalog microservice uses Elastic Search and serves as cache to the Inventory service. 
+This project demonstrates the implementation of Catalog Microservice. The catalog microservice uses Elastic Search and serves as cache to the Inventory service.
 
 - Based on [MicroProfile](https://microprofile.io/).
 - Uses Elasticsearch.
@@ -40,7 +40,7 @@ Catalog Microservice serves 'IBM Cloud Native Reference Architecture' suite, ava
 
 ```
 GET     /catalog/rest/items/              # Returns all items in inventory
-GET     /catalog/rest/items/{id}          # Returns item by id 
+GET     /catalog/rest/items/{id}          # Returns item by id
 ```
 ## Implementation
 
@@ -49,7 +49,7 @@ GET     /catalog/rest/items/{id}          # Returns item by id
 MicroProfile is an open platform that optimizes the Enterprise Java for microservices architecture. In this application, we are using [**MicroProfile 1.3**](https://github.com/eclipse/microprofile-bom). This includes
 
 - MicroProfile 1.0 ([JAX-RS 2.0](https://jcp.org/en/jsr/detail?id=339), [CDI 1.2](https://jcp.org/en/jsr/detail?id=346), and [JSON-P 1.0](https://jcp.org/en/jsr/detail?id=353))
-- MicroProfile 1.1 
+- MicroProfile 1.1
 - MicroProfile 1.2 ([MicroProfile Fault Tolerance 1.0](https://github.com/eclipse/microprofile-fault-tolerance), [MicroProfile Health Check 1.0](https://github.com/eclipse/microprofile-health), [MicroProfile JWT Authentication 1.0](https://github.com/eclipse/microprofile-jwt-auth)).
 - [MicroProfile Config 1.2](https://github.com/eclipse/microprofile-config) (supercedes MicroProfile Config 1.1), [MicroProfile Metrics 1.1](https://github.com/eclipse/microprofile-metrics) (supercedes MicroProfile Metrics 1.0), [MicroProfile OpenAPI 1.0](https://github.com/eclipse/microprofile-open-api), [MicroProfile OpenTracing 1.0](https://github.com/eclipse/microprofile-opentracing), [MicroProfile Rest Client 1.0](https://github.com/eclipse/microprofile-rest-client).
 
@@ -101,7 +101,7 @@ In our sample application, we obtained the configuration programatically.
 
 In our sample application, we used @Timeout, @Retry and @Fallback.
 
-6. [MicroProfile Health Check](https://github.com/eclipse/microprofile-health) - This feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown. 
+6. [MicroProfile Health Check](https://github.com/eclipse/microprofile-health) - This feature helps us to determine the status of the service as well as its availability. This helps us to know if the service is healthy. If not, we can know the reasons behind the termination or shutdown.
 
 In our sample application, we injected this `/health` endpoint in our liveness probes.
 
@@ -115,7 +115,7 @@ In our sample application we used @OpenAPIDefinition, @Info, @Contact, @License,
 
 In our sample application, we used @Timed, @Counted and @Metered annotations. These metrics are reused using reuse functionality. We also integrated Microprofile metrics with Prometheus.
 
-10. [MicroProfile OpenTracing](https://github.com/eclipse/microprofile-opentracing) - This feature enables distributed tracing. It helps us to analyze the transcation flow so that the we can easily debug the problematic services and fix them. It enables and allows for custom tracing of JAX-RS and non-JAX-RS methods. 
+10. [MicroProfile OpenTracing](https://github.com/eclipse/microprofile-opentracing) - This feature enables distributed tracing. It helps us to analyze the transaction flow so that the we can easily debug the problematic services and fix them. It enables and allows for custom tracing of JAX-RS and non-JAX-RS methods. 
 
 In our sample application, we used [Zipkin](https://zipkin.io/) as our distributed tracing system. We used @Traced and an ActiveSpan object to retrieve messages.
 
@@ -150,6 +150,3 @@ To deploy the app locally and test the individual service, please follow the ins
 4. [MicroProfile OpenAPI on Liberty](https://www.ibm.com/support/knowledgecenter/en/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_mpopenapi.html)
 5. [MicroProfile Metrics on Liberty](https://www.ibm.com/support/knowledgecenter/en/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/cwlp_mp_metrics_api.html)
 6. [MicroProfile OpenTracing on Liberty](https://www.ibm.com/support/knowledgecenter/SSEQTP_liberty/com.ibm.websphere.liberty.autogen.base.doc/ae/rwlp_feature_mpOpenTracing-1.0.html)
-
-
-
