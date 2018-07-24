@@ -1,54 +1,26 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ .Chart.Name }}
+  name: {{ template "inventory.fullname" . }}
   labels:
-    app: bluecompute
-    micro: inventory
-    tier: backend
-    release: {{.Release.Name | quote }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    {{- include "inventory.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app: bluecompute
-        micro: inventory
-        tier: backend
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-          {
-            "name": "test-mysql",
-            "image": "{{ .Values.dataloader.image.repository }}:{{ .Values.dataloader.image.tag }}",
-            "imagePullPolicy": "Always",
-            "command": ["/bin/bash", "-c"],
-            "args": ["source ./helper.sh; mysql_uri=`echo ${mysql} | jq -r .uri`; uri_parser ${mysql_uri}; until mysql -h ${uri_host} -P ${uri_port} -u${uri_user} -p${uri_password} -e status `echo ${uri_path} | cut -d/ -f2`; do echo waiting for mysql; sleep 1; done"],
-            "env": [{
-              "name": "mysql",
-              "valueFrom": {
-                "secretKeyRef": {
-                  "name": "{{ template "inventoryMySQLBindingName" . }}",
-                  "key": "binding"
-                }
-              }
-            }]
-          }
-        ]'
+        {{- include "inventory.labels" . | indent 8 }}
     spec:
+      initContainers:
+      {{- include "inventory.mysql.initcontainer" . | indent 6 }}
       containers:
       - name: inventory
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         ports:
-          - containerPort: {{ .Values.service.internalPort }}
-            protocol: TCP
-        resources:
-{{ toYaml .Values.resources | indent 12 }}
+        - containerPort: {{ .Values.service.internalPort }}
+          protocol: TCP
         env:
-        - name: mysql
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "inventoryMySQLBindingName" . }}
-              key: binding
-        {{ template "messageHubBinding" . }}
+        {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
