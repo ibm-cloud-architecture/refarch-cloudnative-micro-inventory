@@ -6,7 +6,7 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 
 <p align="center">
   <a href="https://microprofile.io/">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-wfd/blob/microprofile/static/imgs/microprofile_small.png" width="300" height="100">
+    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/static/microprofile_small.png" width="300" height="100">
   </a>
 </p>
 
