@@ -30,6 +30,15 @@
         <packaging.type>usr</packaging.type>
     </properties>
 
+    <repositories>
+    <!-- Needed for JSON-B API -->
+       <repository>
+           <id>java.net-Public</id>
+           <name>Maven Java Net Snapshots and Releases</name>
+           <url>https://maven.java.net/content/groups/public/</url>
+       </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -66,11 +75,6 @@
             <version>20171018</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.3</version>
-        </dependency>
-        <dependency>
             <groupId>javax.ejb</groupId>
             <artifactId>javax.ejb-api</artifactId>
             <version>3.2-b02</version>
@@ -91,6 +95,21 @@
     		<groupId>io.opentracing</groupId>
     		<artifactId>opentracing-api</artifactId>
     		<version>0.30.0</version>
+		</dependency>
+		<dependency>
+       		<groupId>javax.json.bind</groupId>
+    		<artifactId>javax.json.bind-api</artifactId>
+    		<version>1.0</version>
+		</dependency>
+        <dependency>
+    		<groupId>org.eclipse</groupId>
+    		<artifactId>yasson</artifactId>
+    		<version>1.0</version>
+		</dependency>
+		<dependency>
+   			<groupId>org.glassfish</groupId>
+   			<artifactId>javax.json</artifactId>
+  		    <version>1.1</version>
 		</dependency>
     </dependencies>
 
