@@ -6,7 +6,7 @@ def serviceAccount = env.SERVICE_ACCOUNT ?: "default"
 
 // Pod Environment Variables
 def namespace = env.NAMESPACE ?: "default"
-def registry = env.REGISTRY ?: "mycluster.icp:8500"
+def registry = env.REGISTRY ?: "registry.hub.docker.com"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=bluecompute,tier=backend,micro=inventory"
 def podName = env.POD_NAME ?: "inventory"
