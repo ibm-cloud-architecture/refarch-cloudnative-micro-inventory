@@ -25,8 +25,9 @@ build
 *.iml
 *.iws
 
-# swp files
+# swp and bak files
 *.swp
+*.bak
 
 # Mac
 .DS_Store
