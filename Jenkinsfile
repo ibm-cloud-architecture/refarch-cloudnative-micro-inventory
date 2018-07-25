@@ -7,7 +7,7 @@ def serviceAccount = env.SERVICE_ACCOUNT ?: "default"
 // Pod Environment Variables
 def namespace = env.NAMESPACE ?: "default"
 def registry = env.REGISTRY ?: "mycluster.icp:8500"
-def imageName = env.IMAGE_NAME ?: "bluecompute-inventory"
+def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=bluecompute,tier=backend,micro=inventory"
 def podName = env.POD_NAME ?: "inventory"
 
@@ -41,9 +41,17 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                                                usernameVariable: 'USERNAME',
                                                passwordVariable: 'PASSWORD')]) {
                     sh """
-                    #!/bin/bash
+                    #!/bin/bash\
+
                     docker login -u ${USERNAME} -p ${PASSWORD} ${env.REGISTRY}
-                    docker push ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+
+                    if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
+                        echo 'Pushing to Docker Hub'
+                        docker push ${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    else
+                        echo 'Pushing to Private Registry'
+                        docker push ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    fi
                     """
                 }
             }
@@ -59,8 +67,16 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     echo 'No deployment to update'
                     exit 1
                 fi
-                # Update Deployment
-                kubectl --namespace=${env.NAMESPACE} set image \${DEPLOYMENT} ${env.POD_NAME}=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+
+                # Get image
+                if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
+                    IMAGE=`${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
+                else
+                    IMAGE=`${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
+                fi
+
+                # Update deployment and check rollout status
+                kubectl --namespace=${env.NAMESPACE} set image \${DEPLOYMENT} ${env.POD_NAME}=\${IMAGE}
                 kubectl --namespace=${env.NAMESPACE} rollout status \${DEPLOYMENT}
                 """
             }
