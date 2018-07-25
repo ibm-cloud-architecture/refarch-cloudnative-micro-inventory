@@ -101,6 +101,7 @@ $ ./load_data.sh dbuser password 127.0.0.1 3306 inventorydb
 
 
 Data loaded to inventorydb.items.
+$ cd ..
 ```
 
 Note that we didn't use the IP address we obtained from the MySQL since it is only accessible to other Docker Containers. We used `127.0.0.1` localhost IP address instead since we mapped the 3306 port on the docker container to the 3306 port in localhost.

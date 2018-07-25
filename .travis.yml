@@ -5,17 +5,24 @@ env:
   global:
     - IMAGE_NAME=ibmcase/bluecompute-inventory
     - RELEASE_NAME=inventory
-    - TAG=test
+    - LATEST_TAG=travis-latest
 stages:
   - build
   - test
 jobs:
   include:
     - stage: build
-      before_script:
-      - docker pull "$IMAGE_NAME" || true
-      script: 
-      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      script:
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${LATEST_TAG}" .
+      # Docker Login
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+      # Create Image Tag from chart version
+      - VERSION_TAG="travis-$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')"
+      # Tag image with chart version tag
+      - docker tag "${IMAGE_NAME}:${LATEST_TAG}" "${IMAGE_NAME}:${VERSION_TAG}"
+      # Push image to share with test and deploy stages
+      - docker push "${IMAGE_NAME}:${LATEST_TAG}" && docker push "${IMAGE_NAME}:${VERSION_TAG}"
     - stage: test
       services:
       - mysql
@@ -23,10 +30,10 @@ jobs:
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
       # Start Inventory Container and Connect to local MySQL Service
-      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${TAG}"
-      script:
+      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${LATEST_TAG}"
       # Wait for the Inventory container to start accepting connections
       - sleep 25
+      script:
       # Check that the Inventory container is running
       - docker ps
       # Check logs to see if it started properly
@@ -34,13 +41,6 @@ jobs:
       # Run Inventory API Test
       # TODO: Test more APIs, perhaps with a separate script
       - curl http://127.0.0.1:8080/micro/inventory
-      after_success:
-      - CHART_VERSION=$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')
-      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      - docker tag "${IMAGE_NAME}:${TAG}" "${IMAGE_NAME}:${CHART_VERSION}"
-      - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${CHART_VERSION}"
-      after_script:
-      - docker images
     - stage: deploy
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
@@ -76,8 +76,9 @@ jobs:
       # helm package
       - helm package chart/inventory
       # helm install Inventory from packaged chart
-      - CHART_VERSION=$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')
-      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${CHART_VERSION}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
+      - CHART_VERSION="$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')"
+      - VERSION_TAG="travis-${CHART_VERSION}"
+      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${VERSION_TAG}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
       # Wait for Inventory to be ready
       - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
       - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
