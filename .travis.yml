@@ -28,7 +28,7 @@ jobs:
       - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${TAG}"
       script:
       # Wait for the app container to start
-      - sleep 15
+      - sleep 25
       # Check that the app container is running
       - docker ps
       # Check logs to see if it started properly
