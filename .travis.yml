@@ -1,18 +1,88 @@
-language: java
-jdk: 
-- oraclejdk8
-
-## If we want to test against database and docker we can use these later
-#services:
-#- mysql
-#- docker
-
-before_install: 
-## If we want to test against database we can do this
-#- mysql -e 'CREATE DATABASE IF NOT EXISTS inventorydb;'
-#- mysql -u root < mysql/scripts/load-data.sql
-- cd inventory
- 
-script: 
-- ./gradlew build
-- ./gradlew docker
+sudo: required
+services:
+  - docker
+env:
+  global:
+    - IMAGE_NAME=ibmcase/bluecompute-inventory
+    - RELEASE_NAME=inventory
+    - TAG=test
+stages:
+  - build
+  - test
+jobs:
+  include:
+    - stage: build
+      before_script:
+      - docker pull "$IMAGE_NAME" || true
+      script: 
+      - docker build --pull --cache-from "$IMAGE_NAME" --tag "$TAG" .
+    - stage: test
+      services:
+      - mysql
+      before_script:
+      # Wait for MySQL to start, then load it with inventory data
+      cd scripts
+      ./load_data.sh root "" 127.0.0.1 3306 inventorydb
+      cd ..
+      # Start Inventory Container
+      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}"
+      script:
+      # Wait for the app container to start
+      - sleep 15
+      # Check that the app container is running
+      - docker ps
+      # Test API
+      # TODO: Test more APIs, perhaps with a separate script
+      - curl http://127.0.0.1:8080/micro/inventory
+      after_success:
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${TAG}"
+      - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
+      - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
+      after_script:
+      - docker images
+    - stage: deploy
+      env:
+      - CHANGE_MINIKUBE_NONE_USER=true
+      before_script:
+      # Install nsenter
+      - bash scripts/install_nsenter.sh 
+      # Download kubectl, which is a requirement for using minikube.
+      - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+      # Download minikube.
+      - curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.25.2/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+      - sudo minikube start --vm-driver=none --kubernetes-version=v1.9.0
+      # Fix the kubectl context, as it's often stale.
+      - minikube update-context
+      # Getting ip for testing
+      - minikube ip
+      # Wait for Kubernetes to be up and ready.
+      - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
+      # Download Helm and install on minikube, then wait 10 seconds for it to be ready
+      # Probably add the service account permissions here as well
+      - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && ./get_helm.sh && rm get_helm.sh
+      - kubectl -n kube-system create sa tiller && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+      - helm init --service-account tiller
+      - until helm list; do echo "waiting for helm to be ready"; sleep 1; done
+      script:
+      # Get cluster info
+      - kubectl cluster-info
+      # Create elasticsearch secret for using Travis CI's elasticsearch service
+      #- kubectl apply -f kubernetes/elasticsearch_secret.yml
+      #- kubectl get secret binding-inventory-elasticsearch
+      # helm lint
+      - helm lint chart/inventory
+      # helm package
+      - helm package chart/inventory
+      # helm install
+      - CHART_VERSION=$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')
+      - helm upgrade --install inventory --set service.type=NodePort --set image.repository="${IMAGE_NAME}" --set image.tag="${TRAVIS_JOB_NUMBER}" inventory-${CHART_VERSION}.tgz
+      # Wait for inventory to be ready
+      - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
+      - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
+      - echo $READY
+      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); echo "Waiting for inventory to be ready"; sleep 1; done
+      - sleep 5
+      # Run api test
+      - NODE_PORT=$(kubectl get service ${RELEASE_NAME}-inventory -o=jsonpath='{.spec.ports[0].nodePort}')
+      - curl http://$(minikube ip):${NODE_PORT}/micro/inventory
