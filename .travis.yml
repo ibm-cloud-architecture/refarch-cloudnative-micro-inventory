@@ -38,8 +38,8 @@ jobs:
       - curl http://127.0.0.1:8080/micro/inventory
       after_success:
       - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      - docker tag "${IMAGE_NAME}:${TAG}" "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
-      - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
+      - docker tag "${IMAGE_NAME}:${TAG}" "${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER}"
+      - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER}"
       after_script:
       - docker images
     - stage: deploy
@@ -76,7 +76,7 @@ jobs:
       - helm package chart/inventory
       # helm install
       - CHART_VERSION=$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')
-      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TRAVIS_JOB_NUMBER}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
+      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TRAVIS_BUILD_NUMBER}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
       # Wait for inventory to be ready
       - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
       - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
