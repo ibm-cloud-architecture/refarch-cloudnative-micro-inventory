@@ -1,0 +1,24 @@
+##########################################################
+######    Inventory was successfully installed!!!    #####
+##########################################################
+
+To access the Inventory Microservice API, please follow the steps below:
+
+1. To get the IP Address for the Inventory Application, run one the following commands based on your environment:
+  IBM Cloud Container Service:
+  NODE_IP=$(bx cs workers $YOUR_CLUSTER_NAME | grep -v '^*' | egrep -v "(ID|OK)" | awk '{print $2;}' | head -n1)
+
+  IBM Cloud Private:
+  NODE_IP=$PROXY_NODE_EXTERNAL_IP
+
+  Minikube:
+  NODE_IP=$(minikube ip)
+
+  Others:
+  NODE_IP=$(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' | awk '{print $1}')
+
+2. To get the Port for the Inventory Application, run the following command:
+  PORT=$(kubectl --namespace {{ .Release.Namespace }} get service {{ .Release.Name }}-{{ .Chart.Name }} -o jsonpath='{.spec.ports[0].nodePort}')
+
+3. To get the entire URL for the Inventory Application, run the following command:
+  curl http://$NODE_IP:$PORT/micro/inventory
