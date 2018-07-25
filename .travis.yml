@@ -21,9 +21,9 @@ jobs:
       - mysql
       before_script:
       # Wait for MySQL to start, then load it with inventory data
-      cd scripts
-      ./load_data.sh root "" 127.0.0.1 3306 inventorydb
-      cd ..
+      - cd scripts
+      - ./load_data.sh root "" 127.0.0.1 3306 inventorydb
+      - cd ..
       # Start Inventory Container
       - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}"
       script:
@@ -67,9 +67,6 @@ jobs:
       script:
       # Get cluster info
       - kubectl cluster-info
-      # Create elasticsearch secret for using Travis CI's elasticsearch service
-      #- kubectl apply -f kubernetes/elasticsearch_secret.yml
-      #- kubectl get secret binding-inventory-elasticsearch
       # helm lint
       - helm lint chart/inventory
       # helm package
