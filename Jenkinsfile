@@ -1,76 +1,67 @@
-podTemplate(
-    label: 'mypod',
-    volumes: [
-      hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
-      secretVolume(secretName: 'registry-account', mountPath: '/var/run/secrets/registry-account'),
-      configMapVolume(configMapName: 'registry-config', mountPath: '/var/run/configs/registry-config')
-    ],
+// Pod Template
+def podLabel = "inventory"
+def cloud = env.CLOUD ?: "kubernetes"
+def registryCredsID = env.REGISTRY_CREDENTIALS ?: "registry-credentials-id"
+def serviceAccount = env.SERVICE_ACCOUNT ?: "default"
 
+// Pod Environment Variables
+def namespace = env.NAMESPACE ?: "default"
+def registry = env.REGISTRY ?: "mycluster.icp:8500"
+def imageName = env.IMAGE_NAME ?: "bluecompute-inventory"
+def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=bluecompute,tier=backend,micro=inventory"
+def podName = env.POD_NAME ?: "inventory"
+
+podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, namespace: namespace, envVars: [
+        envVar(key: 'NAMESPACE', value: namespace),
+        envVar(key: 'REGISTRY', value: registry),
+        envVar(key: 'IMAGE_NAME', value: imageName),
+        envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
+        envVar(key: 'POD_NAME', value: podName)
+    ],
+    volumes: [
+        hostPathVolume(hostPath: '/etc/docker/certs.d', mountPath: '/etc/docker/certs.d'),
+        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+    ],
     containers: [
-        containerTemplate(name: 'gradle', image: 'ibmcase/gradle:jdk8-alpine', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'docker:17.06.1-ce', ttyEnabled: true, command: 'cat')
-    ],
-) {
-    node ('mypod') {
-        checkout scm
-        container('gradle') {
-            stage('Build Gradle Project') {
-                sh """
-                #!/bin/sh
-                cd inventory
-                gradle build -x test
-                gradle docker
-                """
-            }
-        }
-        container('docker') {
-            stage ('Build Docker Image') {
-                sh """
-                    #!/bin/bash
-                    NAMESPACE=`cat /var/run/configs/registry-config/namespace`
-                    REGISTRY=`cat /var/run/configs/registry-config/registry`
+  ]) {
 
-                    cd inventory/docker
-                    docker build -t \${REGISTRY}/\${NAMESPACE}/bluecompute-inventory:${env.BUILD_NUMBER} .                    
-                """
-            }
-            stage ('Push Docker Image to Registry') {
+    node(podLabel) {
+        checkout scm
+        container('docker') {
+            stage('Build Docker Image') {
                 sh """
                 #!/bin/bash
-                NAMESPACE=`cat /var/run/configs/registry-config/namespace`
-                REGISTRY=`cat /var/run/configs/registry-config/registry`
-
-                set +x
-                DOCKER_USER=`cat /var/run/secrets/registry-account/username`
-                DOCKER_PASSWORD=`cat /var/run/secrets/registry-account/password`
-                docker login -u=\${DOCKER_USER} -p=\${DOCKER_PASSWORD} \${REGISTRY}
-                set -x
-
-                docker push \${REGISTRY}/\${NAMESPACE}/bluecompute-inventory:${env.BUILD_NUMBER}
+                docker build -t ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
                 """
+            }
+            stage('Push Docker Image to Registry') {
+                withCredentials([usernamePassword(credentialsId: registryCredsID,
+                                               usernameVariable: 'USERNAME',
+                                               passwordVariable: 'PASSWORD')]) {
+                    sh """
+                    #!/bin/bash
+                    docker login -u ${USERNAME} -p ${PASSWORD} ${env.REGISTRY}
+                    docker push ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    """
+                }
             }
         }
         container('kubectl') {
             stage('Deploy new Docker Image') {
                 sh """
                 #!/bin/bash
-                set +e
-                NAMESPACE=`cat /var/run/configs/registry-config/namespace`
-                REGISTRY=`cat /var/run/configs/registry-config/registry`
-                DEPLOYMENT=`kubectl --namespace=\${NAMESPACE} get deployments -l app=bluecompute,tier=backend,micro=inventory -o name`
-
-                kubectl --namespace=\${NAMESPACE} get \${DEPLOYMENT}
-
+                DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
+                kubectl --namespace=${env.NAMESPACE} get \${DEPLOYMENT}
                 if [ \${?} -ne "0" ]; then
                     # No deployment to update
                     echo 'No deployment to update'
                     exit 1
                 fi
-
                 # Update Deployment
-                kubectl --namespace=\${NAMESPACE} set image \${DEPLOYMENT} inventory=\${REGISTRY}/\${NAMESPACE}/bluecompute-inventory:${env.BUILD_NUMBER}
-                kubectl --namespace=\${NAMESPACE} rollout status \${DEPLOYMENT}
+                kubectl --namespace=${env.NAMESPACE} set image \${DEPLOYMENT} ${env.POD_NAME}=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                kubectl --namespace=${env.NAMESPACE} rollout status \${DEPLOYMENT}
                 """
             }
         }
