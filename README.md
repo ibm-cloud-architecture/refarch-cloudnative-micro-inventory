@@ -1,5 +1,6 @@
 # refarch-cloudnative-micro-inventory: Spring Boot Microservice with MySQL Database
 [![Build Status](https://travis-ci.org/fabiogomezdiaz/refarch-cloudnative-micro-inventory.svg?branch=master)](https://travis-ci.org/fabiogomezdiaz/refarch-cloudnative-micro-inventory)
+
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
 https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
 
