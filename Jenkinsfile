@@ -6,7 +6,7 @@ def serviceAccount = env.SERVICE_ACCOUNT ?: "jenkins"
 
 // Pod Environment Variables
 def namespace = env.NAMESPACE ?: "default"
-def registry = env.REGISTRY ?: "registry.hub.docker.com"
+def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=bluecompute,tier=backend,micro=inventory"
 def podName = env.POD_NAME ?: "inventory"
@@ -33,7 +33,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Build Docker Image') {
                 sh """
                 #!/bin/bash
-                if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
+                if [ "${env.REGISTRY}" = "docker.io" ]; then
                     echo 'Building Docker Hub Image'
                     docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
                 else
@@ -51,7 +51,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                     docker login -u ${USERNAME} -p ${PASSWORD} ${env.REGISTRY}
 
-                    if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
+                    if [ "${env.REGISTRY}" = "docker.io" ]; then
                         echo 'Pushing to Docker Hub'
                         docker push ${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                     else
@@ -75,7 +75,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 fi
 
                 # Get image
-                if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
+                if [ "${env.REGISTRY}" = "docker.io" ]; then
                     IMAGE=`${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
                 else
                     IMAGE=`${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
