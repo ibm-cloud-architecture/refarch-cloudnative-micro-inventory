@@ -76,9 +76,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Get image
                 if [ "${env.REGISTRY}" = "docker.io" ]; then
-                    IMAGE=`${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
+                    IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
-                    IMAGE=`${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
+                    IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
 
                 # Update deployment and check rollout status
