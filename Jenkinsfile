@@ -2,7 +2,7 @@
 def podLabel = "inventory"
 def cloud = env.CLOUD ?: "kubernetes"
 def registryCredsID = env.REGISTRY_CREDENTIALS ?: "registry-credentials-id"
-def serviceAccount = env.SERVICE_ACCOUNT ?: "default"
+def serviceAccount = env.SERVICE_ACCOUNT ?: "jenkins"
 
 // Pod Environment Variables
 def namespace = env.NAMESPACE ?: "default"
@@ -35,7 +35,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
                 if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
                     echo 'Building Docker Hub Image'
-                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                    docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
                 else
                     echo 'Building Private Registry Image'
                     docker build -t ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
@@ -53,7 +53,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                     if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
                         echo 'Pushing to Docker Hub'
-                        docker push ${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                        docker push ${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                     else
                         echo 'Pushing to Private Registry'
                         docker push ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
@@ -76,7 +76,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Get image
                 if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
-                    IMAGE=`${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
+                    IMAGE=`${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
                 else
                     IMAGE=`${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}`
                 fi
