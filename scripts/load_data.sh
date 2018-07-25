@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 mysql_user=$1
 mysql_password=$2
