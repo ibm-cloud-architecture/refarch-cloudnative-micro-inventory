@@ -33,7 +33,13 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Build Docker Image') {
                 sh """
                 #!/bin/bash
-                docker build -t ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                if [ "${env.REGISTRY}" = "registry.hub.docker.com" ]; then
+                    echo 'Building Docker Hub Image'
+                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                else
+                    echo 'Building Private Registry Image'
+                    docker build -t ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                fi
                 """
             }
             stage('Push Docker Image to Registry') {
