@@ -21,32 +21,31 @@ jobs:
       - mysql
       before_script:
       # Wait for MySQL to start, then load it with inventory data
-      - cd scripts
-      - ./load_data.sh root "" 127.0.0.1 3306 inventorydb
-      - cd ..
-      # Start Inventory Container
+      - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
+      # Start Inventory Container and Connect to local MySQL Service
       - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${TAG}"
       script:
-      # Wait for the app container to start
+      # Wait for the Inventory container to start accepting connections
       - sleep 25
-      # Check that the app container is running
+      # Check that the Inventory container is running
       - docker ps
       # Check logs to see if it started properly
       - docker logs inventory
-      # Test API
+      # Run Inventory API Test
       # TODO: Test more APIs, perhaps with a separate script
       - curl http://127.0.0.1:8080/micro/inventory
       after_success:
+      - CHART_VERSION=$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')
       - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      - docker tag "${IMAGE_NAME}:${TAG}" "${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER}"
-      - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER}"
+      - docker tag "${IMAGE_NAME}:${TAG}" "${IMAGE_NAME}:${CHART_VERSION}"
+      - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${CHART_VERSION}"
       after_script:
       - docker images
     - stage: deploy
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
       before_script:
-      # Install nsenter
+      # Install nsenter, which is needed for minikube to work
       - bash scripts/install_nsenter.sh 
       # Download kubectl, which is a requirement for using minikube.
       - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
@@ -57,32 +56,35 @@ jobs:
       - minikube update-context
       # Getting ip for testing
       - minikube ip
-      # Wait for Kubernetes to be up and ready.
+      # Wait for Minikube to be up and ready.
       - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
-      # Download Helm and install on minikube, then wait 10 seconds for it to be ready
-      # Probably add the service account permissions here as well
+      # Download Helm CLI
       - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && ./get_helm.sh && rm get_helm.sh
+      # Create Tiller Service Account
       - kubectl -n kube-system create sa tiller && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+      # Install Helm on Minikube
       - helm init --service-account tiller
+      # Wait for helm to be ready
       - until helm list; do echo "waiting for helm to be ready"; sleep 1; done
       script:
       # Get cluster info
       - kubectl cluster-info
-      # Download dependency update
+      # Download Inventory chart dependencies (MySQL)
       - cd chart/inventory; helm dependency update; cd ../..
       # helm lint
       - helm lint chart/inventory
       # helm package
       - helm package chart/inventory
-      # helm install
+      # helm install Inventory from packaged chart
       - CHART_VERSION=$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')
-      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TRAVIS_BUILD_NUMBER}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
-      # Wait for inventory to be ready
+      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${CHART_VERSION}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
+      # Wait for Inventory to be ready
       - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
       - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
       - echo $READY
-      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get deployments -o wide; echo "Waiting for inventory to be ready"; sleep 1; done
+      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get deployments -o wide; echo "Waiting for inventory to be ready"; sleep 10; done
+      # Wait for Inventory deployment to start accepting connections
       - sleep 25
-      # Run api test
+      # Run Inventory API Test
       - NODE_PORT=$(kubectl get service ${RELEASE_NAME}-inventory -o=jsonpath='{.spec.ports[0].nodePort}')
       - curl http://$(minikube ip):${NODE_PORT}/micro/inventory
