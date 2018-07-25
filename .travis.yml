@@ -67,6 +67,8 @@ jobs:
       script:
       # Get cluster info
       - kubectl cluster-info
+      # Download dependency update
+      - cd chart/inventory; helm dependency update; cd ../..
       # helm lint
       - helm lint chart/inventory
       # helm package
