@@ -15,7 +15,7 @@ jobs:
       before_script:
       - docker pull "$IMAGE_NAME" || true
       script: 
-      - docker build --pull --cache-from "$IMAGE_NAME" --tag "$TAG" .
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
     - stage: test
       services:
       - mysql
@@ -25,7 +25,7 @@ jobs:
       - ./load_data.sh root "" 127.0.0.1 3306 inventorydb
       - cd ..
       # Start Inventory Container
-      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}"
+      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${TAG}"
       script:
       # Wait for the app container to start
       - sleep 15
@@ -38,8 +38,7 @@ jobs:
       - curl http://127.0.0.1:8080/micro/inventory
       after_success:
       - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${TAG}"
-      - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
+      - docker tag "${IMAGE_NAME}:${TAG}" "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
       - docker push "${IMAGE_NAME}:${TAG}" && docker push "${IMAGE_NAME}:${TRAVIS_JOB_NUMBER}"
       after_script:
       - docker images
