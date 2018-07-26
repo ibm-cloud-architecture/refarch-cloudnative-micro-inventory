@@ -1,4 +1,3 @@
-{{- if .Values.dataloader.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -17,8 +16,21 @@ spec:
       {{- include "inventory.mysql.initcontainer" . | indent 6 }}
       containers:
       - name: populate-mysql
-        image: {{ .Values.dataloader.image.repository }}:{{ .Values.dataloader.image.tag }}
-        imagePullPolicy: {{ .Values.dataloader.image.pullPolicy }}
+        image: {{ .Values.inventorymysql.image }}:{{ .Values.inventorymysql.imageTag }}
+        imagePullPolicy: {{ .Values.inventorymysql.imagePullPolicy }}
+        volumeMounts:
+        - mountPath: /inventory-data
+          name: inventory-data
+          readOnly: false
+        command: ["/bin/bash", "-c"]
+        {{- if .Values.inventorymysql.mysqlPassword }}
+        args: ["cp /inventory-data/mysql_data.sql .; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} <mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
+        {{- else }}
+        args: ["cp /inventory-data/mysql_data.sql .; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER}                     <mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
+        {{- end }}
         env:
         {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
-{{- end }}
+      volumes:
+      - name: inventory-data
+        configMap:
+          name: {{ template "inventory.fullname" . }}-data
