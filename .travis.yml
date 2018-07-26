@@ -25,7 +25,7 @@ jobs:
           - $HOME/.gradle/wrapper/
       before_script:
       # Wait for MySQL to start, then load it with inventory data
-      - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
+      - until mysql -h 127.0.0.1 -P 3306 -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
       script:
       # Gradle Build
       - ./gradlew build -x test
@@ -44,7 +44,7 @@ jobs:
         - true
       before_script:
       # Wait for MySQL to start, then load it with inventory data
-      - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
+      - until mysql -h 127.0.0.1 -P 3306 -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database";
       script:
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
@@ -104,7 +104,7 @@ jobs:
       - helm package chart/inventory
       # helm install Inventory from packaged chart. Use pullPolicy=Never so it uses local docker image
       - CHART_VERSION="$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')"
-      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never,dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
+      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never inventory-${CHART_VERSION}.tgz
       # Wait for Inventory to be ready
       - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
       - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
