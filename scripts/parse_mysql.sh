@@ -29,7 +29,7 @@ function parse_mysql() {
 	    mysql_uri=$(echo $mysql | jq -r .uri)
 	    parse_from_uri $mysql_uri
 
-    elif [ -n "MYSQL_PASSWORD"]; then
+    elif [ -n "$MYSQL_PASSWORD" ]; then
 	    echo "Using MySQL Community Chart"
 	    parse_from_uri "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
 

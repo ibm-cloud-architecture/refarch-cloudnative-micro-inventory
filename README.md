@@ -14,7 +14,11 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
     + [Populate the MySQL Database](#populate-the-mysql-database)
     + [Deploy the Inventory Docker Container](#deploy-the-inventory-docker-container)
 * [Run Inventory Service application on localhost](#run-inventory-service-application-on-localhost)
+* [Optional: Setup CI/CD Pipeline](#optional-setup-cicd-pipeline)
 * [Conclusion](#conclusion)
+* [Contributing](#contributing)
+    + [GOTCHAs](#gotchas)
+    + [Contributing a New Chart Package to Microservices Reference Architecture Helm Repository](#contributing-a-new-chart-package-to-microservices-reference-architecture-helm-repository)
 
 ## Introduction
 This project will demonstrate how to deploy a Spring Boot Application with a MySQL database onto a Kubernetes Cluster.
@@ -158,7 +162,40 @@ $ curl http://localhost:8080/micro/inventory
 
 That's it, you have successfully deployed and tested the Inventory microservice.
 
+## Optional: Setup CI/CD Pipeline
+If you would like to setup an automated Jenkins CI/CD Pipeline for this repository, we provided a sample [Jenkinsfile](Jenkinsfile), which uses the [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) syntax of the [Jenkins Kubernetes Plugin](https://github.com/jenkinsci/kubernetes-plugin) to automatically create and run Jenkis Pipelines from your Kubernetes environment. 
+
+To learn how to use this sample pipeline, follow the guide below and enter the corresponding values for your environment and for this repository:
+* https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes
+
 ## Conclusion
 You have successfully deployed and tested the Inventory Microservice and a MySQL database both on a Kubernetes Cluster and in local Docker Containers.
 
 To see the Inventory app working in a more complex microservices use case, checkout our Microservice Reference Architecture Application [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes).
+
+## Contributing
+If you would like to contribute to this repository, please fork it, submit a PR, and assign as reviewers any of the GitHub users listed here:
+* https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/graphs/contributors
+
+### GOTCHAs
+1. We use Travis CI for our CI/CD needs, so when you open a Pull Request you will trigger a build in Travis CI, which needs to pass before we consider merging the PR. We use Travis CI to test the following:
+    * Successfully building the Docker image, which in itself runs unit testing.
+    * Push the Docker image to Docker Hub.
+    * Deploy the Docker Container along with its dependencies.
+    * Run API tests against the Docker Container.
+    * Deploy a minikube cluster to test Helm charts.
+    * Download dependencies and package the Helm chart.
+    * Deploy the Helm Chart into Minikube.
+    * Run API tests against the Helm Chart.
+
+2. The Docker Hub credentials, which are used to build and push new Docker images to our Docker Hub account, are stored privately in Travis CI. This means that PRs that come from forks won't be able to push the Docker Image to our Docker Hub account. This is a Travis CI security feature to prevent unauthorized use of our Docker Hub Credentials. The workaround to this is to setup your own fork with Travis CI and add the `DOCKER_USERNAME` `DOCKER_PASSWORD` environment variables so that it can build and push Docker Images to Docker Hub. To do so, checkout Travis CI's [Getting Started guide](https://docs.travis-ci.com/user/getting-started/) and it's [Environment Variables guide](https://docs.travis-ci.com/user/environment-variables/)
+
+3. We use the Community Chart for MySQL as the dependency chart for the Inventory Chart. If you would like to learn more about that chart and submit issues/PRs, please check out its repo here:
+    * https://github.com/helm/charts/tree/master/stable/mysql
+
+4. The source code for the `ibmcase/bluecompute-dataloader` Docker Image, which is defined in the chart in the [chart/inventory/values.yaml](chart/inventory/values.yaml#L31) file and used in the [chart/inventory/templates/load_data.yaml](chart/inventory/templates/load_data.yaml#L20) file, is located in the repository below. So please submit Issues and/or PRs on that repo.
+    * https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes/tree/master/docker_images/mysql-loader
+
+### Contributing a New Chart Package to Microservices Reference Architecture Helm Repository
+To contribute a new chart version to the [Microservices Reference Architecture](https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes) helm repository, follow its guide here:
+* COMING SOON
