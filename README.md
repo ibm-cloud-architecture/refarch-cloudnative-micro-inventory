@@ -100,12 +100,7 @@ Make sure to select the IP Address in the `IPAddress` field. You will use this I
 ### Populate the MySQL Database
 In order for Inventory to make use of the MySQL database, the database needs to be populated first. To do so, run the following commands:
 ```bash
-$ cd scripts
-$ ./load_data.sh dbuser password 127.0.0.1 3306 inventorydb
-
-
-Data loaded to inventorydb.items.
-$ cd ..
+$ until mysql -h 127.0.0.1 -P 3306 -udbuser -ppassword <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
 ```
 
 Note that we didn't use the IP address we obtained from the MySQL since it is only accessible to other Docker Containers. We used `127.0.0.1` localhost IP address instead since we mapped the 3306 port on the docker container to the 3306 port in localhost.
@@ -178,23 +173,18 @@ If you would like to contribute to this repository, please fork it, submit a PR,
 * https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/graphs/contributors
 
 ### GOTCHAs
-1. We use Travis CI for our CI/CD needs, so when you open a Pull Request you will trigger a build in Travis CI, which needs to pass before we consider merging the PR. We use Travis CI to test the following:
-    * Successfully building the Docker image, which in itself runs unit testing.
-    * Push the Docker image to Docker Hub.
-    * Deploy the Docker Container along with its dependencies.
+1. We use [Travis CI](https://travis-ci.org/) for our CI/CD needs, so when you open a Pull Request you will trigger a build in Travis CI, which needs to pass before we consider merging the PR. We use Travis CI to test the following:
+    * Create and load a MySQL database with the inventory static data.
+    * Building and running the Inventory app against the MySQL database and run API tests.
+    * Build and Deploy a Docker Container, using the same MySQL database.
     * Run API tests against the Docker Container.
     * Deploy a minikube cluster to test Helm charts.
-    * Download dependencies and package the Helm chart.
+    * Download Helm Chart dependencies and package the Helm chart.
     * Deploy the Helm Chart into Minikube.
     * Run API tests against the Helm Chart.
 
-2. The Docker Hub credentials, which are used to build and push new Docker images to our Docker Hub account, are stored privately in Travis CI. This means that PRs that come from forks won't be able to push the Docker Image to our Docker Hub account. This is a Travis CI security feature to prevent unauthorized use of our Docker Hub Credentials. The workaround to this is to setup your own fork with Travis CI and add the `DOCKER_USERNAME` `DOCKER_PASSWORD` environment variables so that it can build and push Docker Images to Docker Hub. To do so, checkout Travis CI's [Getting Started guide](https://docs.travis-ci.com/user/getting-started/) and it's [Environment Variables guide](https://docs.travis-ci.com/user/environment-variables/)
-
-3. We use the Community Chart for MySQL as the dependency chart for the Inventory Chart. If you would like to learn more about that chart and submit issues/PRs, please check out its repo here:
+2. We use the Community Chart for MySQL as the dependency chart for the Inventory Chart. If you would like to learn more about that chart and submit issues/PRs, please check out its repo here:
     * https://github.com/helm/charts/tree/master/stable/mysql
-
-4. The source code for the `ibmcase/bluecompute-dataloader` Docker Image, which is defined in the chart in the [chart/inventory/values.yaml](chart/inventory/values.yaml#L31) file and used in the [chart/inventory/templates/load_data.yaml](chart/inventory/templates/load_data.yaml#L20) file, is located in the repository below. So please submit Issues and/or PRs on that repo.
-    * https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes/tree/master/docker_images/mysql-loader
 
 ### Contributing a New Chart Package to Microservices Reference Architecture Helm Repository
 To contribute a new chart version to the [Microservices Reference Architecture](https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes) helm repository, follow its guide here:
