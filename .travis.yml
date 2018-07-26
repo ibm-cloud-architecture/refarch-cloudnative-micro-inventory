@@ -31,7 +31,7 @@ jobs:
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
       script:
       # Gradle Build
-      - ./gradlew build -x test
+      - ./gradlew build --scan -s
       # Start Application
       - java -jar build/libs/micro-inventory-0.0.1.jar&
       # Wait for the Inventory container to start accepting connections
