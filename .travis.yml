@@ -16,8 +16,6 @@ jobs:
     - stage: local build and test
       services:
       - mysql
-      install:
-        - true
       before_cache:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -42,6 +40,8 @@ jobs:
       services:
       - mysql
       - docker
+      install:
+        - true
       before_script:
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
@@ -64,6 +64,8 @@ jobs:
       - docker
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
+      install:
+        - true
       before_script:
       # Install nsenter, which is needed for minikube to work
       - bash scripts/install_nsenter.sh 
