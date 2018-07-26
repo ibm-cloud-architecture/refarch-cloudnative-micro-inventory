@@ -2,20 +2,11 @@ sudo: required
 language: java
 jdk:
   - openjdk8
-install:
-- true
 env:
   global:
     - IMAGE_NAME=bluecompute-inventory
     - RELEASE_NAME=inventory
     - TAG=travis-latest
-before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
 stages:
   - local build and test
   - docker build, deploy, and test
@@ -25,6 +16,15 @@ jobs:
     - stage: local build and test
       services:
       - mysql
+      install:
+        - true
+      before_cache:
+        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+      cache:
+        directories:
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
       before_script:
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
@@ -79,6 +79,7 @@ jobs:
       # Wait for Minikube to be up and ready.
       - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
       # Set minikube Docker Registry to be the local one
+      - minikube docker-env
       - eval $(minikube docker-env)
       # Download Helm CLI
       - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && ./get_helm.sh && rm get_helm.sh
