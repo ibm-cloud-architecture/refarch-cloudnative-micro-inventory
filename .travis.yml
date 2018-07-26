@@ -14,7 +14,7 @@ jobs:
     - stage: build
       script:
       # Compose Full Docker Image Name
-      - if [ -n "$DOCKER_ORG"]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
+      - if [ -n "$DOCKER_ORG" ]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
       # Build Docker image
       - docker build -t "${FULL_IMAGE_NAME}:${LATEST_TAG}" .
       # Docker Login
@@ -30,7 +30,7 @@ jobs:
       - mysql
       before_script:
       # Compose Full Docker Image Name
-      - if [ -n "$DOCKER_ORG"]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
+      - if [ -n "$DOCKER_ORG" ]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
       # Start Inventory Container and Connect to local MySQL Service
@@ -72,7 +72,7 @@ jobs:
       - until helm list; do echo "waiting for helm to be ready"; sleep 1; done
       script:
       # Compose Full Docker Image Name
-      - if [ -n "$DOCKER_ORG"]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
+      - if [ -n "$DOCKER_ORG" ]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
       # Get cluster info
       - kubectl cluster-info
       # Download Inventory chart dependencies (MySQL)
