@@ -1,308 +1,191 @@
-###### refarch-cloudnative-micro-inventory
-
-## Spring Boot Netflix OSS Microservice Apps Integration with ElasticSearch and MySQL Database Server
+# refarch-cloudnative-micro-inventory: Spring Boot Microservice with MySQL Database
+[![Build Status](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.svg?branch=master)](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory)
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
 https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
 
 ## Table of Contents
-- **[Introduction](#introduction)**
-    - [APIs](#apis)
-- **[Pre-requisites](#pre-requisites)**
-    - [CLIs](#clis)
-    - [Message Hub](#message-hub)
-    - [MySQL](#mysql)
-    - [Elasticsearch](#elasticsearch)
-- **[Run Inventory and Catalog Locally](#run-inventory-and-catalog-locally)**
-    - [Run Inventory Service application on localhost](#run-inventory-service-application-on-localhost)
-    - [Run Catalog Service application on localhost](#run-catalog-service-application-on-localhost)
-- **[Deploy Inventory and Catalog to Kubernetes Cluster](#deploy-inventory-and-catalog-to-kubernetes-cluster)**
-    - [Deploy Inventory Service application to Kubernetes Cluster](#deploy-inventory-service-application-to-kubernetes-cluster)
-    - [Deploy Catalog Service application to Kubernetes Cluster](#deploy-catalog-service-application-to-kubernetes-cluster)
+* [Introduction](#introduction)
+    + [APIs](#apis)
+* [Pre-requisites:](#pre-requisites)
+* [Deploy Inventory Application to Kubernetes Cluster](#deploy-inventory-application-to-kubernetes-cluster)
+* [Deploy Inventory Application on Docker](#deploy-inventory-application-on-docker)
+    + [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container)
+    + [Populate the MySQL Database](#populate-the-mysql-database)
+    + [Deploy the Inventory Docker Container](#deploy-the-inventory-docker-container)
+* [Run Inventory Service application on localhost](#run-inventory-service-application-on-localhost)
+* [Optional: Setup CI/CD Pipeline](#optional-setup-cicd-pipeline)
+* [Conclusion](#conclusion)
+* [Contributing](#contributing)
+    + [GOTCHAs](#gotchas)
+    + [Contributing a New Chart Package to Microservices Reference Architecture Helm Repository](#contributing-a-new-chart-package-to-microservices-reference-architecture-helm-repository)
 
 ## Introduction
-This project is built to demonstrate how to build two Microservices applications using Spring Boot and Docker container.. The first application (`Inventory`) uses MySQL database as its datasource. The second and publicly available application (`Catalog`) serves as a cache to `Inventory` by leveraging `Elasticsearch` as its datasource.
+This project will demonstrate how to deploy a Spring Boot Application with a MySQL database onto a Kubernetes Cluster.
+
+![Application Architecture](static/inventory.png?raw=true)
 
 Here is an overview of the project's features:
 - Leverage [`Spring Boot`](https://projects.spring.io/spring-boot/) framework to build a Microservices application.
-- Use [`Spring Data JPA`](http://projects.spring.io/spring-data-jpa/) to persist data to MySQL database and Elasticsearch.
-- Uses `MySQL` as the inventory database.
-- [`Elasticsearch`](https://github.com/elastic/elasticsearch) is used as the `Catalog` microservice's data source.
-- Uses [`MessageHub`](https://console.ng.bluemix.net/catalog/message-hub/) to receive messages that act as triggers to synchronize Inventory database with `Elasticsearch`.
-- Integrate with [`Netflix Eureka`](https://github.com/Netflix/eureka) framework.
-- Deployment option for [`IBM Bluemix Container`](https://www.ibm.com/cloud-computing/bluemix/containers) runtime.
-
-**Architecture Diagram**
-
-![Inventory/Catalog Diagram](inventory-catalog.png)
+- Uses [`Spring Data JPA`](http://projects.spring.io/spring-data-jpa/) to persist data to MySQL database.
+- Uses [`MySQL`](https://www.mysql.com/) as the inventory database.
+- Uses [`Docker`](https://docs.docker.com/) to package application binary and its dependencies.
+- Uses [`Helm`](https://helm.sh/) to package application and MySQL deployment configuration and deploy to a [`Kubernetes`](https://kubernetes.io/) cluster. 
 
 ### APIs
-You can use cURL or Chrome POSTMAN to send get/post/put/delete requests to the application.
-- Get all items in inventory:
-    `http://<catalog_hostname>/micro/items`
-
-- Get item by id:
-    `http://<catalog_hostname>/micro/items/{id}`
-
-- Example curl command to get al items in localhost:
-    `curl -X GET "http://localhost:8081/micro/items"`
+* Get all items in inventory:
+    + `http://localhost:8080/micro/inventory`
 
 ## Pre-requisites:
-Clone git repository before getting started.
-
-    ```
-    # git clone http://github.com/refarch-cloudnative-micro-inventory.git
-    # cd refarch-cloudnative-micro-inventory
-    ```
-
-### CLIs
-To install the CLIs for Bluemix, Kubernetes, Helm, JQ, and YAML,  Run the following script to install the CLIs:
-
-    `$ ./install_cli.sh`
-
-### Message Hub
-1. [Provision](https://console.ng.bluemix.net/catalog/services/message-hub) an instance of Message Hub into your Bluemix space.
-    - Select name for your instance.
-    - Click the `Create` button.
-2. Refresh the page until you see `Status: Ready`.
-3. Now obtain `Message Hub` service credentials.
-    - Click on `Service Credentials` tab.
-    - Then click on the `View Credentials` dropdown next to the credentials.
-4. You will need the following:
-    - **kafka_rest_url:** Needed to query and create `topics`.
-    - **api_key:** Needed to use the Message Hub REST API.
-    - **user:** Message Hub user.
-    - **password:** Message Hub password.
-    - **kafka_brokers_sasl:** Message Hub kafka brokers, which are in charge of receiving and sending messages for specific topics.
-5. Keep those credential handy for when deploying the Inventory and Catalog services in the following sections.
-
-### MySQL
-1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-mysql) and instance of MySQL into your Bluemix space.
-    - Select name for your instance.
-    - Click the `Create` button.
-2. Refresh the page until you see `Status: Ready`.
-3. Now obtain `MySQL` service credentials.
-    - Click on `Service Credentials` tab.
-    - Then click on the `View Credentials` dropdown next to the credentials.
-4. See the `uri` field, which has the format `mysql://user:password@host:port/database`, and extract the following:
-    - **user:** MySQL user.
-    - **password:** MySQL password.
-    - **host**: MySQL host.
-    - **port:** MySQL port.
-    - **database:** MySQL database.
-5. Keep those credential handy for when deploying the Inventory and Catalog services in the following sections.
-6. **Create `items` table and load sample data. You should see message _Data loaded to inventorydb.items._**
-
-    ```
-    # cd mysql/scripts
-    # bash load-data.sh {USER} {PASSWORD} {HOST} {PORT}
-    ```
- 
-    - Replace `{USER}` with MySQL user.
-    - Replace `{PASSWORD}` with MySQL password.
-    - Replace `{HOST}` with MySQL host.
-    - Replace `{PORT}` with MySQL port.
-
-MySQL database is now setup in Compose.
-
-### Elasticsearch
-1. [Provision](https://console.ng.bluemix.net/catalog/services/compose-for-elasticsearch) and instance of Elasticsearch into your Bluemix space.
-    - Select name for your instance.
-    - Click the `Create` button.
-2. Refresh the page until you see `Status: Ready`.
-3. Now obtain `Elasticsearch` service credentials.
-    - Click on `Service Credentials` tab.
-    - Then click on the `View Credentials` dropdown next to the credentials.
-4. See the `uri` field, which has the format `https://user:password@host:port/`, and extract the following:
-    - **user:** Elasticsearch user.
-    - **password:** Elasticsearch password.
-    - **host**: Elasticsearch host.
-    - **port:** Elasticsearch port.
-5. Keep those credential handy for when deploying the Inventory and Catalog services in the following sections.
-
-Elasticsearch database is now setup in Compose.
-
-## Run Inventory and Catalog Locally
-In this section you will learn how to build and run the Inventory and Catalog apps locally.
-
-### Run Inventory Service application on localhost
-In this section you will run the Spring Boot application to run on your localhost.
-
-1. **Change to `inventory` directory**.
-
-    ```
-    # cd inventory
-    ```
-
-2. Open `src/main/resources/application.yml` file.
-
-3. **If not already done, [Provision `Message Hub` service instance](#message-hub)**.
-    - After provisioning, go to instance `Service Credentials` tab on Bluemix, then press `View credentials`.
-    - Open `src/main/resources/application.yml`, go to `message_hub` section, then copy and paste required `message_hub` fields using credentials from above.
-
-4. **If not already done, [Provision a `MySQL` database on Compose](#mysql)**. Then replace the values for the fields in the `datasource` section with those obtained in the [MySQL Section](#mysql):
-    - In the `url` field, type `jdbc:mysql://host:port/inventorydb`, and enter the values for `host` and `port`.
-    - Enter values for `user`, `password`, and `port`.
-
-5. **If not already done, [Provision an `Elasticsearch` database on Compose](#elasticsearch)**. Then replace the values for the fields in the `elasticsearch` section with those obtained in the [Elasticsearch Section](#elasticsearch):
-    - In the `url` field, type `https://host:port`, and enter the values for `host` and `port`.
-    - Enter values for `user` and `password`
-
-6. **Build the application**.
-
-    ```
-    # ./gradlew build -x test
-    ```
-
-7. **Run the application on localhost**.
-
-    ```
-    # java -jar build/libs/micro-inventory-0.0.1.jar
-    ```
-
-8. **Validate. You should get a list of all inventory items**.
-
-    ```
-    # curl http://localhost:8080/micro/inventory
-    ```
-
-### Run Catalog Service application on localhost
-In this section you will run the Catalog Spring Boot application to run on your localhost.
-
-1. **Change to `catalog` directory**.
-
-    ```
-    # cd catalog
-    ```
-
-2. **If not already done, [Provision an `Elasticsearch` database on Compose](#elasticsearch)**. Then replace the values for the fields in the `elasticsearch` section with those obtained in the [Elasticsearch Section](#elasticsearch):
-    - In the `url` field, type `https://host:port`, and enter the values for `host` and `port`.
-    - Enter values for `user` and `password`
-
-3. **Build the application**.
-
-    ```
-    # ./gradlew build -x test
-    ```
-
-4. **Run the application on localhost**.
-
-    ```
-    # java -jar build/libs/micro-catalog-0.0.1.jar
-    ```
-
-5. **Validate. You should get a list of all catalog items**.
-
-    ```
-    # curl http://localhost:8081/micro/items
-    ```
-
-## Deploy Inventory and Catalog Applications to Kubernetes Cluster
-In this section you will deploy the Inventory and Catalog applications to run on your Bluemix Kubernetes Cluster. 
-We packaged the entire application stack as a Kubernetes [Chart](https://github.com/kubernetes/charts). To deploy the Inventory and Catalog Charts, please follow the instructions in the following sections.
-
-#### Deploy Inventory to Paid Cluster
-
-##### Easy way
-We created a couple of handy scripts to deploy the Inventory chart for you. Please run the following command.
-
-  ```
-  # This script will install Inventory Chart
-  # If you don't provide a cluster name, then it will try to get an
-  # existing cluster for you, though it is not guaranteed to be the one
-  # that you intended to deploy to. So use CAREFULLY.
-
-  $ ./install_inventory.sh <cluster-name> <Optional:bluemix-space-name> <Optional:bluemix-api-key>
-  ```
-
-Once the actual install of Inventory takes place, it takes about 3-5 minutes to finish and show debug output. So it might look like it's stuck, but it's not. Once you start to see output, look for the `Bluecompute was successfully installed!` text in green, which indicates that the deploy was successful and cleanup of jobs and installation pods will now take place.
-
-That's it! **Inventory is now installed** in your Kubernetes Cluster. To see the Kubernetes dashboard, run the following command:
-
-  `$ kubectl proxy`
-
-Then open a browser and paste the following URL to see the **Services** created by Inventory Chart:
-
-  http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/service?namespace=default
-
-If you like to see **installation progress** as it occurs, open a browser window and paste the following URL to see the Installation Jobs. About 17 jobs will be created in sequence:
-
-  http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/job?namespace=default
-
-Be mindful that the jobs will dissapear once the `Cleaning up` message is displayed by *install_inventory.sh*.
-
-**Notes:**
-
-The *install_inventory.sh* script will do the following:
-1. **Ask you login to Bluemix.**
-2. **Initialize Container Plugin (bx cs init).**
-3. **Get cluster configuration and set your terminal context to the cluster.**
-4. **Initialize Helm.**
-5. **Install *bluecompute-inventory* Chart.**
-    * `$ helm install bluecompute-inventory`
-    * It will create all the necessary configurations before deploying any pods.
-6. **Cleanup Jobs and Pods used to deploy dependencies.**
-
-
-##### Manual Way
-If you like to run the steps manually, please follow the steps below:
-
-1. ***Get paid cluster name*** by running the command below & then copy it to your clipboard:
-
-    `$ bx cs clusters`
-
-2. ***Set your terminal context to your cluster***:
-
-    `$ bx cs cluster-config <cluster-name>`
-
-    In the output to the command above, the path to your configuration file is displayed as a command to set an environment variable, for example:
-    ```
-    ...
-    export KUBECONFIG=/Users/ibm/.bluemix/plugins/cs-cli/clusters/pr_firm_cluster/kube-config-dal10-pr_firm_cluster.yml
-    ```
-
-3. ***Set the `KUBECONFIG` Kubernetes configuration file*** using the ouput obtained with the above command:
-
-    `$ export KUBECONFIG=/Users/ibm/.bluemix/plugins/cs-cli/clusters/pr_firm_cluster/kube-config-dal10-pr_firm_cluster.yml`
-
-4. ***Initialize Helm***, which will be used to install Bluecompute Chart:
-
-    `$ helm init --upgrade`
-
-    Helm will install `Tiller` agent (Helm's server side) into your cluster, which enables you to install Charts on your cluster. The `--upgrade` flag is to make sure that both Helm client and Tiller are using the same Helm version.
-
-5. ***Make sure that Tiller agent is fully Running*** before installing chart.
-
-    `$ kubectl --namespace=kube-system get pods | grep tiller`
-
-    To know whether Tiller is Running, you should see an output similar to this:
-
-    `tiller-deploy-3210876050-l61b3              1/1       Running   0          1d`
-
-6. If you don't have a ***BLUEMIX API Key***, create one as follows:
-
-    `$ bx iam api-key-create bluekey`
-
-7. ***Install bluecompute-inventory Chart***. The process usually takes between 3-5 minutes to finish and start showing debugging output:
-
-    ```
-    $ time helm install \
-      --set configMap.bluemixOrg=${ORG} \
-      --set configMap.bluemixSpace=${SPACE} \
-      --set configMap.kubeClusterName=${CLUSTER_NAME} \
-      --set secret.apiKey=${API_KEY} \
-      . --debug
-    ```
-
-    * Replace ${ORG} with your Bluemix Organization name.
-    * Replace ${SPACE} with your Bluemix Space.
-    * Replace ${CLUSTER_NAME} with your Kubernetes Cluster name from Step 1.
-    * Replace ${API_KEY} with the Bluemix API Key from Step 6.
-
-That's it! **Inventory is now installed** in your Kubernetes Cluster. To see the Kubernetes dashboard, run the following command:
-
-  `$ kubectl proxy`
-
-Then open a browser and paste the following URL to see the **Services** created by Inventory Chart:
-
-  http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/service?namespace=default
+* Create a Kubernetes Cluster by following the steps [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes#create-a-kubernetes-cluster).
+* Install the following CLI's on your laptop/workstation:
+    + [`docker`](https://docs.docker.com/install/)
+    + [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+    + [`helm`](https://docs.helm.sh/using_helm/#installing-helm)
+* Clone inventory repository:
+```bash
+$ git clone http://github.com/refarch-cloudnative-micro-inventory.git
+$ cd refarch-cloudnative-micro-inventory
+```
+
+## Deploy Inventory Application to Kubernetes Cluster
+In this section, we are going to deploy the Inventory Application, along with a MySQL service, to a Kubernetes cluster using Helm. To do so, follow the instructions below:
+```bash
+# Go to Chart Directory
+$ cd chart/inventory
+
+# Download MySQL Dependency Chart
+$ helm dependency update
+
+# Deploy Inventory and MySQL to Kubernetes cluster
+$ helm upgrade --install inventory --set service.type=NodePort .
+```
+
+The last command will give you instructions on how to access/test the Inventory application. Please note that before the Inventory application starts, the MySQL deployment must be fully up and running, which normally takes a couple of minutes. With Kubernetes [Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/), the Inventory Deployment polls for MySQL readiness status so that Inventory can start once MySQL is ready, or error out if MySQL fails to start.
+
+Also, once MySQL is fully up and running, a [`Kubernetes Job`](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/) will run to populate the MySQL database with the inventory data so that it can be served by the application. This is done for convenience as the inventory data is static.
+
+To check and wait for the deployment status, you can run the following command:
+```bash
+$ kubectl get deployments -w
+NAME                  DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+inventory-inventory   1         1         1            1           10h
+```
+
+The `-w` flag is so that the command above not only retrieves the deployment but also listens for changes. If you a 1 under the `CURRENT` column, that means that the inventory app deployment is ready.
+
+## Deploy Inventory Application on Docker
+You can also run the Inventory Application locally on Docker. Before we show you how to do so, you will need to have a running MySQL deployment running somewhere. 
+
+### Deploy a MySQL Docker Container
+The easiest way to get MySQL running is via a Docker container. To do so, run the following commands:
+```bash
+# Start a MySQL Container with a database user, a password, and create a new database
+$ docker run --name inventorymysql \
+    -e MYSQL_ROOT_PASSWORD=admin123 \
+    -e MYSQL_USER=dbuser \
+    -e MYSQL_PASSWORD=password \
+    -e MYSQL_DATABASE=inventorydb \
+    -p 3306:3306 \
+    -d mysql:5.7.14
+
+# Get the MySQL Container's IP Address
+$ docker inspect inventorymysql | grep "IPAddress"
+            "SecondaryIPAddresses": null,
+            "IPAddress": "172.17.0.2",
+                    "IPAddress": "172.17.0.2",
+```
+Make sure to select the IP Address in the `IPAddress` field. You will use this IP address when deploying the Inventory container.
+
+### Populate the MySQL Database
+In order for Inventory to make use of the MySQL database, the database needs to be populated first. To do so, run the following commands:
+```bash
+$ until mysql -h 127.0.0.1 -P 3306 -udbuser -ppassword <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
+```
+
+Note that we didn't use the IP address we obtained from the MySQL since it is only accessible to other Docker Containers. We used `127.0.0.1` localhost IP address instead since we mapped the 3306 port on the docker container to the 3306 port in localhost.
+
+### Deploy the Inventory Docker Container
+To deploy the Inventory container, run the following commands:
+```bash
+# Build the Docker Image
+$ docker build -t inventory .
+
+# Start the Inventory Container
+$ docker run --name inventory \
+    -e MYSQL_HOST=${MYSQL_IP_ADDRESS} \
+    -e MYSQL_PORT=3306 \
+    -e MYSQL_USER=dbuser \
+    -e MYSQL_PASSWORD=password \
+    -e MYSQL_DATABASE=inventorydb \
+    -p 8080:8080 \
+    -d inventory
+```
+
+Where `${MYSQL_IP_ADDRESS}` is the IP address of the MySQL container, which is only accessible from the Docker container network.
+
+If everything works successfully, you should be able to get some data when you run the following command:
+```bash
+$ curl http://localhost:8080/micro/inventory
+```
+
+## Run Inventory Service application on localhost
+In this section you will run the Spring Boot application to run on your local workstation. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
+
+Once MySQL is ready and populated, we can run the Spring Boot Inventory application locally as follows:
+
+1. Open [`src/main/resources/application.yml`](src/main/resources/application.yml) file, enter the following values for the fields under `spring.datasource`, and save the file:
+    * **url:** jdbc:mysql://127.0.0.1/inventorydb
+    * **username:** dbuser
+    * **password:** password
+    * **port:** 3306
+
+2. Build the application:
+```bash
+$ ./gradlew build -x test
+```
+
+3. Run the application on localhost:
+```bash
+$ java -jar build/libs/micro-inventory-0.0.1.jar
+```
+
+4. Validate. You should get a list of all inventory items:
+```bash
+$ curl http://localhost:8080/micro/inventory
+```
+
+That's it, you have successfully deployed and tested the Inventory microservice.
+
+## Optional: Setup CI/CD Pipeline
+If you would like to setup an automated Jenkins CI/CD Pipeline for this repository, we provided a sample [Jenkinsfile](Jenkinsfile), which uses the [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) syntax of the [Jenkins Kubernetes Plugin](https://github.com/jenkinsci/kubernetes-plugin) to automatically create and run Jenkis Pipelines from your Kubernetes environment. 
+
+To learn how to use this sample pipeline, follow the guide below and enter the corresponding values for your environment and for this repository:
+* https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes
+
+## Conclusion
+You have successfully deployed and tested the Inventory Microservice and a MySQL database both on a Kubernetes Cluster and in local Docker Containers.
+
+To see the Inventory app working in a more complex microservices use case, checkout our Microservice Reference Architecture Application [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes).
+
+## Contributing
+If you would like to contribute to this repository, please fork it, submit a PR, and assign as reviewers any of the GitHub users listed here:
+* https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/graphs/contributors
+
+### GOTCHAs
+1. We use [Travis CI](https://travis-ci.org/) for our CI/CD needs, so when you open a Pull Request you will trigger a build in Travis CI, which needs to pass before we consider merging the PR. We use Travis CI to test the following:
+    * Create and load a MySQL database with the inventory static data.
+    * Building and running the Inventory app against the MySQL database and run API tests.
+    * Build and Deploy a Docker Container, using the same MySQL database.
+    * Run API tests against the Docker Container.
+    * Deploy a minikube cluster to test Helm charts.
+    * Download Helm Chart dependencies and package the Helm chart.
+    * Deploy the Helm Chart into Minikube.
+    * Run API tests against the Helm Chart.
+
+2. We use the Community Chart for MySQL as the dependency chart for the Inventory Chart. If you would like to learn more about that chart and submit issues/PRs, please check out its repo here:
+    * https://github.com/helm/charts/tree/master/stable/mysql
+
+### Contributing a New Chart Package to Microservices Reference Architecture Helm Repository
+To contribute a new chart version to the [Microservices Reference Architecture](https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes) helm repository, follow its guide here:
+* COMING SOON

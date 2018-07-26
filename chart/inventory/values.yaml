@@ -1,0 +1,51 @@
+replicaCount: 1
+
+image:
+  repository: ibmcase/bluecompute-inventory
+  pullPolicy: Always
+  tag: latest
+
+service:
+  name: inventory
+  type: ClusterIP
+  externalPort: 8080
+  internalPort: 8080
+  nodePort: 31380
+
+ingress:
+  enabled: false
+  hostname: inventory.bluecompute.com
+  path: /micro/inventory
+
+tls:
+  enabled: false
+  secretName:
+  crt: ENTER_BASE64_ENCODED_CERTIFICATE
+  key: ENTER_BASE64_ENCODED_KEY
+
+# Included Community MySQL Chart.
+# - Even if disabled, these fields are used to provide information
+#   for external MySQL deployments.
+# - Also, the MySQL docker image is used in load_data.yaml to load
+#   MySQL deployment (internal or not) with some static inventory data
+inventorymysql:
+  enabled: true
+  image: "mysql"
+  imageTag: "5.7.14"
+  imagePullPolicy: IfNotPresent
+  # If chart is not enabled, this field can be used as external mysql host
+  fullnameOverride: bluecompute-inventory-mysql
+  mysqlRootPassword: admin123
+  mysqlUser: dbuser
+  mysqlPassword: password
+  mysqlDatabase: inventorydb
+  service:
+    port: 3306
+  persistence:
+    enabled: false
+
+resources:
+  limits:
+    memory: 384Mi
+  requests:
+    memory: 64Mi
