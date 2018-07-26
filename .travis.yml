@@ -32,7 +32,7 @@ jobs:
       # Gradle Build
       - ./gradlew build -x test
       # Start Application
-      - java -jar build/libs/micro-inventory-0.0.1.jar&
+      - java -jar build/libs/micro-inventory-0.0.1.jar &
       # Wait for the Inventory container to start accepting connections
       - sleep 25
       # Run Inventory API Test
