@@ -1,10 +1,9 @@
 sudo: required
 language: java
-install: true
 jdk:
   - oraclejdk8
-services:
-  - docker
+install:
+- true
 env:
   global:
     - IMAGE_NAME=bluecompute-inventory
@@ -31,7 +30,7 @@ jobs:
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
       script:
       # Gradle Build
-      - ./gradlew build --scan -s
+      - ./gradlew build -x test
       # Start Application
       - java -jar build/libs/micro-inventory-0.0.1.jar&
       # Wait for the Inventory container to start accepting connections
@@ -42,6 +41,7 @@ jobs:
     - stage: docker build, deploy, and test
       services:
       - mysql
+      - docker
       before_script:
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
@@ -60,6 +60,8 @@ jobs:
       # TODO: Test more APIs, perhaps with a separate script
       - curl http://127.0.0.1:8080/micro/inventory
     - stage: kubernetes build, deploy, and test
+      services:
+      - docker
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
       before_script:
