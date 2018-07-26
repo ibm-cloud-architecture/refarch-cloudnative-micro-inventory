@@ -23,34 +23,17 @@ tls:
   crt: ENTER_BASE64_ENCODED_CERTIFICATE
   key: ENTER_BASE64_ENCODED_KEY
 
-# Source for dataloader found in:
-# https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes/tree/master/docker_images/mysql-loader
-dataloader:
-  enabled: true
-  image:
-    repository: ibmcase/bluecompute-dataloader
-    tag: latest
-    pullPolicy: Always
-
-# External MySQL Deployment
-# This is just for quick testing and it exposes the password
-# mysql://dbuser:password@mysql-host:3306/inventorydb
-mysqlURI: 
-
-# External MySQL Deployment
-mysql:
-  host: mysql-host
-  port: 3306
-  user: dbuser
-  password: password
-  database: inventorydb
-
-# Included Community MySQL Chart
+# Included Community MySQL Chart.
+# - Even if disabled, these fields are used to provide information
+#   for external MySQL deployments.
+# - Also, the MySQL docker image is used in load_data.yaml to load
+#   MySQL deployment (internal or not) with some static inventory data
 inventorymysql:
   enabled: true
   image: "mysql"
   imageTag: "5.7.14"
   imagePullPolicy: IfNotPresent
+  # If chart is not enabled, this field can be used as external mysql host
   fullnameOverride: bluecompute-inventory-mysql
   mysqlRootPassword: admin123
   mysqlUser: dbuser
