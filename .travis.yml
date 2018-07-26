@@ -1,7 +1,7 @@
 sudo: required
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk8
 install:
 - true
 env:
@@ -25,8 +25,6 @@ jobs:
     - stage: local build and test
       services:
       - mysql
-      before_install:
-       - chmod +x gradlew
       before_script:
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
