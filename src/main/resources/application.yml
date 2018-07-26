@@ -19,8 +19,8 @@ spring:
   datasource:
     driverClassName: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1/inventorydb
-    username: dbuser
-    password: password
+    username: root
+    password:
     port: 3306
     max-active: 4
     testOnBorrow: true

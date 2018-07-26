@@ -1,43 +1,48 @@
 sudo: required
+language: java
+jdk: openjdk8
 services:
   - docker
 env:
   global:
     - IMAGE_NAME=bluecompute-inventory
     - RELEASE_NAME=inventory
-    - LATEST_TAG=travis-latest
+    - TAG=travis-latest
 stages:
-  - build
-  - test
+  - local build and test
+  - docker build, deploy, and test
+  - kubernetes build, deploy, and test
 jobs:
   include:
-    - stage: build
-      script:
-      # Compose Full Docker Image Name
-      - if [ -n "$DOCKER_ORG" ]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
-      # Build Docker image
-      - docker build -t "${FULL_IMAGE_NAME}:${LATEST_TAG}" .
-      # Docker Login
-      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-      # Create Image Tag from chart version
-      - VERSION_TAG="travis-$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')"
-      # Tag image with chart version tag
-      - docker tag "${FULL_IMAGE_NAME}:${LATEST_TAG}" "${FULL_IMAGE_NAME}:${VERSION_TAG}"
-      # Push image to share with test and deploy stages
-      - docker push "${FULL_IMAGE_NAME}:${LATEST_TAG}" && docker push "${FULL_IMAGE_NAME}:${VERSION_TAG}"
-    - stage: test
+    - stage: local build and test
       services:
       - mysql
       before_script:
-      # Compose Full Docker Image Name
-      - if [ -n "$DOCKER_ORG" ]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
       # Wait for MySQL to start, then load it with inventory data
       - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
-      # Start Inventory Container and Connect to local MySQL Service
-      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${FULL_IMAGE_NAME}:${LATEST_TAG}"
+      script:
+      # Gradle Build
+      - ./gradlew build -x test
+      # Start Application
+      - java -jar build/libs/micro-inventory-0.0.1.jar&
       # Wait for the Inventory container to start accepting connections
       - sleep 25
+      # Run Inventory API Test
+      # TODO: Test more APIs, perhaps with a separate script
+      - curl http://127.0.0.1:8080/micro/inventory
+    - stage: docker build, deploy, and test
+      services:
+      - mysql
+      before_script:
+      # Wait for MySQL to start, then load it with inventory data
+      - cd scripts; ./load_data.sh root "" 127.0.0.1 3306 inventorydb; cd ..
       script:
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      # Start Inventory Container and Connect to local MySQL Service
+      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${TAG}"
+      # Wait for the Inventory container to start accepting connections
+      - sleep 25
       # Check that the Inventory container is running
       - docker ps
       # Check logs to see if it started properly
@@ -45,7 +50,7 @@ jobs:
       # Run Inventory API Test
       # TODO: Test more APIs, perhaps with a separate script
       - curl http://127.0.0.1:8080/micro/inventory
-    - stage: deploy
+    - stage: kubernetes build, deploy, and test
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
       before_script:
@@ -62,6 +67,8 @@ jobs:
       - minikube ip
       # Wait for Minikube to be up and ready.
       - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
+      # Set minikube Docker Registry to be the local one
+      - eval $(minikube docker-env)
       # Download Helm CLI
       - curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && ./get_helm.sh && rm get_helm.sh
       # Create Tiller Service Account
@@ -71,20 +78,19 @@ jobs:
       # Wait for helm to be ready
       - until helm list; do echo "waiting for helm to be ready"; sleep 1; done
       script:
-      # Compose Full Docker Image Name
-      - if [ -n "$DOCKER_ORG" ]; then FULL_IMAGE_NAME=${DOCKER_ORG}/${IMAGE_NAME}; else FULL_IMAGE_NAME=${DOCKER_USERNAME}/${IMAGE_NAME}; fi
       # Get cluster info
       - kubectl cluster-info
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
       # Download Inventory chart dependencies (MySQL)
       - cd chart/inventory; helm dependency update; cd ../..
       # helm lint
       - helm lint chart/inventory
       # helm package
       - helm package chart/inventory
-      # helm install Inventory from packaged chart
+      # helm install Inventory from packaged chart. Use pullPolicy=Never so it uses local docker image
       - CHART_VERSION="$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')"
-      - VERSION_TAG="travis-${CHART_VERSION}"
-      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${FULL_IMAGE_NAME}",image.tag="${VERSION_TAG}",dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
+      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never,dataloader.image.tag="test" inventory-${CHART_VERSION}.tgz
       # Wait for Inventory to be ready
       - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
       - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
