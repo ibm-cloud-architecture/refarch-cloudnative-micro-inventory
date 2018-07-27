@@ -23,7 +23,7 @@ spec:
             add:
               - IPC_LOCK
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: Always
         env:
           - name: KUBERNETES_CA_CERTIFICATE_FILE
             value: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt

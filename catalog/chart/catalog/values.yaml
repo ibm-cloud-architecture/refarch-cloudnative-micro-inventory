@@ -7,7 +7,7 @@ image:
   repository: ibmcase/catalog-mp
   #repository: catalog-mp
   tag: v3.0.0
-  pullPolicy: IfNotPresent
+  #pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 200m

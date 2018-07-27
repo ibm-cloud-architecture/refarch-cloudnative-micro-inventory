@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: quay.io/pires/docker-elasticsearch-kubernetes
-  pullPolicy: IfNotPresent
+  #pullPolicy: IfNotPresent
   tag: 1.7.1-4
 
 clustername: default-cluster
