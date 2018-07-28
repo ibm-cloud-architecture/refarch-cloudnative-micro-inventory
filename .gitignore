@@ -25,13 +25,15 @@ build
 
 # Intellij
 .idea/
+out/
 *.iml
 *.iws
 
-# swp, bak, tgz files
+# swp, bak, tgz, log files
 *.swp
 *.bak
 *.tgz
+*.log
 
 # Mac
 .DS_Store
