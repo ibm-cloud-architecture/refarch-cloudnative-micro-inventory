@@ -13,8 +13,11 @@ Here is an overview of the chart's features:
 - Uses [`Helm`](https://helm.sh/) to package application and MySQL deployment configuration and deploy to a [`Kubernetes`](https://kubernetes.io/) cluster. 
 
 ## Chart Source
-The source code for this chart can be found in the project below under the [chart/inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/master/chart/inventory):
-https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory
+The source for the `Inventory` chart can be found at:
+* https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/master/chart/inventory
+
+The source for the `MySQL` chart can be found at:
+* https://github.com/helm/charts/tree/master/stable/mysql
 
 ## APIs
 * Get all items in inventory:
