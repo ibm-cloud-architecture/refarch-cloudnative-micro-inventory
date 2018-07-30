@@ -10,7 +10,7 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
 * [Pre-requisites:](#pre-requisites)
 * [Deploy Inventory Application to Kubernetes Cluster](#deploy-inventory-application-to-kubernetes-cluster)
 * [Deploy Inventory Application on Docker](#deploy-inventory-application-on-docker)
-    + [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container)
+    + [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container)
     + [Populate the MySQL Database](#populate-the-mysql-database)
     + [Deploy the Inventory Docker Container](#deploy-the-inventory-docker-container)
 * [Run Inventory Service application on localhost](#run-inventory-service-application-on-localhost)
@@ -77,7 +77,7 @@ The `-w` flag is so that the command above not only retrieves the deployment but
 ## Deploy Inventory Application on Docker
 You can also run the Inventory Application locally on Docker. Before we show you how to do so, you will need to have a running MySQL deployment running somewhere. 
 
-### Deploy a MySQL Docker Container
+### Deploy the MySQL Docker Container
 The easiest way to get MySQL running is via a Docker container. To do so, run the following commands:
 ```bash
 # Start a MySQL Container with a database user, a password, and create a new database
