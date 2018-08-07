@@ -1,4 +1,9 @@
-# refarch-cloudnative-micro-inventory: Spring Boot Microservice with MySQL Database
+***In this repo, the branches will be refactored within 14 days. The current branches will be condensed down to `master`, `spring` and `microprofile`. Existing `master` will be renamed to `spring` and the new `master` will have documentation pointing to the relevant branches.***
+
+###### refarch-cloudnative-micro-inventory
+
+## Microservice Apps Integration with ElasticSearch and MySQL Database
+
 [![Build Status](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.svg?branch=master)](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory)
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
