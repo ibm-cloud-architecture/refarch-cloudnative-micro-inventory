@@ -27,12 +27,12 @@ This project is built to demonstrate Microservice Apps Integration with ElasticS
 **Inventory service**
 
 - [Microprofile](../../tree/microprofile/inventory) - leverages the Microprofile framework.
-- [Spring](../../tree/spring/inventory) - leverages Spring Boot as the Java programming model of choice.
+- [Spring](../../tree/spring) - leverages Spring Boot as the Java programming model of choice.
 
 **Catalog service**
 
-- [Microprofile](../../tree/microprofile/inventory) - leverages the Microprofile framework.
-- [Spring](../../tree/spring/inventory) - leverages Spring Boot as the Java programming model of choice.
+- [Microprofile](../../tree/microprofile/catalog) - leverages the Microprofile framework.
+- [Spring](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-catalog) - leverages Spring Boot as the Java programming model of choice.
 
 
 ## References
