@@ -49,7 +49,7 @@ Here is an overview of the project's features:
     + [`helm`](https://docs.helm.sh/using_helm/#installing-helm)
 * Clone inventory repository:
 ```bash
-$ git clone http://github.com/refarch-cloudnative-micro-inventory.git
+$ git clone -b spring --single-branch https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git
 $ cd refarch-cloudnative-micro-inventory
 ```
 
