@@ -1,13 +1,8 @@
-***In this repo, the branches will be refactored within 14 days. The current branches will be condensed down to `master`, `spring` and `microprofile`. Existing `master` will be renamed to `spring` and the new `master` will have documentation pointing to the relevant branches.***
-
-###### refarch-cloudnative-micro-inventory
-
-## Microservice Apps Integration with ElasticSearch and MySQL Database
-
+# refarch-cloudnative-micro-inventory: Spring Boot Microservice with MySQL Database
 [![Build Status](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.svg?branch=master)](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory)
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
-https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
+https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring*
 
 ## Table of Contents
 * [Introduction](#introduction)
@@ -135,7 +130,7 @@ $ curl http://localhost:8080/micro/inventory
 ```
 
 ## Run Inventory Service application on localhost
-In this section you will run the Spring Boot application to run on your local workstation. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
+In this section you will run the Spring Boot application on your local workstation. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
 
 Once MySQL is ready and populated, we can run the Spring Boot Inventory application locally as follows:
 
