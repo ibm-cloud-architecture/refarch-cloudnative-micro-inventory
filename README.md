@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.svg?branch=master)](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory)
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
-https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
+https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring*
 
 ## Table of Contents
 * [Introduction](#introduction)
@@ -47,7 +47,7 @@ Here is an overview of the project's features:
     + [`helm`](https://docs.helm.sh/using_helm/#installing-helm)
 * Clone inventory repository:
 ```bash
-$ git clone http://github.com/refarch-cloudnative-micro-inventory.git
+$ git clone -b spring --single-branch https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git
 $ cd refarch-cloudnative-micro-inventory
 ```
 
@@ -133,7 +133,7 @@ $ curl http://localhost:8080/micro/inventory
 ```
 
 ## Run Inventory Service application on localhost
-In this section you will run the Spring Boot application to run on your local workstation. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
+In this section you will run the Spring Boot application on your local workstation. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy a MySQL Docker Container](#deploy-a-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
 
 Once MySQL is ready and populated, we can run the Spring Boot Inventory application locally as follows:
 
