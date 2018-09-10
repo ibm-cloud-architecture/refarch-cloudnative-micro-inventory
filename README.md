@@ -1,4 +1,7 @@
-# refarch-cloudnative-micro-inventory: Spring Boot Microservice with MySQL Database
+###### refarch-cloudnative-micro-inventory
+
+## Microservice Apps Integration with ElasticSearch and MySQL Database
+
 [![Build Status](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.svg?branch=master)](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory)
 
 *This project is part of the 'IBM Cloud Native Reference Architecture' suite, available at
