@@ -51,7 +51,7 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 {{/* Inventory MySQL Secret Name */}}
 {{- define "inventory.mysql.secretName" }}
   {{- if .Values.mysql.enabled }}
-    {{- printf "%s-mysql" .Values.mysql.fullnameOverride -}}
+    {{- printf "%s" .Values.mysql.fullnameOverride -}}
   {{- else -}}
     {{ template "inventory.fullname" . }}-mysql-secret
   {{- end }}
