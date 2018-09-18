@@ -43,7 +43,16 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 - name: MYSQL_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.mysql.fullnameOverride | quote }}
+      name: {{ template "inventory.mysql.secretName" . }}
       key: mysql-password
 {{- end }}
+{{- end }}
+
+{{/* Inventory MySQL Secret Name */}}
+{{- define "inventory.mysql.secretName" }}
+  {{- if .Values.mysql.enabled }}
+    {{- printf "%s-mysql" .Values.mysql.fullnameOverride -}}
+  {{- else -}}
+    {{ template "inventory.fullname" . }}-mysql-secret
+  {{- end }}
 {{- end }}
