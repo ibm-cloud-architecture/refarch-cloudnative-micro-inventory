@@ -15,12 +15,12 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.mysql.initcontainer" }}
 - name: test-mysql
-  image: {{ .Values.inventorymysql.image }}:{{ .Values.inventorymysql.imageTag }}
-  imagePullPolicy: {{ .Values.inventorymysql.imagePullPolicy }}
+  image: {{ .Values.mysql.image }}:{{ .Values.mysql.imageTag }}
+  imagePullPolicy: {{ .Values.mysql.imagePullPolicy }}
   command:
   - "/bin/bash"
   - "-c"
-  {{- if .Values.inventorymysql.mysqlPassword }}
+  {{- if .Values.mysql.mysqlPassword }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e status; do echo waiting for mysql; sleep 1; done"
   {{- else }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -e status; do echo waiting for mysql; sleep 1; done"
@@ -32,18 +32,18 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 {{/* Inventory MySQL Environment Variables */}}
 {{- define "inventory.mysql.environmentvariables" }}
 - name: MYSQL_HOST
-  value: {{ .Values.inventorymysql.fullnameOverride | quote }}
+  value: {{ .Values.mysql.fullnameOverride | quote }}
 - name: MYSQL_PORT
-  value: {{ .Values.inventorymysql.service.port | quote }}
+  value: {{ .Values.mysql.service.port | quote }}
 - name: MYSQL_DATABASE
-  value: {{ .Values.inventorymysql.mysqlDatabase | quote }}
+  value: {{ .Values.mysql.mysqlDatabase | quote }}
 - name: MYSQL_USER
-  value: {{ .Values.inventorymysql.mysqlUser | quote }}
-{{- if .Values.inventorymysql.mysqlPassword }}
+  value: {{ .Values.mysql.mysqlUser | quote }}
+{{- if .Values.mysql.mysqlPassword }}
 - name: MYSQL_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.inventorymysql.fullnameOverride | quote }}
+      name: {{ .Values.mysql.fullnameOverride | quote }}
       key: mysql-password
 {{- end }}
 {{- end }}

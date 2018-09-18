@@ -15,6 +15,8 @@ ingress:
   enabled: false
   hostname: inventory.bluecompute.com
   path: /micro/inventory
+  ibmCloud:
+    redirectToHTTPS: false
 
 tls:
   enabled: false
@@ -27,7 +29,7 @@ tls:
 #   for external MySQL deployments.
 # - Also, the MySQL docker image is used in load_data.yaml to load
 #   MySQL deployment (internal or not) with some static inventory data
-inventorymysql:
+mysql:
   enabled: true
   image: "mysql"
   imageTag: "5.7.14"
