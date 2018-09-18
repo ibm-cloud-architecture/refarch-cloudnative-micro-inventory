@@ -2,33 +2,33 @@
 
 function parse_arguments() {
 	#set -x;
-	# INVENTORYHOST
-	if [ -z "${INVENTORYHOST}" ]; then
-		echo "INVENTORYHOST not set. Using parameter \"$1\"";
-		INVENTORYHOST=$1;
+	# INVENTORY_HOST
+	if [ -z "${INVENTORY_HOST}" ]; then
+		echo "INVENTORY_HOST not set. Using parameter \"$1\"";
+		INVENTORY_HOST=$1;
 	fi
 
-	if [ -z "${INVENTORYHOST}" ]; then
-		echo "INVENTORYHOST not set. Using default key";
-		INVENTORYHOST=127.0.0.1;
+	if [ -z "${INVENTORY_HOST}" ]; then
+		echo "INVENTORY_HOST not set. Using default key";
+		INVENTORY_HOST=127.0.0.1;
 	fi
 
-	# INVENTORYPORT
-	if [ -z "${INVENTORYPORT}" ]; then
-		echo "INVENTORYPORT not set. Using parameter \"$2\"";
-		INVENTORYPORT=$2;
+	# INVENTORY_PORT
+	if [ -z "${INVENTORY_PORT}" ]; then
+		echo "INVENTORY_PORT not set. Using parameter \"$2\"";
+		INVENTORY_PORT=$2;
 	fi
 
-	if [ -z "${INVENTORYPORT}" ]; then
-		echo "INVENTORYPORT not set. Using default key";
-		INVENTORYPORT=8080;
+	if [ -z "${INVENTORY_PORT}" ]; then
+		echo "INVENTORY_PORT not set. Using default key";
+		INVENTORY_PORT=8080;
 	fi
 
 	#set +x;
 }
 
 function get_inventory() {
-	CURL=$(curl -s --max-time 5 http://${INVENTORYHOST}:${INVENTORYPORT}/micro/inventory | jq '. | length');
+	CURL=$(curl -s --max-time 5 http://${INVENTORY_HOST}:${INVENTORY_PORT}/micro/inventory | jq '. | length');
 	#echo "Found inventory with \"${CURL}\" items"
 
 	if [ ! "$CURL" -gt "0" ]; then
