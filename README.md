@@ -68,7 +68,7 @@ $ helm upgrade --install mysql \
 # Go to Chart Directory
 $ cd chart/inventory
 
-# Deploy Inventory and MySQL to Kubernetes cluster
+# Deploy Inventory to Kubernetes cluster
 $ helm upgrade --install inventory --set service.type=NodePort,mysql.existingSecret=inventory-mysql .
 ```
 

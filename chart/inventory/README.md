@@ -43,6 +43,6 @@ $ git clone -b spring --single-branch https://github.com/ibm-cloud-architecture/
 # Go to Chart Directory
 $ cd refarch-cloudnative-micro-inventory/chart/inventory
 
-# Deploy Inventory and MySQL to Kubernetes cluster
+# Deploy Inventory to Kubernetes cluster
 $ helm upgrade --install inventory --set service.type=NodePort .
 ```
