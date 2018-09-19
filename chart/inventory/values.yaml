@@ -26,11 +26,11 @@ tls:
 
 mysql:
   host: inventory-mysql
+  port: 3306
   existingSecret:
   user: dbuser
   password: password
   database: inventorydb
-  port: 3306
   # For mysql init container
   image: "mysql"
   imageTag: "5.7.14"
