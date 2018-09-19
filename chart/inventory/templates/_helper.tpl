@@ -1,5 +1,9 @@
 {{- define "inventory.fullname" -}}
-  {{- .Release.Name }}-{{ .Chart.Name -}}
+  {{- if .Values.fullnameOverride -}}
+    {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+  {{- else -}}
+    {{- printf "%s-%s" .Release.Name .Chart.Name -}}
+  {{- end -}}
 {{- end -}}
 
 {{/* MySQL Init Container Template */}}
@@ -20,7 +24,7 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   command:
   - "/bin/bash"
   - "-c"
-  {{- if .Values.mysql.mysqlPassword }}
+  {{- if or .Values.mysql.password .Values.mysql.existingSecret }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e status; do echo waiting for mysql; sleep 1; done"
   {{- else }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -e status; do echo waiting for mysql; sleep 1; done"
@@ -32,14 +36,14 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 {{/* Inventory MySQL Environment Variables */}}
 {{- define "inventory.mysql.environmentvariables" }}
 - name: MYSQL_HOST
-  value: {{ .Values.mysql.fullnameOverride | quote }}
+  value: {{ .Values.mysql.host | quote }}
 - name: MYSQL_PORT
-  value: {{ .Values.mysql.service.port | quote }}
+  value: {{ .Values.mysql.port | quote }}
 - name: MYSQL_DATABASE
-  value: {{ .Values.mysql.mysqlDatabase | quote }}
+  value: {{ .Values.mysql.database | quote }}
 - name: MYSQL_USER
-  value: {{ .Values.mysql.mysqlUser | quote }}
-{{- if .Values.mysql.mysqlPassword }}
+  value: {{ .Values.mysql.user | quote }}
+{{- if or .Values.mysql.password .Values.mysql.existingSecret }}
 - name: MYSQL_PASSWORD
   valueFrom:
     secretKeyRef:
@@ -50,8 +54,8 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 
 {{/* Inventory MySQL Secret Name */}}
 {{- define "inventory.mysql.secretName" }}
-  {{- if .Values.mysql.enabled }}
-    {{- printf "%s" .Values.mysql.fullnameOverride -}}
+  {{- if .Values.mysql.existingSecret }}
+    {{- .Values.mysql.existingSecret }}
   {{- else -}}
     {{ template "inventory.fullname" . }}-mysql-secret
   {{- end }}

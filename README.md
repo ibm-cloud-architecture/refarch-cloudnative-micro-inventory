@@ -54,14 +54,22 @@ $ cd refarch-cloudnative-micro-inventory
 ## Deploy Inventory Application to Kubernetes Cluster
 In this section, we are going to deploy the Inventory Application, along with a MySQL service, to a Kubernetes cluster using Helm. To do so, follow the instructions below:
 ```bash
+# Install MySQL Chart
+$ helm upgrade --install mysql \
+  --version 0.10.1 \
+  --set fullnameOverride=inventory-mysql \
+  --set mysqlRootPassword=admin123 \
+  --set mysqlUser=dbuser \
+  --set mysqlPassword=password \
+  --set mysqlDatabase=inventorydb \
+  --set persistence.enabled=false \
+  stable/mysql
+
 # Go to Chart Directory
 $ cd chart/inventory
 
-# Download MySQL Dependency Chart
-$ helm dependency update
-
-# Deploy Inventory and MySQL to Kubernetes cluster
-$ helm upgrade --install inventory --set service.type=NodePort .
+# Deploy Inventory to Kubernetes cluster
+$ helm upgrade --install inventory --set service.type=NodePort,mysql.existingSecret=inventory-mysql .
 ```
 
 The last command will give you instructions on how to access/test the Inventory application. Please note that before the Inventory application starts, the MySQL deployment must be fully up and running, which normally takes a couple of minutes. With Kubernetes [Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/), the Inventory Deployment polls for MySQL readiness status so that Inventory can start once MySQL is ready, or error out if MySQL fails to start.

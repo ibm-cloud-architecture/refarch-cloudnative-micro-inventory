@@ -26,15 +26,23 @@ The source for the `MySQL` chart can be found at:
 ## Deploy Inventory Application to Kubernetes Cluster from CLI
 To deploy the Inventory Chart and its MySQL dependency Chart to a Kubernetes cluster using Helm CLI, follow the instructions below:
 ```bash
+# Install MySQL Chart
+$ helm upgrade --install mysql \
+  --version 0.10.1 \
+  --set fullnameOverride=inventory-mysql \
+  --set mysqlRootPassword=admin123 \
+  --set mysqlUser=dbuser \
+  --set mysqlPassword=password \
+  --set mysqlDatabase=inventorydb \
+  --set persistence.enabled=false \
+  stable/mysql
+
 # Clone inventory repository:
 $ git clone -b spring --single-branch https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git
 
 # Go to Chart Directory
 $ cd refarch-cloudnative-micro-inventory/chart/inventory
 
-# Download MySQL Dependency Chart
-$ helm dependency update
-
-# Deploy Inventory and MySQL to Kubernetes cluster
+# Deploy Inventory to Kubernetes cluster
 $ helm upgrade --install inventory --set service.type=NodePort .
 ```
