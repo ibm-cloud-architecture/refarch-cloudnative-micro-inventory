@@ -177,7 +177,7 @@ To learn how to use this sample pipeline, follow the guide below and enter the c
 ## Conclusion
 You have successfully deployed and tested the Inventory Microservice and a MySQL database both on a Kubernetes Cluster and in local Docker Containers.
 
-To see the Inventory app working in a more complex microservices use case, checkout our Microservice Reference Architecture Application [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes).
+To see the Inventory app working in a more complex microservices use case, checkout our Microservice Reference Architecture Application [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring).
 
 ## Contributing
 If you would like to contribute to this repository, please fork it, submit a PR, and assign as reviewers any of the GitHub users listed here:
@@ -198,5 +198,5 @@ If you would like to contribute to this repository, please fork it, submit a PR,
     * https://github.com/helm/charts/tree/master/stable/mysql
 
 ### Contributing a New Chart Package to Microservices Reference Architecture Helm Repository
-To contribute a new chart version to the [Microservices Reference Architecture](https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes) helm repository, follow its guide here:
-* COMING SOON
+To contribute a new chart version to the [Microservices Reference Architecture](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring) helm repository, follow its guide here:
+* https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/spring#contributing-a-new-chart-to-the-helm-repositories
