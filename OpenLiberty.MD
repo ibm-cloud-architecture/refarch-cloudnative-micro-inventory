@@ -93,7 +93,17 @@ That's it, you have successfully deployed and tested the Inventory microservice 
 
 ## Deploy the Inventory Docker Container
 
-1. Modify you pom to generate the docker image. Follow the below steps.
+In this section you will run the Spring Boot application on OpenLiberty using Docker. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
+
+Once MySQL is ready and populated, we can run the Spring Boot Inventory application on OpenLiberty dcoker as follows:
+
+1. Open [`src/main/resources/application.yml`](src/main/resources/application.yml) file, enter the following values for the fields under `spring.datasource`, and save the file:
+    * **url:** jdbc:mysql://inventorymysql:3306/inventorydb?useSSL=false
+    * **username:** dbuser
+    * **password:** password
+    * **port:** 3306
+
+2. Modify you pom to generate the docker image. Follow the below steps.
 - Open [`pom.xml`](pom.xml)
 - Modify the `boost-maven-plugin` as below.
 
