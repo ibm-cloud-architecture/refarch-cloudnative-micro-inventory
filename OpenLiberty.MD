@@ -103,7 +103,7 @@ Once MySQL is ready and populated, we can run the Spring Boot Inventory applicat
     * **password:** password
     * **port:** 3306
 
-2. Modify you pom to generate the docker image. Follow the below steps.
+2. Modify your pom to generate the docker image. Follow the below steps.
 - Open [`pom.xml`](pom.xml)
 - Modify the `boost-maven-plugin` as below.
 
