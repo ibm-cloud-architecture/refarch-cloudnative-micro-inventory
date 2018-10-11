@@ -133,9 +133,13 @@ Before building the Docker image, make sure there are no other dockerfiles in yo
 ```bash
 # Build the Docker Image
 $ mvn clean install 
+```
 
 Once done, a docker image named `liberty-inventory-spring:latest` will be built automatically for you.
 
+Run the docker container as follows.
+
+```
 # Start the Inventory Container
 $ docker run --name inventory \
     -e MYSQL_HOST=inventorymysql \
