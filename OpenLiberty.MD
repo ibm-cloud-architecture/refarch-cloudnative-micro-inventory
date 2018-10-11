@@ -1,8 +1,8 @@
 ###### refarch-cloudnative-micro-inventory
 
-## Deploy Inventory Application on OpenLiberty
+## Deploy Inventory Application on Open Liberty
 
-You can run your Spring Boot applications on WebSphere application server Liberty. When the application is deployed on Liberty, the default server that is embedded as part of the application will be disabled and it will use Liberty instead of it. Below are steps to deploy the Inventory application on Liberty server instance.
+You can run your Spring Boot applications on Open Liberty. Open Liberty will be the packaged server and the application will run on it instead of the default embedded server. Below are steps to run the Inventory application on Open Liberty.
 
 ## Table of Contents
 + [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container)
@@ -51,9 +51,9 @@ Enter `exit` again to come out of the conatiner.
 
 ## Deploy the Inventory locally
 
-In this section you will run the Spring Boot application on OpenLiberty locally using maven. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
+In this section you will build and run the Spring Boot application on Open Liberty locally using Maven. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
 
-Once MySQL is ready and populated, we can run the Spring Boot Inventory application on OpenLiberty locally as follows:
+Once MySQL is ready and populated, we can run the Spring Boot Inventory application on Open Liberty locally as follows:
 
 1. Open [`src/main/resources/application.yml`](src/main/resources/application.yml) file, enter the following values for the fields under `spring.datasource`, and save the file:
     * **url:** jdbc:mysql://localhost:9041/inventorydb?useSSL=false
@@ -89,11 +89,11 @@ Will not use Message Hub due to invalid configuration
 $ curl http://localhost:8080/micro/inventory
 ```
 
-That's it, you have successfully deployed and tested the Inventory microservice running on SpringBoot using OpenLiberty server.
+That's it, you have successfully deployed and tested the Inventory microservice running on Spring Boot using Open Liberty server.
 
 ## Deploy the Inventory Docker Container
 
-In this section you will run the Spring Boot application on OpenLiberty using Docker. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
+In this section you will run the Spring Boot application on Open Liberty using Docker. Before we show you how to do so, you will need to deploy a MySQL Docker container and populate it with data as shown in the [Deploy the MySQL Docker Container](#deploy-the-mysql-docker-container) and [Populate the MySQL Database](#populate-the-mysql-database) sections, respectively.
 
 Once MySQL is ready and populated, we can run the Spring Boot Inventory application on OpenLiberty dcoker as follows:
 
@@ -128,7 +128,7 @@ Once MySQL is ready and populated, we can run the Spring Boot Inventory applicat
 
 3. To deploy the Inventory container, run the following commands:
 
-Before building the docker image, make sure there are no other docker files in your repo. If a dockerfile already exists, please remove it.
+Before building the Docker image, make sure there are no other dockerfiles in your repo. If a dockerfile already exists, please remove it.
 
 ```bash
 # Build the Docker Image
