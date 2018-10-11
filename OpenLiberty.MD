@@ -144,7 +144,7 @@ $ docker run --name inventory \
     -e MYSQL_PASSWORD=password \
     -e MYSQL_DATABASE=inventorydb \
     -p 8080:8080 \
-    -p 9080:9080 \
+    -p 9081:9080 \
     -p 8443:9443 \
     --link inventorymysql:inventorymysql \
     -d liberty-inventory-spring:latest
@@ -152,5 +152,5 @@ $ docker run --name inventory \
 
 If everything works successfully, you should be able to get some data when you run the following command:
 ```bash
-$ curl http://localhost:9080/micro/inventory
+$ curl http://localhost:9081/micro/inventory
 ```
