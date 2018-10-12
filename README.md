@@ -169,9 +169,9 @@ $ curl http://localhost:8080/micro/inventory
 
 That's it, you have successfully deployed and tested the Inventory microservice.
 
-## Deploy Inventory Application on OpenLiberty
+## Deploy Inventory Application on Open Liberty
 
-The Spring Boot applications can be deployed on WebSphere Application Server Liberty as well. When the application is deployed on Liberty, the default server that is embedded as part of the application will be disabled and it will use Liberty instead of it. For instructions on how to deploy it on OpenLiberty, follow the instructions [here](OpenLiberty.MD).
+The Spring Boot applications can be deployed on WebSphere Liberty as well. In this case, the embedded server i.e. the application server packaged up in the JAR file will be Liberty. For instructions on how to deploy the Inventory application optimized for Docker on Open Liberty, which is the open source foundation for WebSphere Liberty, follow the instructions [here](OpenLiberty.MD).
 
 ## Optional: Setup CI/CD Pipeline
 If you would like to setup an automated Jenkins CI/CD Pipeline for this repository, we provided a sample [Jenkinsfile](Jenkinsfile), which uses the [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) syntax of the [Jenkins Kubernetes Plugin](https://github.com/jenkinsci/kubernetes-plugin) to automatically create and run Jenkis Pipelines from your Kubernetes environment. 
