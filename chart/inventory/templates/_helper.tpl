@@ -8,7 +8,8 @@
 
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.labels" }}
-app: bluecompute
+app: inventory
+version: v1
 micro: inventory
 tier: backend
 heritage: {{ .Release.Service | quote }}
