@@ -8,10 +8,9 @@
 
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.labels" }}
-app: inventory
-version: v1
-micro: inventory
-tier: backend
+{{- range $key, $value := .Values.labels }}
+{{ $key }}: {{ $value | quote }}
+{{- end }}
 heritage: {{ .Release.Service | quote }}
 release: {{ .Release.Name | quote }}
 chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
