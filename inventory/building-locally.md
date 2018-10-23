@@ -44,6 +44,28 @@ To build the application, we used maven build. Maven is a project management too
 [INFO] Final Memory: 32M/467M
 [INFO] ------------------------------------------------------------------------
 ```
+By default, the application runs on [WebSphere Liberty with Web Profile](https://developer.ibm.com/wasdev/websphere-liberty/). You can also run it on [Open Liberty](https://openliberty.io/) as follows.
+
+`mvn clean install -Popenliberty`
+
+ If this runs successfully, you will be able to see the below messages.
+ 
+ ```
+ [INFO] --- maven-failsafe-plugin:2.18.1:verify (verify-results) @ inventory ---
+[INFO] Failsafe report directory: /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/test-reports/it
+[INFO]
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ inventory ---
+[INFO] Installing /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/inventory-1.0-SNAPSHOT.war to /Users/Hemankita.Perabathini@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.war
+[INFO] Installing /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/pom.xml to /Users/Hemankita.Perabathini@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 29.264 s
+[INFO] Finished at: 2018-10-23T17:55:10-05:00
+[INFO] Final Memory: 29M/449M
+[INFO] ------------------------------------------------------------------------
+```
+
 ## Setting up MySQL
 
 To set up MySQL locally, we are running it as a docker container. You need [Docker](https://www.docker.com/) as a prerequisite.
