@@ -41,3 +41,8 @@ resources:
     memory: 384Mi
   requests:
     memory: 64Mi
+
+labels:
+  app: inventory
+  version: v1
+  tier: backend
