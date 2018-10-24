@@ -50,8 +50,8 @@ By default, the application runs on [WebSphere Liberty with Web Profile](https:/
 
  If this runs successfully, you will be able to see the below messages.
  
- ```
- [INFO] --- maven-failsafe-plugin:2.18.1:verify (verify-results) @ inventory ---
+```
+[INFO] --- maven-failsafe-plugin:2.18.1:verify (verify-results) @ inventory ---
 [INFO] Failsafe report directory: /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/test-reports/it
 [INFO]
 [INFO] --- maven-install-plugin:2.4:install (default-install) @ inventory ---
