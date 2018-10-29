@@ -52,11 +52,11 @@ By default, the application runs on [WebSphere Liberty with Web Profile](https:/
  
 ```
 [INFO] --- maven-failsafe-plugin:2.18.1:verify (verify-results) @ inventory ---
-[INFO] Failsafe report directory: /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/test-reports/it
+[INFO] Failsafe report directory: /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/test-reports/it
 [INFO]
 [INFO] --- maven-install-plugin:2.4:install (default-install) @ inventory ---
-[INFO] Installing /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/inventory-1.0-SNAPSHOT.war to /Users/Hemankita.Perabathini@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.war
-[INFO] Installing /Users/Hemankita.Perabathini@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/pom.xml to /Users/Hemankita.Perabathini@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.pom
+[INFO] Installing /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/target/inventory-1.0-SNAPSHOT.war to /Users/user@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.war
+[INFO] Installing /Users/user@ibm.com/BlueCompute/refarch-cloudnative-micro-inventory/inventory/pom.xml to /Users/user@ibm.com/.m2/repository/projects/inventory/1.0-SNAPSHOT/inventory-1.0-SNAPSHOT.pom
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
