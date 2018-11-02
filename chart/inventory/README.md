@@ -28,7 +28,7 @@ To deploy the Inventory Chart and its MySQL dependency Chart to a Kubernetes clu
 ```bash
 # Install MySQL Chart
 $ helm upgrade --install mysql \
-  --version 0.10.1 \
+  --version 0.10.2 \
   --set fullnameOverride=inventory-mysql \
   --set mysqlRootPassword=admin123 \
   --set mysqlUser=dbuser \
