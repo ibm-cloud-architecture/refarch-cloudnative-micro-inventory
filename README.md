@@ -57,7 +57,7 @@ In this section, we are going to deploy the Inventory Application, along with a 
 ```bash
 # Install MySQL Chart
 $ helm upgrade --install mysql \
-  --version 0.10.1 \
+  --version 0.10.2 \
   --set fullnameOverride=inventory-mysql \
   --set mysqlRootPassword=admin123 \
   --set mysqlUser=dbuser \

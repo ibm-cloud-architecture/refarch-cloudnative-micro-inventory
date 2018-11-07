@@ -18,6 +18,7 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.mysql.initcontainer" }}
+{{- if not (or .Values.global.istio.enabled .Values.istio.enabled) }}
 - name: test-mysql
   image: {{ .Values.mysql.image }}:{{ .Values.mysql.imageTag }}
   imagePullPolicy: {{ .Values.mysql.imagePullPolicy }}
@@ -31,6 +32,7 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   {{- end }}
   env:
   {{- include "inventory.mysql.environmentvariables" . | indent 2 }}
+{{- end }}
 {{- end }}
 
 {{/* Inventory MySQL Environment Variables */}}
