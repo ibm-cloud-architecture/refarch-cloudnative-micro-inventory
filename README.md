@@ -6,7 +6,7 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 
 <p align="center">
   <a href="https://microprofile.io/">
-    <img src="https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/static/microprofile_small.png" width="300" height="100">
+    <img src="/static/microprofile_small.png" width="300" height="100">
   </a>
 </p>
 
@@ -122,7 +122,7 @@ To deploy it on Minikube, please follow the instructions provided [here](https:/
 
 ### Run Inventory Service locally
 
-To deploy the app locally and test the individual service, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/blob/microprofile/inventory/building-locally.md).
+To deploy the app locally and test the individual service, please follow the instructions provided [here](/building-locally.md).
 
 ## References
 
