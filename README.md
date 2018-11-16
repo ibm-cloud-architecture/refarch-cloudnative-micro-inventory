@@ -13,10 +13,9 @@ https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes*
 
 ## Introduction
 
-This project is built to demonstrate Microservice Apps Integration with ElasticSearch and MySQL Database. The first application [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) uses MySQL database as its datasource. The second application [Catalog](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/catalog) serves as a cache to [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) by leveraging Elasticsearch as its datasource.
+This project is built to demonstrate Microservice Apps Integration with ElasticSearch and MySQL Database. [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) uses MySQL database as its datasource.
 
 - Uses MySQL as the [Inventory](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory) database.
-- Elasticsearch is used as the [Catalog](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/catalog) microservice's data source.
 
 <p align="center">
     <img src="images/inventory-catalog.png">
@@ -28,11 +27,6 @@ This project is built to demonstrate Microservice Apps Integration with ElasticS
 
 - [Microprofile](../../tree/microprofile/inventory) - leverages the Microprofile framework.
 - [Spring](../../tree/spring) - leverages Spring Boot as the Java programming model of choice.
-
-**Catalog service**
-
-- [Microprofile](../../tree/microprofile/catalog) - leverages the Microprofile framework.
-- [Spring](https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-catalog) - leverages Spring Boot as the Java programming model of choice.
 
 
 ## References
