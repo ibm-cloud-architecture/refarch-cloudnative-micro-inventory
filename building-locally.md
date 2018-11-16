@@ -21,9 +21,7 @@ To build the application, we used maven build. Maven is a project management too
 
    `git checkout microprofile`
 
-3. `cd inventory`
-
-4. Run this command. This command builds the project and installs it.
+3. Run this command. This command builds the project and installs it.
 
    `mvn install`
    
@@ -73,7 +71,6 @@ To set up MySQL locally, we are running it as a docker container. You need [Dock
 To run MySQL on docker locally, run the below commands.
 
 ```
-cd ..
 cd mysql
 ```
 
@@ -89,7 +86,6 @@ cd mysql
 
 ```
 cd ..
-cd inventory
 ```
 
 In this case, your environement variables will be 
