@@ -7,14 +7,15 @@ env:
     - dbpassword=password
     - zipkinHost=localhost
     - zipkinPort=9411
+    - IMAGE_NAME=inventory-mp
+    - TAG=travis-latest
 stages:
   - local build and test
+  - docker build, deploy, and test
 jobs:
   include:
     - stage: local build and test
       services:
-      # - elasticsearch
-      # - mysql
       - docker
       before_script:
       # Wait for MySQL to start, then load it with catalog data
@@ -29,4 +30,27 @@ jobs:
       # Wait for the Inventory container to start accepting connections
       - sleep 25
       # Run Catalog API Test
+      - bash scripts/api_tests.sh 127.0.0.1 9081
+    - stage: docker build, deploy, and test
+      services:
+      - docker
+      install:
+        - true
+      before_script:
+      # Wait for MySQL to start, then load it with catalog data
+      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password ibmcase/bc-inventorydb:v2.0.0
+      # Wait for MySQL to load data
+      - sleep 25
+      script:
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      # Start Inventory Container and Connect to local MySQL Service
+      - docker run -d -p 9081:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password --env zipkinHost=localhost --env zipkinPort=9411 "${IMAGE_NAME}:${TAG}"
+      # Wait for the Inventory container to start accepting connections
+      - sleep 25
+      # Check that the Inventory container is running
+      - docker ps
+      # Check logs to see if it started properly
+      - docker logs inventory
+      # Run Inventory API Test
       - bash scripts/api_tests.sh 127.0.0.1 9081
