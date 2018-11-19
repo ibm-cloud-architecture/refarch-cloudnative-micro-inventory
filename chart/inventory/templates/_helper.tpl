@@ -6,7 +6,7 @@
   {{- end -}}
 {{- end -}}
 
-{{/* MySQL Init Container Template */}}
+{{/* Inventory Init Container Template */}}
 {{- define "inventory.labels" }}
 {{- range $key, $value := .Values.labels }}
 {{ $key }}: {{ $value | quote }}
@@ -60,5 +60,19 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     {{- .Values.mysql.existingSecret }}
   {{- else -}}
     {{ template "inventory.fullname" . }}-mysql-secret
+  {{- end }}
+{{- end }}
+
+{{/* Istio Gateway */}}
+{{- define "inventory.istio.gateway" }}
+  {{- if or .Values.global.istio.gateway.name .Values.istio.gateway.enabled .Values.istio.gateway.name }}
+  gateways:
+  {{ if .Values.global.istio.gateway.name -}}
+  - {{ .Values.global.istio.gateway.name }}
+  {{- else if .Values.istio.gateway.enabled }}
+  - {{ template "inventory.fullname" . }}-gateway
+  {{ else if .Values.istio.gateway.name -}}
+  - {{ .Values.istio.gateway.name }}
+  {{ end }}
   {{- end }}
 {{- end }}
