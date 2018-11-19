@@ -1,1 +1,32 @@
+sudo: required
 language: java
+env:
+  global:
+    - jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false
+    - dbuser=root
+    - dbpassword=password
+    - zipkinHost=localhost
+    - zipkinPort=9411
+stages:
+  - local build and test
+jobs:
+  include:
+    - stage: local build and test
+      services:
+      # - elasticsearch
+      # - mysql
+      - docker
+      before_script:
+      # Wait for MySQL to start, then load it with catalog data
+      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password ibmcase/bc-inventorydb:v2.0.0
+      # Wait for MySQL to load data
+      - sleep 25
+      script:
+      # Maven Build
+      - mvn install
+      # Start Application
+      - mvn liberty:start-server -DtestServerHttpPort=9081
+      # Wait for the Inventory container to start accepting connections
+      - sleep 25
+      # Run Catalog API Test
+      - bash scripts/api_tests.sh 127.0.0.1 9081
