@@ -79,8 +79,13 @@ jobs:
       before_script:
       # Install nsenter, which is needed for minikube to work
       - bash scripts/install_minikube_and_helm.sh
+      - cd mysql
+      # Build the docker image
+      - docker build -t "${SQL_IMAGE_NAME}:${TAG}" .
+      # Wait for MySQL to start, then load it with data
+      - cd ..
       # Install MySQL
-      - helm install --name mysql ./chart/inventorydb
+      - helm install --set image=${SQL_IMAGE_NAME} --set imageTag=${TAG} --name mysql ./chart/inventorydb
       script:
       # Maven Build
       - mvn install
