@@ -47,6 +47,7 @@ jobs:
       - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password "${SQL_IMAGE_NAME}:${TAG}"
       # Wait for MySQL to load data
       - sleep 25
+      - cd ..
       script:
       # Maven Build
       - mvn install
