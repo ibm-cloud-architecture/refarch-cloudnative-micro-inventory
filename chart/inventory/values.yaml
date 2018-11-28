@@ -7,7 +7,7 @@ image:
   repository: ibmcase/inventory-mp
   #repository: inventory-mp
   tag: v2.0.0
-  #pullPolicy: IfNotPresent
+  pullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 200m
@@ -41,3 +41,5 @@ base:
 istio:
   enabled: false
   weight: 100
+travis: false
+jdbcURL: jdbc:mysql://mysql-inventorydb:3306/inventorydb?useSSL=false

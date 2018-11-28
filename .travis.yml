@@ -9,9 +9,11 @@ env:
     - zipkinPort=9411
     - IMAGE_NAME=inventory-mp
     - TAG=travis-latest
+    - RELEASE_NAME=inv
 stages:
   - local build and test
   - docker build, deploy, and test
+  - kubernetes build, deploy, and test
 jobs:
   include:
     - stage: local build and test
@@ -56,3 +58,31 @@ jobs:
       - docker logs inventory
       # Run Inventory API Test
       - bash scripts/api_tests.sh 127.0.0.1 9081
+    - stage: kubernetes build, deploy, and test
+      services:
+      - docker
+      env:
+      - CHANGE_MINIKUBE_NONE_USER=true
+      install:
+        - true
+      before_script:
+      # Install nsenter, which is needed for minikube to work
+      - bash scripts/install_minikube_and_helm.sh
+      # Install MySQL
+      - helm install --name mysql ./chart/inventorydb
+      script:
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      # Install Inventory
+      - helm install --set travis=true --name inv ./chart/inventory
+      # Wait for Inventory to be ready
+      - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
+      - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
+      - echo $READY
+      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get deployments -o wide; echo "Waiting for inventory to be ready"; sleep 10; done
+      # Wait for Inventory deployment to start accepting connections
+      - sleep 35
+      # Run Inventory API Test
+      - MINIKUBE_IP=$(minikube ip)
+      - NODE_PORT=$(kubectl get service ${RELEASE_NAME}-inventory -o=jsonpath='{.spec.ports[0].nodePort}')
+      - bash scripts/api_tests.sh $MINIKUBE_IP $NODE_PORT
