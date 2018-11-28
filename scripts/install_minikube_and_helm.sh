@@ -24,6 +24,7 @@ JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.ty
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
 chmod 700 get_helm.sh
 sudo ./get_helm.sh
+helm init
 # Wait for helm to be ready
 until helm list; do echo "waiting for helm to be ready"; sleep 1; done
 
