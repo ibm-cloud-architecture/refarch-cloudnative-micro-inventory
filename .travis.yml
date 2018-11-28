@@ -63,9 +63,6 @@ jobs:
       - docker
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
-      before_install:
-         - sudo apt-get update  -qq
-         - sudo apt-get install -qq socat
       install:
         - true
       before_script:
