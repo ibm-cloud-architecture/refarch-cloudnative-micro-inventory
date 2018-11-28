@@ -18,10 +18,10 @@ jobs:
   include:
     - stage: local build and test
       services:
-      - docker
+      - mysql
       before_script:
       # Wait for MySQL to start, then load it with catalog data
-      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password ibmcase/bc-inventorydb:v2.0.0
+      - until mysql -h 127.0.0.1 -P 3306 -uroot <./mysql/scripts/load_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
       # Wait for MySQL to load data
       - sleep 25
       script:
