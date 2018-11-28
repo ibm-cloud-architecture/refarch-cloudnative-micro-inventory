@@ -20,6 +20,7 @@ curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_
 kubectl -n kube-system create sa tiller && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
 # Install Helm on Minikube
 helm init --service-account tiller
+export HELM_HOME=~/.helm
 # Wait for helm to be ready
 until helm list --tls; do echo "waiting for helm to be ready"; sleep 1; done
 
