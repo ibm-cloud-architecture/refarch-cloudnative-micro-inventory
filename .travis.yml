@@ -68,12 +68,6 @@ jobs:
       - docker
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
-      before_install:
-      # install nsenter for helm and port forwarding
-      - sudo apt-get -qq update
-      - sudo apt-get install -y socat
-      - docker run --rm jpetazzo/nsenter cat /nsenter > /tmp/nsenter && chmod +x /tmp/nsenter
-      - sudo cp /tmp/nsenter /usr/local/bin
       install:
         - true
       before_script:
