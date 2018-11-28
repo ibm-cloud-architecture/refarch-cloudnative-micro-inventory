@@ -15,14 +15,17 @@ minikube ip
 JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
 
 # Download Helm CLI
-curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && ./get_helm.sh && rm get_helm.sh
-# Create Tiller Service Account
-kubectl -n kube-system create sa tiller && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-# Install Helm on Minikube
-helm init --service-account tiller
-export HELM_HOME=~/.helm
+# curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh && chmod 700 get_helm.sh && ./get_helm.sh && rm get_helm.sh
+# # Create Tiller Service Account
+# kubectl -n kube-system create sa tiller && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+# # Install Helm on Minikube
+# helm init --service-account tiller
+
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+chmod 700 get_helm.sh
+sudo ./get_helm.sh
 # Wait for helm to be ready
-until helm list --tls; do echo "waiting for helm to be ready"; sleep 1; done
+until helm list; do echo "waiting for helm to be ready"; sleep 1; done
 
 # Add incubator and bluecompute-charts Helm repos
 helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
