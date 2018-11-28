@@ -77,6 +77,8 @@ jobs:
       # Install MySQL
       - helm install --name mysql ./chart/inventorydb
       script:
+      # Maven Build
+      - mvn install
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
       # Install Inventory
