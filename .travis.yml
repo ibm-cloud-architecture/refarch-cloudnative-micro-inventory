@@ -9,6 +9,7 @@ env:
     - zipkinPort=9411
     - IMAGE_NAME=inventory-mp
     - TAG=travis-latest
+    - SQL_IMAGE_NAME=bc-inventorydb
     - RELEASE_NAME=inv
 stages:
   - local build and test
@@ -39,8 +40,11 @@ jobs:
       install:
         - true
       before_script:
+      - cd mysql
+      # Build the docker image
+      - docker build -t "${SQL_IMAGE_NAME}:${TAG}" .
       # Wait for MySQL to start, then load it with catalog data
-      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password ibmcase/bc-inventorydb:v2.0.0
+      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password "${SQL_IMAGE_NAME}:${TAG}"
       # Wait for MySQL to load data
       - sleep 25
       script:
