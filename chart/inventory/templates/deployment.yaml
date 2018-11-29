@@ -20,7 +20,7 @@ spec:
       containers:
       - name: "{{  .Chart.Name  }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: Always
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
 {{ if .Values.istio.enabled }}
 {{ else }}
         readinessProbe:
@@ -41,8 +41,13 @@ spec:
             cpu: "{{ .Values.image.resources.requests.cpu }}"
             memory: "{{ .Values.image.resources.requests.memory }}"
         env:
+          {{- if .Values.travis }}
+          - name: jdbcURL
+            value: "{{ .Values.jdbcURL }}"
+          {{- else}}
           - name: jdbcURL
             value: "jdbc:mysql://{{ .Release.Name }}-{{ .Values.service.dbname }}:{{ .Values.service.sqlport }}/inventorydb?useSSL=false"
+          {{- end }}
           - name: rabbit
             value: "{{ .Release.Name }}-{{ .Values.service.rabbitmq }}"
           - name: PORT

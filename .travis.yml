@@ -1,0 +1,100 @@
+sudo: required
+language: java
+env:
+  global:
+    - jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false
+    - dbuser=root
+    - dbpassword=password
+    - zipkinHost=localhost
+    - zipkinPort=9411
+    - IMAGE_NAME=inventory-mp
+    - TAG=travis-latest
+    - SQL_IMAGE_NAME=bc-inventorydb
+    - RELEASE_NAME=inv
+stages:
+  - local build and test
+  - docker build, deploy, and test
+  - kubernetes build, deploy, and test
+jobs:
+  include:
+    - stage: local build and test
+      services:
+      - mysql
+      before_script:
+      # Wait for MySQL to start, then load it with catalog data
+      - until mysql -h 127.0.0.1 -P 3306 -uroot <./mysql/scripts/load-data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
+      # Wait for MySQL to load data
+      - sleep 25
+      script:
+      # Maven Build
+      - mvn install
+      # Start Application
+      - mvn liberty:start-server -DtestServerHttpPort=9081
+      # Wait for the Inventory container to start accepting connections
+      - sleep 25
+      # Run Catalog API Test
+      - bash scripts/api_tests.sh 127.0.0.1 9081
+    - stage: docker build, deploy, and test
+      services:
+      - docker
+      install:
+        - true
+      before_script:
+      - cd mysql
+      # Build the docker image
+      - docker build -t "${SQL_IMAGE_NAME}:${TAG}" .
+      # Wait for MySQL to start, then load it with catalog data
+      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password "${SQL_IMAGE_NAME}:${TAG}"
+      # Wait for MySQL to load data
+      - sleep 25
+      - cd ..
+      script:
+      # Maven Build
+      - mvn install
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      # Start Inventory Container and Connect to local MySQL Service
+      - docker run -d -p 9081:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password --env zipkinHost=localhost --env zipkinPort=9411 "${IMAGE_NAME}:${TAG}"
+      # Wait for the Inventory container to start accepting connections
+      - sleep 25
+      # Check that the Inventory container is running
+      - docker ps
+      # Check logs to see if it started properly
+      - docker logs inventory
+      # Run Inventory API Test
+      - bash scripts/api_tests.sh 127.0.0.1 9081
+    - stage: kubernetes build, deploy, and test
+      services:
+      - docker
+      env:
+      - CHANGE_MINIKUBE_NONE_USER=true
+      install:
+        - true
+      before_script:
+      # Install nsenter, which is needed for minikube to work
+      - bash scripts/install_minikube_and_helm.sh
+      - cd mysql
+      # Build the docker image
+      - docker build -t "${SQL_IMAGE_NAME}:${TAG}" .
+      # Wait for MySQL to start, then load it with data
+      - cd ..
+      # Install MySQL
+      - helm install --set image=${SQL_IMAGE_NAME} --set imageTag=${TAG} --name mysql ./chart/inventorydb
+      script:
+      # Maven Build
+      - mvn install
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      # Install Inventory
+      - helm install --set travis=true --set image.repository=${IMAGE_NAME} --set image.tag=${TAG} --name inv ./chart/inventory
+      # Wait for Inventory to be ready
+      - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
+      - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
+      - echo $READY
+      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get deployments -o wide; echo "Waiting for inventory to be ready"; sleep 10; done
+      # Wait for Inventory deployment to start accepting connections
+      - sleep 35
+      # Run Inventory API Test
+      - MINIKUBE_IP=$(minikube ip)
+      - NODE_PORT=$(kubectl get service ${RELEASE_NAME}-inventory -o=jsonpath='{.spec.ports[0].nodePort}')
+      - bash scripts/api_tests.sh $MINIKUBE_IP $NODE_PORT
