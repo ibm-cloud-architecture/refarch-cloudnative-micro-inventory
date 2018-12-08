@@ -16,6 +16,12 @@ release: {{ .Release.Name | quote }}
 chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 {{- end }}
 
+{{/* Inventory Environment Variables */}}
+{{- define "inventory.environmentvariables" }}
+- name: SERVICE_PORT
+  value: {{ .Values.service.internalPort | quote }}
+{{- end }}
+
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.mysql.initcontainer" }}
 {{- if not (or .Values.global.istio.enabled .Values.istio.enabled) }}
@@ -37,8 +43,6 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 
 {{/* Inventory MySQL Environment Variables */}}
 {{- define "inventory.mysql.environmentvariables" }}
-- name: SERVICE_PORT
-  value: {{ .Values.service.internalPort | quote }}
 - name: MYSQL_HOST
   value: {{ .Values.mysql.host | quote }}
 - name: MYSQL_PORT
