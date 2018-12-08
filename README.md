@@ -34,7 +34,7 @@ Here is an overview of the project's features:
 - Uses [`Spring Data JPA`](http://projects.spring.io/spring-data-jpa/) to persist data to MySQL database.
 - Uses [`MySQL`](https://www.mysql.com/) as the inventory database.
 - Uses [`Docker`](https://docs.docker.com/) to package application binary and its dependencies.
-- Uses [`Helm`](https://helm.sh/) to package application and MySQL deployment configuration and deploy to a [`Kubernetes`](https://kubernetes.io/) cluster. 
+- Uses [`Helm`](https://helm.sh/) to package application and MySQL deployment configuration and deploy to a [`Kubernetes`](https://kubernetes.io/) cluster.
 
 ### APIs
 * Get all items in inventory:
@@ -48,15 +48,15 @@ Here is an overview of the project's features:
     + [`helm`](https://docs.helm.sh/using_helm/#installing-helm)
 * Clone inventory repository:
 ```bash
-$ git clone -b spring --single-branch https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git
-$ cd refarch-cloudnative-micro-inventory
+git clone -b spring --single-branch https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.git
+cd refarch-cloudnative-micro-inventory
 ```
 
 ## Deploy Inventory Application to Kubernetes Cluster
 In this section, we are going to deploy the Inventory Application, along with a MySQL service, to a Kubernetes cluster using Helm. To do so, follow the instructions below:
 ```bash
 # Install MySQL Chart
-$ helm upgrade --install mysql \
+helm upgrade --install mysql \
   --version 0.10.2 \
   --set fullnameOverride=inventory-mysql \
   --set mysqlRootPassword=admin123 \
@@ -67,10 +67,10 @@ $ helm upgrade --install mysql \
   stable/mysql
 
 # Go to Chart Directory
-$ cd chart/inventory
+cd chart/inventory
 
 # Deploy Inventory to Kubernetes cluster
-$ helm upgrade --install inventory --set service.type=NodePort,mysql.existingSecret=inventory-mysql .
+helm upgrade --install inventory --set service.type=NodePort,mysql.existingSecret=inventory-mysql .
 ```
 
 The last command will give you instructions on how to access/test the Inventory application. Please note that before the Inventory application starts, the MySQL deployment must be fully up and running, which normally takes a couple of minutes. With Kubernetes [Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/), the Inventory Deployment polls for MySQL readiness status so that Inventory can start once MySQL is ready, or error out if MySQL fails to start.
@@ -79,7 +79,7 @@ Also, once MySQL is fully up and running, a [`Kubernetes Job`](https://kubernete
 
 To check and wait for the deployment status, you can run the following command:
 ```bash
-$ kubectl get deployments -w
+kubectl get deployments -w
 NAME                  DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 inventory-inventory   1         1         1            1           10h
 ```
@@ -87,13 +87,13 @@ inventory-inventory   1         1         1            1           10h
 The `-w` flag is so that the command above not only retrieves the deployment but also listens for changes. If you a 1 under the `CURRENT` column, that means that the inventory app deployment is ready.
 
 ## Deploy Inventory Application on Docker
-You can also run the Inventory Application locally on Docker. Before we show you how to do so, you will need to have a running MySQL deployment running somewhere. 
+You can also run the Inventory Application locally on Docker. Before we show you how to do so, you will need to have a running MySQL deployment running somewhere.
 
 ### Deploy the MySQL Docker Container
 The easiest way to get MySQL running is via a Docker container. To do so, run the following commands:
 ```bash
 # Start a MySQL Container with a database user, a password, and create a new database
-$ docker run --name inventorymysql \
+docker run --name inventorymysql \
     -e MYSQL_ROOT_PASSWORD=admin123 \
     -e MYSQL_USER=dbuser \
     -e MYSQL_PASSWORD=password \
@@ -102,7 +102,7 @@ $ docker run --name inventorymysql \
     -d mysql:5.7.14
 
 # Get the MySQL Container's IP Address
-$ docker inspect inventorymysql | grep "IPAddress"
+docker inspect inventorymysql | grep "IPAddress"
             "SecondaryIPAddresses": null,
             "IPAddress": "172.17.0.2",
                     "IPAddress": "172.17.0.2",
@@ -112,7 +112,7 @@ Make sure to select the IP Address in the `IPAddress` field. You will use this I
 ### Populate the MySQL Database
 In order for Inventory to make use of the MySQL database, the database needs to be populated first. To do so, run the following commands:
 ```bash
-$ until mysql -h 127.0.0.1 -P 3306 -udbuser -ppassword <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
+until mysql -h 127.0.0.1 -P 3306 -udbuser -ppassword <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
 ```
 
 Note that we didn't use the IP address we obtained from the MySQL since it is only accessible to other Docker Containers. We used `127.0.0.1` localhost IP address instead since we mapped the 3306 port on the docker container to the 3306 port in localhost.
@@ -121,10 +121,10 @@ Note that we didn't use the IP address we obtained from the MySQL since it is on
 To deploy the Inventory container, run the following commands:
 ```bash
 # Build the Docker Image
-$ docker build -t inventory .
+docker build -t inventory .
 
 # Start the Inventory Container
-$ docker run --name inventory \
+docker run --name inventory \
     -e MYSQL_HOST=${MYSQL_IP_ADDRESS} \
     -e MYSQL_PORT=3306 \
     -e MYSQL_USER=dbuser \
@@ -138,7 +138,7 @@ Where `${MYSQL_IP_ADDRESS}` is the IP address of the MySQL container, which is o
 
 If everything works successfully, you should be able to get some data when you run the following command:
 ```bash
-$ curl http://localhost:8080/micro/inventory
+curl http://localhost:8080/micro/inventory
 ```
 
 ## Run Inventory Service application on localhost
@@ -147,24 +147,24 @@ In this section you will run the Spring Boot application on your local workstati
 Once MySQL is ready and populated, we can run the Spring Boot Inventory application locally as follows:
 
 1. Open [`src/main/resources/application.yml`](src/main/resources/application.yml) file, enter the following values for the fields under `spring.datasource`, and save the file:
-    * **url:** jdbc:mysql://127.0.0.1/inventorydb
+    * **url:** jdbc:mysql://127.0.0.1:3306/inventorydb
     * **username:** dbuser
     * **password:** password
     * **port:** 3306
 
 2. Build the application:
 ```bash
-$ ./gradlew build -x test
+./gradlew build -x test
 ```
 
 3. Run the application on localhost:
 ```bash
-$ java -jar build/libs/micro-inventory-0.0.1.jar
+java -jar build/libs/micro-inventory-0.0.1.jar
 ```
 
 4. Validate. You should get a list of all inventory items:
 ```bash
-$ curl http://localhost:8080/micro/inventory
+curl http://localhost:8080/micro/inventory
 ```
 
 That's it, you have successfully deployed and tested the Inventory microservice.
@@ -174,7 +174,7 @@ That's it, you have successfully deployed and tested the Inventory microservice.
 The Spring Boot applications can be deployed on WebSphere Liberty as well. In this case, the embedded server i.e. the application server packaged up in the JAR file will be Liberty. For instructions on how to deploy the Inventory application optimized for Docker on Open Liberty, which is the open source foundation for WebSphere Liberty, follow the instructions [here](OpenLiberty.MD).
 
 ## Optional: Setup CI/CD Pipeline
-If you would like to setup an automated Jenkins CI/CD Pipeline for this repository, we provided a sample [Jenkinsfile](Jenkinsfile), which uses the [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) syntax of the [Jenkins Kubernetes Plugin](https://github.com/jenkinsci/kubernetes-plugin) to automatically create and run Jenkis Pipelines from your Kubernetes environment. 
+If you would like to setup an automated Jenkins CI/CD Pipeline for this repository, we provided a sample [Jenkinsfile](Jenkinsfile), which uses the [Jenkins Pipeline](https://jenkins.io/doc/book/pipeline/) syntax of the [Jenkins Kubernetes Plugin](https://github.com/jenkinsci/kubernetes-plugin) to automatically create and run Jenkis Pipelines from your Kubernetes environment.
 
 To learn how to use this sample pipeline, follow the guide below and enter the corresponding values for your environment and for this repository:
 * https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes
