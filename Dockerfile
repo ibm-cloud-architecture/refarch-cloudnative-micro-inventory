@@ -19,7 +19,8 @@ FROM openjdk:8-jre-alpine
 
 # Install Extra Packages
 RUN apk --no-cache update \
- && apk add jq bash bc
+ && apk add jq bash bc ca-certificates curl \
+ && update-ca-certificates
 
 # Create app directory
 ENV APP_HOME=/
@@ -33,5 +34,5 @@ RUN mv ./micro-inventory-0.0.1.jar app.jar
 COPY startup.sh startup.sh
 COPY scripts scripts
 
-EXPOSE 8081
+EXPOSE 8080
 ENTRYPOINT ["./startup.sh"]

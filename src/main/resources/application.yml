@@ -1,27 +1,26 @@
 eureka:
-  instance:
-     preferIpAddress: true
   client:
-    serviceUrl:
-       defaultZone: http://microservices-refapp-eureka-chrisking.mybluemix.net/eureka/
+    enabled: false
+    registerWithEureka: false
+  fetchRegistry: false
 
 # Server configuration
 server:
   context-path: /micro
-  port: 8080
+  port: ${SERVICE_PORT:8080}
 
 # Spring properties
 spring:
   application:
-     name: inventory-microservice
+    name: inventory
 
   # MySQL Data source configuration
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1/inventorydb
-    username: root
-    password:
-    port: 3306
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:inventorydb}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD}
+    port: ${MYSQL_PORT:3306}
     max-active: 4
     testOnBorrow: true
     validationQuery: SELECT 1
@@ -32,18 +31,3 @@ spring:
     hibernate:
       ddl-auto: update
       naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
-
-# Message Hub properties
-message_hub:
-  topic: orders
-  user: 
-  password: 
-  api_key: 
-  kafka_rest_url: 
-  # Add all brokers listed in Message Hub Credentials
-  kafka_brokers_sasl:
-    - 
-    - 
-    - 
-    - 
-    - kafka05-prod01.messagehub.services.us-south.bluemix.net:9093

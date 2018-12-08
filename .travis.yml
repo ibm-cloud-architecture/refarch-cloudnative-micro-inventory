@@ -48,7 +48,7 @@ jobs:
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
       # Start Inventory Container and Connect to local MySQL Service
-      - docker run --net=host --name inventory -d -p 8080:8080 -e MYSQL_URI="mysql://root@127.0.0.1:3306/inventorydb" "${IMAGE_NAME}:${TAG}"
+      - docker run --net=host --name inventory -d -p 8080:8080 "${IMAGE_NAME}:${TAG}"
       # Wait for the Inventory container to start accepting connections
       - sleep 25
       # Check that the Inventory container is running
