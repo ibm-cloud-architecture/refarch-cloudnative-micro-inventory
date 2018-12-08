@@ -38,7 +38,7 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 {{/* Inventory MySQL Environment Variables */}}
 {{- define "inventory.mysql.environmentvariables" }}
 - name: SERVICE_PORT
-  value: {{ .Values.service.internalPort }}
+  value: {{ .Values.service.internalPort | quote }}
 - name: MYSQL_HOST
   value: {{ .Values.mysql.host | quote }}
 - name: MYSQL_PORT
