@@ -29,19 +29,18 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
     ],
     containers: [
-        containerTemplate(name: 'gradle', image: 'gradle:4.9.0-jdk8-alpine', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'jdk', image: 'openjdk:8-jdk-alpine', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'docker:18.06.1-ce', ttyEnabled: true, command: 'cat')
   ]) {
 
     node(podLabel) {
         checkout scm
-        container('gradle') {
+        container('jdk') {
             stage('Gradle Build and Unit Test') {
                 sh """
                 #!/bin/bash
-                chmod a+x /home/jenkins/workspace
-                gradle build
+                ./gradlew build
                 """
             }
         }
