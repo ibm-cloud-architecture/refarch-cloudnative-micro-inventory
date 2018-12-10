@@ -19,7 +19,7 @@ spring:
     driverClassName: com.mysql.jdbc.Driver
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:inventorydb}
     username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD}
+    password: ${MYSQL_PASSWORD:}
     port: ${MYSQL_PORT:3306}
     max-active: 4
     testOnBorrow: true
