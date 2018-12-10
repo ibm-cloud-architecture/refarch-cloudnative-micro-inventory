@@ -40,6 +40,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Gradle Build and Unit Test') {
                 sh """
                 #!/bin/bash
+                sudo usermod -a -G docker $USER
                 gradle build
                 """
             }
