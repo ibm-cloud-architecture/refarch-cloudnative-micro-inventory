@@ -39,9 +39,11 @@ function get_inventory() {
     fi
 }
 
+set -x
 # Setup
 parse_arguments $1 $2
 
 # API Tests
 echo "Starting Tests"
 get_inventory
+set +x
