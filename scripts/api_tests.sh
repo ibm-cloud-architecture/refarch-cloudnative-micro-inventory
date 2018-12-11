@@ -34,7 +34,7 @@ function get_inventory() {
 	if [ ! "$CURL" -gt "0" ]; then
 		echo "get_inventory: ❌ could not get inventory";
         exit 1;
-    else 
+    else
     	echo "get_inventory: ✅";
     fi
 }

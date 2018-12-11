@@ -44,21 +44,23 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
     containers: [
         containerTemplate(name: 'jdk', image: 'ibmcase/openjdk-bash:latest', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'docker' , image: 'docker:18.06.1-ce', ttyEnabled: true, command: 'cat')
+        containerTemplate(name: 'docker' , image: 'ibmcase/docker-bash:latest', ttyEnabled: true, command: 'cat')
   ]) {
 
     node(podLabel) {
         checkout scm
         container(name:'jdk', shell:'/bin/bash') {
-            stage('Gradle Build and Unit Test') {
+            stage('Local - Build and Unit Test') {
                 sh """
                 #!/bin/bash
+
                 ./gradlew build
                 """
             }
-            stage('Run and Test') {
+            stage('Local - Run and Test') {
                 sh """
                 #!/bin/bash
+
                 JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
                 JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
 
@@ -66,47 +68,87 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 sleep 25
 
+                set +x
                 ./scripts/api_tests.sh
+                set -x
                 """
             }
         }
-        container(name:'docker') {
-            stage('Build Docker Image') {
+        container(name:'docker', shell:'/bin/bash') {
+            stage('Docker - Build Image') {
                 sh """
                 #!/bin/bash
+
+                # Get image
                 if [ "${env.REGISTRY}" = "docker.io" ]; then
-                    echo 'Building Docker Hub Image'
-                    docker build -t ${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                    IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
-                    echo 'Building Private Registry Image'
-                    docker build -t ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER} .
+                    IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
+
+                docker build -t \${IMAGE} .
                 """
             }
-            stage('Push Docker Image to Registry') {
+            stage('Docker - Run and Test') {
+                sh """
+                #!/bin/bash
+
+                # Get image
+                if [ "${env.REGISTRY}" = "docker.io" ]; then
+                    IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                else
+                    IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                fi
+
+                # Start Container
+                docker run --name ${env.POD_NAME} -d -p 8080:8080 \
+                    -e MYSQL_HOST=${env.DB_HOST} \
+                    -e MYSQL_PORT=${env.DB_PORT} \
+                    -e MYSQL_USER=${MYSQL_USER} \
+                    -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+                    -e MYSQL_DATABASE=${env.DB_DATABASE} \${IMAGE}
+
+                # Let the container start
+                sleep 25
+
+                # Check that container started successfully
+                docker ps
+
+                # Check the logs
+                docker logs ${env.POD_NAME}
+
+                # Run tests
+                set +x
+                ./scripts/api_tests.sh
+                set -x
+                """
+            }
+            stage('Docker - Push Image to Registry') {
                 withCredentials([usernamePassword(credentialsId: registryCredsID,
                                                usernameVariable: 'USERNAME',
                                                passwordVariable: 'PASSWORD')]) {
                     sh """
-                    #!/bin/bash\
+                    #!/bin/bash
+
+                    # Get image
+                    if [ "${env.REGISTRY}" = "docker.io" ]; then
+                        IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    else
+                        IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    fi
 
                     docker login -u ${USERNAME} -p ${PASSWORD} ${env.REGISTRY}
 
-                    if [ "${env.REGISTRY}" = "docker.io" ]; then
-                        echo 'Pushing to Docker Hub'
-                        docker push ${env.IMAGE_NAME}:${env.BUILD_NUMBER}
-                    else
-                        echo 'Pushing to Private Registry'
-                        docker push ${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
-                    fi
+                    docker push \${IMAGE}
                     """
                 }
             }
         }
         container(name:'kubectl') {
-            stage('Deploy new Docker Image') {
+            stage('kuBERNETES - Deploy new Docker Image') {
                 sh """
                 #!/bin/bash
+
                 DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
                 kubectl --namespace=${env.NAMESPACE} get \${DEPLOYMENT}
                 if [ \${?} -ne "0" ]; then
