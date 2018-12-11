@@ -73,7 +73,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 25
 
                 # Run tests
-                bash scripts/api_tests.sh "127.0.0.1" "${env.SERVICE_PORT}"
+                bash scripts/api_tests.sh 127.0.0.1 ${env.SERVICE_PORT}
                 """
             }
         }
