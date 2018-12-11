@@ -17,12 +17,29 @@ def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=inventory,tier=backend,version=v1"
 def podName = env.POD_NAME ?: "inventory"
 
+// External Test Database Parameters
+// For username and passwords
+def dbURL = env.DB_URL
+def dbProtocol = env.DB_PROTOCOL
+def dbHost = env.DB_HOST
+def dbPort = env.DB_PORT ?: "3306"
+def dbDatabase = env.DB_DATABASE ?: "inventorydb"
+def dbCredsID = env.DB_CREDENTIALS ?: "inventory-mysql-id"
+
+//def dbUser = env.DB_USER
+//def dbPassword = env.DB_PASSWORD
+
 podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, namespace: namespace, envVars: [
         envVar(key: 'NAMESPACE', value: namespace),
         envVar(key: 'REGISTRY', value: registry),
         envVar(key: 'IMAGE_NAME', value: imageName),
         envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
-        envVar(key: 'POD_NAME', value: podName)
+        envVar(key: 'POD_NAME', value: podName),
+        envVar(key: 'DB_URL', value: podName),
+        envVar(key: 'DB_PROTOCOL', value: podName),
+        envVar(key: 'DB_HOST', value: podName),
+        envVar(key: 'DB_PORT', value: podName),
+        envVar(key: 'DB_DATABASE', value: podName)
     ],
     volumes: [
         hostPathVolume(hostPath: '/etc/docker/certs.d', mountPath: '/etc/docker/certs.d'),
@@ -42,6 +59,25 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
                 ./gradlew build
                 """
+            }
+            stage('Run and Test') {
+                withCredentials([usernamePassword(credentialsId: dbCredsID,
+                                               usernameVariable: 'DB_USER',
+                                               passwordVariable: 'DB_PASSWORD')]) {
+                    sh """
+                    #!/bin/bash
+                    JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
+                    JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.username=${env.DB_USER}"
+                    JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.password=${env.DB_PASSWORD}"
+                    JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
+
+                    java -jar build/libs/micro-inventory-0.0.1.jar &
+
+                    sleep 25
+
+                    bash scripts/api_tests.sh
+                    """
+                }
             }
         }
         container('docker') {
