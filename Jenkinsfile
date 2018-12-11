@@ -71,11 +71,11 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.password=${env.DB_PASSWORD}"
                     JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
 
-                    java -jar build/libs/micro-inventory-0.0.1.jar &
+                    java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
 
                     sleep 25
 
-                    bash scripts/api_tests.sh
+                    ./scripts/api_tests.sh
                     """
                 }
             }
