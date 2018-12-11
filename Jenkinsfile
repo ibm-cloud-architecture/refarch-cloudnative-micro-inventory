@@ -19,8 +19,6 @@ def podName = env.POD_NAME ?: "inventory"
 
 // External Test Database Parameters
 // For username and passwords
-def dbURL = env.DB_URL
-def dbProtocol = env.DB_PROTOCOL
 def dbHost = env.DB_HOST
 def dbPort = env.DB_PORT ?: "3306"
 def dbDatabase = env.DB_DATABASE ?: "inventorydb"
@@ -35,8 +33,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'IMAGE_NAME', value: imageName),
         envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
         envVar(key: 'POD_NAME', value: podName),
-        envVar(key: 'DB_URL', value: podName),
-        envVar(key: 'DB_PROTOCOL', value: podName),
         envVar(key: 'DB_HOST', value: podName),
         envVar(key: 'DB_PORT', value: podName),
         envVar(key: 'DB_DATABASE', value: podName)
@@ -62,13 +58,11 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             }
             stage('Run and Test') {
                 withCredentials([usernamePassword(credentialsId: dbCredsID,
-                                               usernameVariable: 'DB_USER',
-                                               passwordVariable: 'DB_PASSWORD')]) {
+                                               usernameVariable: 'MYSQL_USER',
+                                               passwordVariable: 'MYSQL_PASSWORD')]) {
                     sh """
                     #!/bin/bash
                     JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
-                    JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.username=${DB_USER}"
-                    JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.password=${DB_PASSWORD}"
                     JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
 
                     java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
