@@ -24,14 +24,20 @@ function parse_arguments() {
 		INVENTORY_PORT=8080;
 	fi
 
+	echo "Using http://${INVENTORY_HOST}:${INVENTORY_PORT}"
+	echo "Using http://\${INVENTORY_HOST}:\${INVENTORY_PORT}"
 	#set +x;
 }
 
 function get_inventory() {
-	CURL=$(curl -s --max-time 5 http://\${INVENTORY_HOST}:\${INVENTORY_PORT}/micro/inventory | jq '. | length');
+	curl -s --max-time 5 http://${INVENTORY_HOST}:${INVENTORY_PORT}/micro/inventory | jq '. | length'
+	curl -s --max-time 5 http://\${INVENTORY_HOST}:\${INVENTORY_PORT}/micro/inventory | jq '. | length'
+	#CURL=$(curl -s --max-time 5 http://${INVENTORY_HOST}:${INVENTORY_PORT}/micro/inventory | jq '. | length');
+	CURL=`curl -s --max-time 5 http://\${INVENTORY_HOST}:\${INVENTORY_PORT}/micro/inventory | jq '. | length'`;
 	echo "Found inventory with \"${CURL}\" items"
 
 	if [ -z "${CURL}" ] || [ ! "${CURL}" -gt "0" ]; then
+	#if [ -z "\${CURL}" ] || [ ! "\${CURL}" -gt "0" ]; then
 		echo "get_inventory: ❌ could not get inventory";
         exit 1;
     else
