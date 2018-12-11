@@ -33,9 +33,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'IMAGE_NAME', value: imageName),
         envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
         envVar(key: 'POD_NAME', value: podName),
-        envVar(key: 'DB_HOST', value: podName),
-        envVar(key: 'DB_PORT', value: podName),
-        envVar(key: 'DB_DATABASE', value: podName)
+        envVar(key: 'DB_HOST', value: dbHost),
+        envVar(key: 'DB_PORT', value: dbPort),
+        envVar(key: 'DB_DATABASE', value: dbDatabase)
     ],
     volumes: [
         hostPathVolume(hostPath: '/etc/docker/certs.d', mountPath: '/etc/docker/certs.d'),
