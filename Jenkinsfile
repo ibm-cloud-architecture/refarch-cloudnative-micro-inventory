@@ -69,7 +69,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 25
 
                 set +x
-                ./scripts/api_tests.sh
+                bash scripts/api_tests.sh
                 set -x
                 """
             }
