@@ -42,7 +42,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
     ],
     containers: [
-        containerTemplate(name: 'jdk', image: 'openjdk:8-jdk-alpine', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'jdk', image: 'ibmcase/openjdk-bash:latest', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'docker:18.06.1-ce', ttyEnabled: true, command: 'cat')
   ]) {
