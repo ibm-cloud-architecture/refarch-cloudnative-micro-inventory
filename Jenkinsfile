@@ -49,7 +49,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
     node(podLabel) {
         checkout scm
-        container('jdk') {
+        container(name:'jdk', shell:'/bin/bash') {
             stage('Gradle Build and Unit Test') {
                 sh """
                 #!/bin/bash
@@ -57,24 +57,19 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 """
             }
             stage('Run and Test') {
-                withCredentials([usernamePassword(credentialsId: dbCredsID,
-                                               usernameVariable: 'MYSQL_USER',
-                                               passwordVariable: 'MYSQL_PASSWORD')]) {
-                    sh """
-                    #!/bin/bash
-                    JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
-                    JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
+                sh """
+                JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
+                JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
 
-                    java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
+                java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
 
-                    sleep 25
+                sleep 25
 
-                    ./scripts/api_tests.sh
-                    """
-                }
+                ./scripts/api_tests.sh
+                """
             }
         }
-        container('docker') {
+        container(name:'docker') {
             stage('Build Docker Image') {
                 sh """
                 #!/bin/bash
@@ -107,7 +102,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 }
             }
         }
-        container('kubectl') {
+        container(name:'kubectl') {
             stage('Deploy new Docker Image') {
                 sh """
                 #!/bin/bash
