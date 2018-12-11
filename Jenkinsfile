@@ -58,6 +58,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             }
             stage('Run and Test') {
                 sh """
+                #!/bin/bash
                 JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
                 JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
 
