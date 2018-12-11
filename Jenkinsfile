@@ -65,7 +65,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
                 JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
-                JAVA_OPTS="\${JAVA_OPTS} -Dserver.port=${env.SERVICE_PORT}"
+                JAVA_OPTS="\${JAVA_OPTS} -Dserver.port=${env.SERVICE_PORTO}"
 
                 java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
 
