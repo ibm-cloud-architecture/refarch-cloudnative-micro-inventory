@@ -29,7 +29,7 @@ function parse_arguments() {
 
 function get_inventory() {
 	CURL=$(curl -s --max-time 5 http://${INVENTORY_HOST}:${INVENTORY_PORT}/micro/inventory | jq '. | length');
-	#echo "Found inventory with \"${CURL}\" items"
+	echo "Found inventory with \"${CURL}\" items"
 
 	if [ ! "$CURL" -gt "0" ]; then
 		echo "get_inventory: ❌ could not get inventory";
