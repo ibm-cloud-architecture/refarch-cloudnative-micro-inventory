@@ -68,7 +68,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 sleep 25
 
-                bash scripts/api_tests.sh 127.0.0.1 8080
+                bash scripts/api_tests.sh "127.0.0.1" "8080"
                 """
             }
         }
