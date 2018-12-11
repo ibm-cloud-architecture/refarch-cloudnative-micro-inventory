@@ -16,7 +16,7 @@ def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=inventory,tier=backend,version=v1"
 def podName = env.POD_NAME ?: "inventory"
-def servicePort = env.SERVICE_PORT ?: "8081"
+def servicePort = env.SERVICE_PORTO ?: "8081"
 
 // External Test Database Parameters
 // For username and passwords
@@ -34,7 +34,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'IMAGE_NAME', value: imageName),
         envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
         envVar(key: 'POD_NAME', value: podName),
-        envVar(key: 'SERVICE_PORT', value: servicePort),
+        envVar(key: 'SERVICE_PORTO', value: servicePort),
         envVar(key: 'DB_HOST', value: dbHost),
         envVar(key: 'DB_PORT', value: dbPort),
         envVar(key: 'DB_DATABASE', value: dbDatabase)
@@ -73,8 +73,10 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 25
 
                 # Run tests
-                bash scripts/api_tests.sh 127.0.0.1 ${env.SERVICE_PORT}
+                printenv
+                bash scripts/api_tests.sh 127.0.0.1 ${env.SERVICE_PORTO}
                 """
+                sh "bash scripts/api_tests.sh 127.0.0.1 ${env.SERVICE_PORTO}"
             }
         }
         container(name:'docker', shell:'/bin/bash') {
