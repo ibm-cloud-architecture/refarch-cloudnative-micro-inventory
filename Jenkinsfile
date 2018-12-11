@@ -100,6 +100,10 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
 
+                # Kill Container if it already exists
+                docker kill ${env.POD_NAME} || true
+                docker rm ${env.POD_NAME} || true
+
                 # Start Container
                 docker run --name ${env.POD_NAME} -d -p 8080:8080 \
                     -e MYSQL_HOST=${env.DB_HOST} \
@@ -145,7 +149,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             }
         }
         container(name:'kubectl') {
-            stage('kuBERNETES - Deploy new Docker Image') {
+            stage('Kubernetes - Deploy new Docker Image') {
                 sh """
                 #!/bin/bash
 
