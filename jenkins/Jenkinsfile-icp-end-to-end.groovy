@@ -189,29 +189,15 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PARAMETERS="\${PARAMETERS} --set mysql.user=${env.MYSQL_PORT}"
                 PARAMETERS="\${PARAMETERS} --set mysql.password=${env.MYSQL_PORT}"
 
-                helm upgrade --install ${env.MICROSERVICE_NAME} "\${PARAMETERS}" chart/${env.MICROSERVICE_NAME}
+                helm upgrade --install ${env.MICROSERVICE_NAME} "\${PARAMETERS}" chart/${env.MICROSERVICE_NAME} --wait --tls
                 """
             }
             stage('Kubernetes - Test') {
                 sh """
                 #!/bin/bash
 
-                function list_deployments {
-                    kubectl get deployments -o wide;
-                }
-
-                list_deployments;
-
-                # Wait for Inventory to be ready
-                READY=`kubectl get deployments "\${env.MICROSERVICE_NAME}-\${env.MICROSERVICE_NAME}" -o yaml | grep "readyReplicas" | awk '{print $2}'`
-                echo \${READY}
-
-                until [ -n "\${READY}" ] && [ \${READY} -ge 1 ]; do
-                    READY=`kubectl get deployments "\${env.MICROSERVICE_NAME}-\${env.MICROSERVICE_NAME}" -o yaml | grep "readyReplicas" | awk '{print $2}'`;
-                    list_deployments;
-                    echo "Waiting for ${env.MICROSERVICE_NAME} to be ready";
-                    sleep 10;
-                done
+                # Get deployment
+                DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
 
                 # Wait for deployment to start accepting connections
                 sleep 35
