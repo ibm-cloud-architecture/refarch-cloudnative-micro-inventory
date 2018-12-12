@@ -181,31 +181,31 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 """
             }
             stage('Kubernetes - Deploy new Docker Image') {
-                withCredentials([usernamePassword(credentialsId: mySQLCredsId,
-                                               usernameVariable: 'MYSQL_USER',
-                                               passwordVariable: 'MYSQL_PASSWORD')]) {
-                    sh """
-                    #!/bin/bash
+                sh """
+                #!/bin/bash
 
-                    # Get image
-                    if [ "${REGISTRY}" = "docker.io" ]; then
-                        IMAGE=${IMAGE_NAME}
-                    else
-                        IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}
-                    fi
+                # Get image
+                if [ "${REGISTRY}" = "docker.io" ]; then
+                    IMAGE=${IMAGE_NAME}
+                else
+                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}
+                fi
 
-                    # Build PARAMETERS
-                    PARAMETERS="--set image.repository=\${IMAGE}"
-                    PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
-                    PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
-                    PARAMETERS="\${PARAMETERS} --set mysql.port=${MYSQL_PORT}"
-                    PARAMETERS="\${PARAMETERS} --set mysql.database=${MYSQL_DATABASE}"
-                    PARAMETERS="\${PARAMETERS} --set mysql.user=${MYSQL_USER}"
-                    PARAMETERS="\${PARAMETERS} --set mysql.password=${MYSQL_PASSWORD}"
+                # Build PARAMETERS
+                echo "Installing chart/${MICROSERVICE_NAME} chart and waiting for pods to be ready"
+                set -x
+                PARAMETERS="--set image.repository=\${IMAGE}"
+                PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
+                PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
+                PARAMETERS="\${PARAMETERS} --set mysql.port=${MYSQL_PORT}"
+                PARAMETERS="\${PARAMETERS} --set mysql.database=${MYSQL_DATABASE}"
+                PARAMETERS="\${PARAMETERS} --set mysql.user=${MYSQL_USER}"
+                PARAMETERS="\${PARAMETERS} --set mysql.password=${MYSQL_PASSWORD}"
 
-                    helm upgrade --install ${MICROSERVICE_NAME} "\${PARAMETERS}" chart/${MICROSERVICE_NAME} --wait --tls
-                    """
-                }
+                helm upgrade --install ${MICROSERVICE_NAME} "\${PARAMETERS}" chart/${MICROSERVICE_NAME} --wait --tls
+                set +x
+                echo "Done"
+                """
             }
             stage('Kubernetes - Test') {
                 sh """
