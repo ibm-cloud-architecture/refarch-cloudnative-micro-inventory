@@ -134,7 +134,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Start Container
                 echo "Starting ${MICROSERVICE_NAME} container"
                 set +x
-                docker run --name ${MICROSERVICE_NAME} -d -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
+                docker run --net=host --name ${MICROSERVICE_NAME} -d \
+                    -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
                     -e SERVICE_PORT=${MICROSERVICE_PORT} \
                     -e MYSQL_HOST=${MYSQL_HOST} \
                     -e MYSQL_PORT=${MYSQL_PORT} \
