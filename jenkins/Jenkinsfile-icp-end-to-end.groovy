@@ -4,6 +4,11 @@
     - https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes
 */
 
+// Environment
+def clusterURL = env.CLUSTER_URL
+def clusterAccountId = env.CLUSTER_ACCOUNT_ID
+def clusterCredentialId = env.CLUSTER_CREDENTIAL_ID ?: "cluster-credentials"
+
 // Pod Template
 def podLabel = "inventory"
 def cloud = env.CLOUD ?: "kubernetes"
@@ -34,6 +39,8 @@ def mySQLCredsId = env.MYSQL_CREDENTIALS ?: "inventory-mysql-id"
 def helmHome = env.HELM_HOME ?: env.JENKINS_HOME + "/.helm"
 
 podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, namespace: namespace, envVars: [
+        envVar(key: 'CLUSTER_URL', value: clusterURL),
+        envVar(key: 'CLUSTER_ACCOUNT_ID', value: clusterAccountId),
         envVar(key: 'NAMESPACE', value: namespace),
         envVar(key: 'REGISTRY', value: registry),
         envVar(key: 'IMAGE_NAME', value: imageName),
@@ -52,7 +59,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
     containers: [
         containerTemplate(name: 'jdk', image: 'ibmcase/openjdk-bash:latest', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'ibmcase/docker-bash:latest', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'kubectl', image: 'ibmcase/jenkins-slave-utils:latest', ttyEnabled: true, command: 'cat')
+        containerTemplate(name: 'kubernetes', image: 'ibmcase/jenkins-slave-utils:latest', ttyEnabled: true, command: 'cat')
   ]) {
 
     node(podLabel) {
@@ -172,16 +179,20 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         }
 
         // Kubernetes
-        container(name:'kubectl', shell:'/bin/bash') {
+        container(name:'kubernetes', shell:'/bin/bash') {
             stage('Initialize CLIs') {
-                sh """
-                echo "Initializing Helm ..."
-                export HELM_HOME=${HELM_HOME}
-                helm init -c
+                withCredentials([usernamePassword(credentialsId: clusterCredentialId,
+                                               passwordVariable: 'CLUSTER_PASSWORD',
+                                               usernameVariable: 'CLUSTER_USERNAME')]) {
+                    sh """
+                    echo "Initializing Helm ..."
+                    export HELM_HOME=${HELM_HOME}
+                    helm init -c
 
-                echo "Login with cloudctl ..."
-                cloudctl login -a ${CLUSTER_URL} -u ${CLUSTER_USERNAME}  -p "${CLUSTER_PASSWORD}" -c ${CLUSTER_ACCOUNT_ID} -n ${CLUSTER_NAMESPACE} ${SKIP_SSL_VALIDATION}
-                """
+                    echo "Login with cloudctl ..."
+                    cloudctl login -a ${CLUSTER_URL} -u ${CLUSTER_USERNAME}  -p "${CLUSTER_PASSWORD}" -c ${CLUSTER_ACCOUNT_ID} -n ${NAMESPACE} --skip-ssl-validation
+                    """
+                }
             }
             stage('Kubernetes - Deploy new Docker Image') {
                 sh """
