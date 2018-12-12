@@ -117,49 +117,48 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 """
             }
             stage('Docker - Run and Test') {
-                withCredentials([usernamePassword(credentialsId: mySQLCredsId,
-                                               usernameVariable: 'MYSQL_USER',
-                                               passwordVariable: 'MYSQL_PASSWORD')]) {
-                    sh """
-                    #!/bin/bash
+                sh """
+                #!/bin/bash
 
-                    # Get image
-                    if [ "${REGISTRY}" = "docker.io" ]; then
-                        IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
-                    else
-                        IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
-                    fi
+                # Get image
+                if [ "${REGISTRY}" = "docker.io" ]; then
+                    IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
+                else
+                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
+                fi
 
-                    # Kill Container if it already exists
-                    docker kill ${MICROSERVICE_NAME} || true
-                    docker rm ${MICROSERVICE_NAME} || true
+                # Kill Container if it already exists
+                docker kill ${MICROSERVICE_NAME} || true
+                docker rm ${MICROSERVICE_NAME} || true
 
-                    # Start Container
-                    docker run --name ${MICROSERVICE_NAME} -d -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
-                        -e SERVICE_PORT=${MICROSERVICE_PORT} \
-                        -e MYSQL_HOST=${MYSQL_HOST} \
-                        -e MYSQL_PORT=${MYSQL_PORT} \
-                        -e MYSQL_USER=${MYSQL_USER} \
-                        -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-                        -e MYSQL_DATABASE=${MYSQL_DATABASE} \${IMAGE}
+                # Start Container
+                echo "Starting ${MICROSERVICE_NAME} container"
+                set +x
+                docker run --name ${MICROSERVICE_NAME} -d -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
+                    -e SERVICE_PORT=${MICROSERVICE_PORT} \
+                    -e MYSQL_HOST=${MYSQL_HOST} \
+                    -e MYSQL_PORT=${MYSQL_PORT} \
+                    -e MYSQL_USER=${MYSQL_USER} \
+                    -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+                    -e MYSQL_DATABASE=${MYSQL_DATABASE} \${IMAGE}
+                set -x
 
-                    # Let the application start
-                    sleep 25
+                # Let the application start
+                sleep 25
 
-                    # Check that application started successfully
-                    docker ps
+                # Check that application started successfully
+                docker ps
 
-                    # Check the logs
-                    docker logs ${MICROSERVICE_NAME}
+                # Check the logs
+                docker logs ${MICROSERVICE_NAME}
 
-                    # Run tests
-                    bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
+                # Run tests
+                bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
 
-                    # Kill Container
-                    docker kill ${MICROSERVICE_NAME} || true
-                    docker rm ${MICROSERVICE_NAME} || true
-                    """
-                }
+                # Kill Container
+                docker kill ${MICROSERVICE_NAME} || true
+                docker rm ${MICROSERVICE_NAME} || true
+                """
             }
             stage('Docker - Push Image to Registry') {
                 withCredentials([usernamePassword(credentialsId: registryCredsID,
