@@ -19,14 +19,13 @@ def podName = env.POD_NAME ?: "inventory"
 def servicePort = env.MICROSERVICE_PORT ?: "8081"
 
 // External Test Database Parameters
-// For username and passwords
+// For username and passwords, set MYSQL_USER (as string parameter) and MYSQL_PASSWORD (as password parameter)
+//     - These variables get picked up by the Java application automatically
+//     - There were issues with Jenkins credentials plugin interfering with setting up the password directly
+
 def dbHost = env.DB_HOST
 def dbPort = env.DB_PORT ?: "3306"
 def dbDatabase = env.DB_DATABASE ?: "inventorydb"
-def dbCredsID = env.DB_CREDENTIALS ?: "inventory-mysql-id"
-
-//def dbUser = env.DB_USER
-//def dbPassword = env.DB_PASSWORD
 
 podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, namespace: namespace, envVars: [
         envVar(key: 'NAMESPACE', value: namespace),
@@ -45,12 +44,14 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
     ],
     containers: [
         containerTemplate(name: 'jdk', image: 'ibmcase/openjdk-bash:latest', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'kubectl', image: 'ibmcase/kubectl-bash:latest', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'ibmcase/docker-bash:latest', ttyEnabled: true, command: 'cat')
   ]) {
 
     node(podLabel) {
         checkout scm
+
+        // Local
         container(name:'jdk', shell:'/bin/bash') {
             stage('Local - Build and Unit Test') {
                 sh """
@@ -79,6 +80,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 """
             }
         }
+
+        // Docker
         container(name:'docker', shell:'/bin/bash') {
             stage('Docker - Build Image') {
                 sh """
@@ -105,10 +108,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
 
-                # Kill Container if it already exists
-                docker kill ${env.POD_NAME} || true
-                docker rm ${env.POD_NAME} || true
-
                 # Start Container
                 docker run --name ${env.POD_NAME} -d -p 8080:8080 \
                     -e SERVICE_PORT=${env.MICROSERVICE_PORT} \
@@ -129,6 +128,10 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Run tests
                 bash scripts/api_tests.sh 127.0.0.1 ${env.MICROSERVICE_PORT}
+
+                # Kill Container
+                docker kill ${env.POD_NAME} || true
+                docker rm ${env.POD_NAME} || true
                 """
             }
             stage('Docker - Push Image to Registry') {
@@ -152,15 +155,20 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 }
             }
         }
-        container(name:'kubectl') {
+
+        // Kubernetes
+        container(name:'kubectl', shell:'/bin/bash') {
             stage('Kubernetes - Deploy new Docker Image') {
                 sh """
                 #!/bin/bash
 
+                # Get deployment
                 DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
+
+                # Check if deployment exists
                 kubectl --namespace=${env.NAMESPACE} get \${DEPLOYMENT}
+
                 if [ \${?} -ne "0" ]; then
-                    # No deployment to update
                     echo 'No deployment to update'
                     exit 1
                 fi
@@ -175,6 +183,34 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Update deployment and check rollout status
                 kubectl --namespace=${env.NAMESPACE} set image \${DEPLOYMENT} ${env.POD_NAME}=\${IMAGE}
                 kubectl --namespace=${env.NAMESPACE} rollout status \${DEPLOYMENT}
+                """
+            }
+            stage('Kubernetes - Test') {
+                sh """
+                #!/bin/bash
+
+                # Get deployment
+                DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
+
+                # Check if deployment exists
+                kubectl --namespace=${env.NAMESPACE} get \${DEPLOYMENT}
+
+                if [ \${?} -ne "0" ]; then
+                    echo 'No deployment to test'
+                    exit 1
+                fi
+
+                # Let the application start
+                sleep 25
+
+                # Check the logs
+                kubectl port-forward \${DEPLOYMENT} ${env.MICROSERVICE_PORT}:${env.MICROSERVICE_PORT} &
+
+                # Run tests
+                bash scripts/api_tests.sh 127.0.0.1 ${env.MICROSERVICE_PORT}
+
+                # Kill port forwarding
+                killall kubectl
                 """
             }
         }
