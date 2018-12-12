@@ -90,9 +90,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 25
 
                 # Run tests
-                set -x
+                set +x
                 bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
-                set +x;
+                set -x;
 
                 # Kill process
                 kill \${PID}
@@ -215,6 +215,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 set +x
                 PARAMETERS="--set image.repository=\${IMAGE}"
                 PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
+                PARAMETERS="\${PARAMETERS} --set service.externalPort=${MICROSERVICE_PORT}"
+                PARAMETERS="\${PARAMETERS} --set service.internalPort=${MICROSERVICE_PORT}"
                 PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
                 PARAMETERS="\${PARAMETERS} --set mysql.port=${MYSQL_PORT}"
                 PARAMETERS="\${PARAMETERS} --set mysql.database=${MYSQL_DATABASE}"
