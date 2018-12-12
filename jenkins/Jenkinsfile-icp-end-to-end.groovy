@@ -19,7 +19,7 @@ def serviceAccount = env.SERVICE_ACCOUNT ?: "jenkins"
 def namespace = env.NAMESPACE ?: "default"
 def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
-def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=inventory,tier=backend,version=v1"
+def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend,version=v1"
 def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
 def servicePort = env.MICROSERVICE_PORT ?: "8081"
 
@@ -44,7 +44,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'NAMESPACE', value: namespace),
         envVar(key: 'REGISTRY', value: registry),
         envVar(key: 'IMAGE_NAME', value: imageName),
-        envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
+        envVar(key: 'SERVICE_LABELS', value: serviceLabels),
         envVar(key: 'MICROSERVICE_NAME', value: microServiceName),
         envVar(key: 'MICROSERVICE_PORT', value: servicePort),
         envVar(key: 'MYSQL_HOST', value: mySQLHost),
@@ -216,7 +216,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PARAMETERS="--set image.repository=\${IMAGE}"
                 PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
                 PARAMETERS="\${PARAMETERS} --set service.externalPort=${MICROSERVICE_PORT}"
-                PARAMETERS="\${PARAMETERS} --set service.internalPort=${MICROSERVICE_PORT}"
                 PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
                 PARAMETERS="\${PARAMETERS} --set mysql.port=${MYSQL_PORT}"
                 PARAMETERS="\${PARAMETERS} --set mysql.database=${MYSQL_DATABASE}"
@@ -232,13 +231,13 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get deployment
-                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l ${DEPLOYMENT_LABELS} -o name`
+                SERVICE=`kubectl --namespace=${NAMESPACE} get services -l ${SERVICE_LABELS} -o name | head -n 1`
 
                 # Wait for deployment to start accepting connections
                 sleep 35
 
                 # Check the logs
-                kubectl port-forward \${DEPLOYMENT} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
+                kubectl port-forward \${SERVICE} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
 
                 # Run tests
                 bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
