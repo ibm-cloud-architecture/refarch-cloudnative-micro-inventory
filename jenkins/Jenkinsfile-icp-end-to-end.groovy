@@ -84,7 +84,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
 
-                PID="$!"
+                PID=`echo \$!`
 
                 # Let the application start
                 sleep 25
