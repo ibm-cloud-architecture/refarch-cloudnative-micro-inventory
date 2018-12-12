@@ -195,9 +195,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Kubernetes - Test') {
                 sh """
                 #!/bin/bash
-                function is_deployment_ready {
-                    kubectl get deployments "${env.MICROSERVICE_NAME}-${env.MICROSERVICE_NAME}" -o yaml | grep "readyReplicas" | awk '{print $2}'
-                }
 
                 function list_deployments {
                     kubectl get deployments -o wide;
@@ -206,11 +203,11 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 list_deployments;
 
                 # Wait for Inventory to be ready
-                READY=`is_deployment_ready`
+                READY=`kubectl get deployments "${env.MICROSERVICE_NAME}-${env.MICROSERVICE_NAME}" -o yaml | grep "readyReplicas" | awk '{print $2}'`
                 echo \$READY
 
                 until [ -n "\$READY" ] && [ \${READY} -ge 1 ]; do
-                    READY=`is_deployment_ready`;
+                    READY=`kubectl get deployments "${env.MICROSERVICE_NAME}-${env.MICROSERVICE_NAME}" -o yaml | grep "readyReplicas" | awk '{print $2}'`;
                     list_deployments;
                     echo "Waiting for ${env.MICROSERVICE_NAME} to be ready";
                     sleep 10;
