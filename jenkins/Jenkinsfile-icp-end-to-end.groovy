@@ -216,7 +216,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PARAMETERS="\${PARAMETERS} --set mysql.user=${MYSQL_USER}"
                 PARAMETERS="\${PARAMETERS} --set mysql.password=${MYSQL_PASSWORD}"
 
-                helm list
                 helm upgrade --install ${MICROSERVICE_NAME} `echo \${PARAMETERS}` chart/${MICROSERVICE_NAME} --wait --tls
                 set -x
                 """
