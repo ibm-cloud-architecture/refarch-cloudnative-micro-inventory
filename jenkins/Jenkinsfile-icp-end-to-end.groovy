@@ -202,9 +202,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PARAMETERS="\${PARAMETERS} --set mysql.user=${MYSQL_USER}"
                 PARAMETERS="\${PARAMETERS} --set mysql.password=${MYSQL_PASSWORD}"
 
-                helm upgrade --install ${MICROSERVICE_NAME} "\${PARAMETERS}" chart/${MICROSERVICE_NAME} --wait --tls
+                helm upgrade --install ${MICROSERVICE_NAME} `echo \${PARAMETERS}` chart/${MICROSERVICE_NAME} --wait --tls
                 set +x
-                echo "Done"
                 """
             }
             stage('Kubernetes - Test') {
