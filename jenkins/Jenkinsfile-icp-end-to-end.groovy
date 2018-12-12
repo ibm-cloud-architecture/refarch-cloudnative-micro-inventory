@@ -196,7 +196,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sh """
                 #!/bin/bash
                 function is_deployment_ready {
-                    kubectl get deployments "${env.MICROSERVICE_NAME}-inventory" -o yaml | grep "readyReplicas" | awk '{print $2}'
+                    kubectl get deployments "${env.MICROSERVICE_NAME}-${env.MICROSERVICE_NAME}" -o yaml | grep "readyReplicas" | awk '{print $2}'
                 }
 
                 function list_deployments {
