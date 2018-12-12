@@ -178,6 +178,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 echo "Initializing Helm ..."
                 export HELM_HOME=${HELM_HOME}
                 helm init -c
+
+                echo "Login with cloudctl ..."
+                cloudctl login -a ${CLUSTER_URL} -u ${CLUSTER_USERNAME}  -p "${CLUSTER_PASSWORD}" -c ${CLUSTER_ACCOUNT_ID} -n ${CLUSTER_NAMESPACE} ${SKIP_SSL_VALIDATION}
                 """
             }
             stage('Kubernetes - Deploy new Docker Image') {
@@ -193,7 +196,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Build PARAMETERS
                 echo "Installing chart/${MICROSERVICE_NAME} chart and waiting for pods to be ready"
-                set -x
+                set +x
                 PARAMETERS="--set image.repository=\${IMAGE}"
                 PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
                 PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
@@ -202,8 +205,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PARAMETERS="\${PARAMETERS} --set mysql.user=${MYSQL_USER}"
                 PARAMETERS="\${PARAMETERS} --set mysql.password=${MYSQL_PASSWORD}"
 
+                helm list
                 helm upgrade --install ${MICROSERVICE_NAME} `echo \${PARAMETERS}` chart/${MICROSERVICE_NAME} --wait --tls
-                set +x
+                set -x
                 """
             }
             stage('Kubernetes - Test') {
