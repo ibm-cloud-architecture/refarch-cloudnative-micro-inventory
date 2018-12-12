@@ -195,7 +195,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     fi
 
                     # Build PARAMETERS
-                    PARAMETERS="--set image.repository="\${IMAGE}"
+                    PARAMETERS="--set image.repository=\${IMAGE}"
                     PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
                     PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
                     PARAMETERS="\${PARAMETERS} --set mysql.port=${MYSQL_PORT}"
