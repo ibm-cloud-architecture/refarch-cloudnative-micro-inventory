@@ -84,6 +84,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
 
+                PID="$!"
+
                 # Let the application start
                 sleep 25
 
@@ -91,6 +93,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 set -x
                 bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
                 set +x;
+
+                # Kill process
+                kill \${PID}
                 """
             }
         }
