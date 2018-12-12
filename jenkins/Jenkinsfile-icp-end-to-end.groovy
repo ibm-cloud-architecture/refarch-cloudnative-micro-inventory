@@ -31,7 +31,7 @@ def mySQLCredsId = env.MYSQL_CREDENTIALS ?: "inventory-mysql-id"
 /*
   Optional Pod Environment Variables
  */
-def helmHome = HELM_HOME ?: "/root/.helm"
+def helmHome = HELM_HOME ?: "/usr/local/bin/helm"
 
 podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, namespace: namespace, envVars: [
         envVar(key: 'NAMESPACE', value: namespace),
@@ -176,7 +176,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Initialize CLIs') {
                 sh """
                 echo "Initializing Helm ..."
-                export HELM_HOME=${HELM_HOME}
                 helm init -c
                 """
             }
