@@ -74,8 +74,15 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 25
 
                 # Run tests
-                printenv
-                bash scripts/api_tests.sh 127.0.0.1 ${env.SERVICE_PORT}
+                CURL=`curl -s --max-time 5 http://127.0.0.1:${env.SERVICE_PORT}/micro/inventory | jq '. | length'`
+                echo "Found inventory with \"${CURL}\" items"
+
+                if [ -z "\${CURL}" ] || [ ! "\${CURL}" -gt "0" ]; then
+                    echo "get_inventory: ❌ could not get inventory"
+                    exit 1
+                else
+                    echo "get_inventory: ✅"
+                fi
                 """
             }
         }
@@ -128,7 +135,15 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 docker logs ${env.POD_NAME}
 
                 # Run tests
-                bash scripts/api_tests.sh "127.0.0.1" "${env.SERVICE_PORT}"
+                CURL=`curl -s --max-time 5 http://127.0.0.1:${env.SERVICE_PORT}/micro/inventory | jq '. | length'`
+                echo "Found inventory with \"${CURL}\" items"
+
+                if [ -z "\${CURL}" ] || [ ! "\${CURL}" -gt "0" ]; then
+                    echo "get_inventory: ❌ could not get inventory"
+                    exit 1
+                else
+                    echo "get_inventory: ✅"
+                fi
                 """
             }
             stage('Docker - Push Image to Registry') {
