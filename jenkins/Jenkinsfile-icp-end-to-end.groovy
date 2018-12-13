@@ -21,7 +21,7 @@ def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend,version=v1"
 def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
-def servicePort = env.MICROSERVICE_PORT ?: "8081"
+def servicePort = env.MICROSERVICE_PORT ?: "8080"
 
 // External Test Database Parameters
 // For username and passwords, set MYSQL_USER (as string parameter) and MYSQL_PASSWORD (as password parameter)
@@ -134,9 +134,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Start Container
                 echo "Starting ${MICROSERVICE_NAME} container"
                 set +x
-                docker run --net=host --name ${MICROSERVICE_NAME} -d \
+                docker run --name ${MICROSERVICE_NAME} -d \
                     -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
-                    -e SERVICE_PORT=${MICROSERVICE_PORT} \
                     -e MYSQL_HOST=${MYSQL_HOST} \
                     -e MYSQL_PORT=${MYSQL_PORT} \
                     -e MYSQL_USER=${MYSQL_USER} \
