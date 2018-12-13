@@ -230,8 +230,19 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     --set mysql.user=${MYSQL_USER} \
                     --set mysql.password=${MYSQL_PASSWORD} \
                     chart/${MICROSERVICE_NAME} --wait --tls
-
                 set -x
+
+                alias is_deployment_ready="kubectl get deployments \${NAME} -o yaml | grep \"readyReplicas\" | awk '{print \$2}'"
+
+                READY=`is_deployment_ready`
+                echo $READY
+
+                until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do
+                    READY=`is_deployment_ready`
+                    kubectl get deployments -o wide;
+                    echo "Waiting for \${NAME} to be ready";
+                    sleep 10;
+                done
                 """
             }
             stage('Kubernetes - Test') {
