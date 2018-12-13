@@ -154,10 +154,13 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Check the logs
                 docker logs ${MICROSERVICE_NAME}
 
+                # Get the container IP Address
+                CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
+
                 # Run tests
-                curl localhost:${MICROSERVICE_PORT}/micro/inventory | true
-                curl 127.0.0.1:${MICROSERVICE_PORT}/micro/inventory | true
-                bash scripts/api_tests.sh localhost ${MICROSERVICE_PORT}
+                curl localhost:\${CONTAINER_IP}/micro/inventory | true
+                curl 127.0.0.1:\${CONTAINER_IP}/micro/inventory | true
+                bash scripts/api_tests.sh \${CONTAINER_IP} ${APPLICATION_PORT}
 
                 # Kill Container
                 docker kill ${MICROSERVICE_NAME} || true
