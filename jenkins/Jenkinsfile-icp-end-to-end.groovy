@@ -21,7 +21,7 @@ def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend,version=v1"
 def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
-def servicePort = env.MICROSERVICE_PORT ?: "8081"
+def servicePort = env.MICROSERVICE_PORT ?: "8080"
 
 // External Test Database Parameters
 // For username and passwords, set MYSQL_USER (as string parameter) and MYSQL_PASSWORD (as password parameter)
@@ -235,12 +235,14 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Get deployment
                 SERVICE=`kubectl --namespace=${NAMESPACE} get services -l ${SERVICE_LABELS} -o name | head -n 1`
+                POD=`kubectl --namespace=${NAMESPACE} get pods -l ${SERVICE_LABELS} -o name | head -n 1`
 
                 # Wait for deployment to start accepting connections
                 sleep 35
 
-                # Port forwarding
+                # Port forwarding & logs
                 kubectl port-forward \${SERVICE} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
+                kubectl logs -f \${POD} &
                 echo "Sleeping for 3 seconds while connection is established..."
                 sleep 3
 
