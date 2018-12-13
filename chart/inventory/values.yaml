@@ -42,6 +42,7 @@ base:
 istio:
   enabled: false
   weight: 100
+# For travis
 travis: false
 jdbcURL: jdbc:mysql://my-release-mysql:3306/inventorydb?useSSL=false
 mysql:
