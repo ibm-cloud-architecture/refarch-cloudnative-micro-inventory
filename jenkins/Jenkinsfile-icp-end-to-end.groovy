@@ -246,11 +246,14 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Get deployment
                 QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
-                POD=`kubectl --namespace=${NAMESPACE} get pods -l \${QUERY_LABELS} -o name | head -n 1`
+                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
+
+                # Wait for deployment to be ready
+                kubectl rollout status \${DEPLOYMENT}
 
                 # Port forwarding & logs
-                kubectl port-forward \${POD} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
-                kubectl logs -f \${POD} &
+                kubectl port-forward \${DEPLOYMENT} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
+                kubectl logs -f \${DEPLOYMENT} &
                 echo "Sleeping for 3 seconds while connection is established..."
                 sleep 3
 
