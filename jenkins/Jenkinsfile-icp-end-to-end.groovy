@@ -53,7 +53,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'HELM_HOME', value: helmHome)
     ],
     volumes: [
-        hostPathVolume(hostPath: '/etc/docker/certs.d', mountPath: '/etc/docker/certs.d'),
+        hostPathVolume(mountPath: '/home/gradle/.gradle', hostPath: '/tmp/jenkins/.gradle'),
         hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
     ],
     containers: [
