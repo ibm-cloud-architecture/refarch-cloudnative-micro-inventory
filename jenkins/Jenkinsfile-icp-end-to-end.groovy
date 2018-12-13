@@ -157,8 +157,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
 
                 # Run tests
-                curl \${CONTAINER_IP}:${MICROSERVICE_PORT}/micro/inventory | true
-                curl \${CONTAINER_IP}:${MICROSERVICE_PORT}/micro/inventory | true
                 bash scripts/api_tests.sh \${CONTAINER_IP} ${MICROSERVICE_PORT}
 
                 # Kill Container
@@ -241,8 +239,10 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Wait for deployment to start accepting connections
                 sleep 35
 
-                # Check the logs
+                # Port forwarding
                 kubectl port-forward \${SERVICE} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
+                echo "Sleeping for 3 seconds while connection is established..."
+                sleep 3
 
                 # Run tests
                 bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
