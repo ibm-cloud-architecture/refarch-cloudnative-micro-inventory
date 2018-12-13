@@ -22,6 +22,7 @@ def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend" //,version=v1"
 def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
 def servicePort = env.MICROSERVICE_PORT ?: "8080"
+def managementPort = env.MANAGEMENT_PORT ?: "8090"
 
 // External Test Database Parameters
 // For username and passwords, set MYSQL_USER (as string parameter) and MYSQL_PASSWORD (as password parameter)
@@ -47,6 +48,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'SERVICE_LABELS', value: serviceLabels),
         envVar(key: 'MICROSERVICE_NAME', value: microServiceName),
         envVar(key: 'MICROSERVICE_PORT', value: servicePort),
+        envVar(key: 'MANAGEMENT_PORT', value: servicePort),
         envVar(key: 'MYSQL_HOST', value: mySQLHost),
         envVar(key: 'MYSQL_PORT', value: mySQLPort),
         envVar(key: 'MYSQL_DATABASE', value: mySQLDatabase),
@@ -87,7 +89,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PID=`echo \$!`
 
                 # Let the application start
-                sleep 25
+                bash scripts/health_check.sh "http://127.0.0.1/${MANAGEMENT_PORT}"
 
                 # Run tests
                 set +x
@@ -136,6 +138,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 set +x
                 docker run --name ${MICROSERVICE_NAME} -d \
                     -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
+                    -p ${MANAGEMENT_PORT}:${MANAGEMENT_PORT} \
                     -e SERVICE_PORT=${MICROSERVICE_PORT} \
                     -e MYSQL_HOST=${MYSQL_HOST} \
                     -e MYSQL_PORT=${MYSQL_PORT} \
@@ -144,17 +147,17 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     -e MYSQL_DATABASE=${MYSQL_DATABASE} \${IMAGE}
                 set -x
 
-                # Let the application start
-                sleep 25
-
                 # Check that application started successfully
                 docker ps
 
                 # Check the logs
-                docker logs ${MICROSERVICE_NAME}
+                docker logs -f ${MICROSERVICE_NAME}
 
                 # Get the container IP Address
                 CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
+
+                # Let the application start
+                bash scripts/health_check.sh "http://\${CONTAINER_IP}/${MANAGEMENT_PORT}"
 
                 # Run tests
                 bash scripts/api_tests.sh \${CONTAINER_IP} ${MICROSERVICE_PORT}
@@ -231,20 +234,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     --set mysql.password=${MYSQL_PASSWORD} \
                     chart/${MICROSERVICE_NAME} --wait --tls
                 set -x
-
-                function is_deployment_ready {
-                    kubectl get deployments \${NAME} -o=jsonpath='{.status.availableReplicas}'
-                }
-
-                READY=`is_deployment_ready`
-                echo \${READY}
-
-                until [ -n "\${READY}" ] && [ "\${READY}" -ge 1 ]; do
-                    READY=`is_deployment_ready`
-                    kubectl get deployments -o wide;
-                    echo "Waiting for \${NAME} to be ready";
-                    sleep 10;
-                done
                 """
             }
             stage('Kubernetes - Test') {
@@ -259,10 +248,13 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 45
 
                 # Port forwarding & logs
-                kubectl port-forward \${POD} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
+                kubectl port-forward \${POD} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
                 kubectl logs -f \${POD} &
                 echo "Sleeping for 3 seconds while connection is established..."
                 sleep 3
+
+                # Let the application start
+                bash scripts/health_check.sh "http://127.0.0.1/${MANAGEMENT_PORT}"
 
                 # Run tests
                 bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
