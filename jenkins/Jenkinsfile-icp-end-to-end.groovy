@@ -48,7 +48,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'SERVICE_LABELS', value: serviceLabels),
         envVar(key: 'MICROSERVICE_NAME', value: microServiceName),
         envVar(key: 'MICROSERVICE_PORT', value: servicePort),
-        envVar(key: 'MANAGEMENT_PORT', value: servicePort),
+        envVar(key: 'MANAGEMENT_PORT', value: managementPort),
         envVar(key: 'MYSQL_HOST', value: mySQLHost),
         envVar(key: 'MYSQL_PORT', value: mySQLPort),
         envVar(key: 'MYSQL_DATABASE', value: mySQLDatabase),
