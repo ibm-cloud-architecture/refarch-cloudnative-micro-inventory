@@ -2,6 +2,8 @@
 
 ## Inventory Service - MicroProfile
 
+[![Build Status](https://api.travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory.svg?branch=microprofile)](https://travis-ci.org/ibm-cloud-architecture/refarch-cloudnative-micro-inventory)
+
 This repository contains the **MicroProfile** implementation of the **Inventory Service** which is a part of 'IBM Cloud Native Reference Architecture' suite, available [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile)
 
 <p align="center">
