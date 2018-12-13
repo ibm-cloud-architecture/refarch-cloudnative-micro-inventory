@@ -19,7 +19,7 @@
 {{- define "inventory.mysql.environmentvariables" }}
 {{- if .Values.travis }}
 - name: MYSQL_HOST
-  value: {{ .Release.Name }}-{{ .Values.service.mysql }}
+  value: {{ .Values.mysql.host | quote }}
 {{- else}}
 - name: MYSQL_HOST
   value: {{ .Release.Name }}-{{ .Values.service.mysql }}
