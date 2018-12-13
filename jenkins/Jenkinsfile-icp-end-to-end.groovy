@@ -215,32 +215,32 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Build PARAMETERS
                 NAME="${MICROSERVICE_NAME}-v${env.BUILD_NUMBER}"
-                echo "Installing chart/${MICROSERVICE_NAME} chart with name "\${NAME}" and waiting for pods to be ready"
+                echo "Installing chart/${MICROSERVICE_NAME} chart with name \"\${NAME}\" and waiting for pods to be ready"
 
                 set +x
-                helm upgrade --install \${NAME} \
-                    --set fullnameOverride=\${NAME} \
-                    --set image.repository=\${IMAGE} \
-                    --set image.tag=${env.BUILD_NUMBER} \
-                    --set labels.version=v${env.BUILD_NUMBER} \
-                    --set service.externalPort=${MICROSERVICE_PORT} \
-                    --set mysql.host=${MYSQL_HOST} \
-                    --set mysql.port=${MYSQL_PORT} \
-                    --set mysql.database=${MYSQL_DATABASE} \
-                    --set mysql.user=${MYSQL_USER} \
-                    --set mysql.password=${MYSQL_PASSWORD} \
+                helm upgrade --install "\${NAME}" \
+                    --set fullnameOverride="\${NAME}" \
+                    --set image.repository="\${IMAGE}" \
+                    --set image.tag="${env.BUILD_NUMBER}" \
+                    --set labels.version="v${env.BUILD_NUMBER}" \
+                    --set service.externalPort="${MICROSERVICE_PORT}" \
+                    --set mysql.host="${MYSQL_HOST}" \
+                    --set mysql.port="${MYSQL_PORT}" \
+                    --set mysql.database="${MYSQL_DATABASE}" \
+                    --set mysql.user="${MYSQL_USER}" \
+                    --set mysql.password="${MYSQL_PASSWORD}" \
                     chart/${MICROSERVICE_NAME} --wait --tls
                 set -x
 
-                #READY=`kubectl get deployments \${NAME} -o yaml | grep "readyReplicas" | awk '{print $2}'`
-                #echo \${READY}
+                READY=`kubectl get deployments \${NAME} -o yaml | grep "readyReplicas" | awk '{print $2}'`
+                echo \${READY}
 
-                #until [ -n "\${READY}" ] && [ \${READY} -ge 1 ]; do
-                #    READY=`kubectl get deployments \${NAME} -o yaml | grep "readyReplicas" | awk '{print $2}'`
-                #    kubectl get deployments -o wide;
-                #    echo "Waiting for \${NAME} to be ready";
-                #    sleep 10;
-                #done
+                until [ -n "\${READY}" ] && [ \${READY} -ge 1 ]; do
+                    READY=`kubectl get deployments \${NAME} -o yaml | grep "readyReplicas" | awk '{print $2}'`
+                    kubectl get deployments -o wide;
+                    echo "Waiting for \${NAME} to be ready";
+                    sleep 10;
+                done
                 """
             }
             stage('Kubernetes - Test') {
