@@ -153,7 +153,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 docker logs ${MICROSERVICE_NAME}
 
                 # Run tests
-                bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
+                curl localhost:8080/micro/inventory
+                curl 127.0.0.1:8080/micro/inventory
+                bash scripts/api_tests.sh localhost ${MICROSERVICE_PORT}
 
                 # Kill Container
                 docker kill ${MICROSERVICE_NAME} || true
