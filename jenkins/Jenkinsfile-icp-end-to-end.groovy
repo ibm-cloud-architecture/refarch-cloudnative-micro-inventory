@@ -159,7 +159,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Run tests
                 curl \${CONTAINER_IP}:${MICROSERVICE_PORT}/micro/inventory | true
                 curl \${CONTAINER_IP}:${MICROSERVICE_PORT}/micro/inventory | true
-                bash scripts/api_tests.sh ${CONTAINER_IP} ${MICROSERVICE_PORT}
+                bash scripts/api_tests.sh \${CONTAINER_IP} ${MICROSERVICE_PORT}
 
                 # Kill Container
                 docker kill ${MICROSERVICE_NAME} || true
