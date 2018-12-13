@@ -22,7 +22,6 @@ def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
 def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend,version=v1"
 def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
 def servicePort = env.MICROSERVICE_PORT ?: "8081"
-def applicationPort = env.APPLICATION_PORT ?: "8080"
 
 // External Test Database Parameters
 // For username and passwords, set MYSQL_USER (as string parameter) and MYSQL_PASSWORD (as password parameter)
@@ -48,7 +47,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'SERVICE_LABELS', value: serviceLabels),
         envVar(key: 'MICROSERVICE_NAME', value: microServiceName),
         envVar(key: 'MICROSERVICE_PORT', value: servicePort),
-        envVar(key: 'APPLICATION_PORT', value: applicationPort),
         envVar(key: 'MYSQL_HOST', value: mySQLHost),
         envVar(key: 'MYSQL_PORT', value: mySQLPort),
         envVar(key: 'MYSQL_DATABASE', value: mySQLDatabase),
@@ -137,7 +135,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 echo "Starting ${MICROSERVICE_NAME} container"
                 set +x
                 docker run --name ${MICROSERVICE_NAME} -d \
-                    -p ${MICROSERVICE_PORT}:${APPLICATION_PORT} \
+                    -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
+                    -e SERVICE_PORT=${MICROSERVICE_PORT} \
                     -e MYSQL_HOST=${MYSQL_HOST} \
                     -e MYSQL_PORT=${MYSQL_PORT} \
                     -e MYSQL_USER=${MYSQL_USER} \
@@ -158,9 +157,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
 
                 # Run tests
-                curl localhost:\${CONTAINER_IP}/micro/inventory | true
-                curl 127.0.0.1:\${CONTAINER_IP}/micro/inventory | true
-                bash scripts/api_tests.sh \${CONTAINER_IP} ${APPLICATION_PORT}
+                curl \${CONTAINER_IP}:${MICROSERVICE_PORT}/micro/inventory | true
+                curl \${CONTAINER_IP}:${MICROSERVICE_PORT}/micro/inventory | true
+                bash scripts/api_tests.sh ${CONTAINER_IP} ${MICROSERVICE_PORT}
 
                 # Kill Container
                 docker kill ${MICROSERVICE_NAME} || true
