@@ -221,7 +221,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 helm upgrade --install \${NAME} \
                     --set fullnameOverride=\${NAME} \
                     --set image.repository=\${IMAGE} \
-                    --set image.tag=${env.BUILD_NUMBER}"
+                    --set image.tag=${env.BUILD_NUMBER} \
                     --set labels.version=v${env.BUILD_NUMBER} \
                     --set service.externalPort=${MICROSERVICE_PORT} \
                     --set mysql.host=${MYSQL_HOST} \
