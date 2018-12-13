@@ -248,9 +248,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
                 POD=`kubectl --namespace=${NAMESPACE} get pods -l \${QUERY_LABELS} -o name | head -n 1`
 
-                # Wait for deployment to start accepting connections
-                sleep 45
-
                 # Port forwarding & logs
                 kubectl port-forward \${POD} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
                 kubectl logs -f \${POD} &
