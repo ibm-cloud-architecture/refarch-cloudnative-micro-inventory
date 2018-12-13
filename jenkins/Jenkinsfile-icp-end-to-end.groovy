@@ -19,7 +19,7 @@ def serviceAccount = env.SERVICE_ACCOUNT ?: "jenkins"
 def namespace = env.NAMESPACE ?: "default"
 def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
-def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend,version=v1"
+def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend" //,version=v1"
 def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
 def servicePort = env.MICROSERVICE_PORT ?: "8080"
 
@@ -214,18 +214,23 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 fi
 
                 # Build PARAMETERS
-                echo "Installing chart/${MICROSERVICE_NAME} chart and waiting for pods to be ready"
-                set +x
-                PARAMETERS="--set image.repository=\${IMAGE}"
-                PARAMETERS="\${PARAMETERS} --set image.tag=${env.BUILD_NUMBER}"
-                PARAMETERS="\${PARAMETERS} --set service.externalPort=${MICROSERVICE_PORT}"
-                PARAMETERS="\${PARAMETERS} --set mysql.host=${MYSQL_HOST}"
-                PARAMETERS="\${PARAMETERS} --set mysql.port=${MYSQL_PORT}"
-                PARAMETERS="\${PARAMETERS} --set mysql.database=${MYSQL_DATABASE}"
-                PARAMETERS="\${PARAMETERS} --set mysql.user=${MYSQL_USER}"
-                PARAMETERS="\${PARAMETERS} --set mysql.password=${MYSQL_PASSWORD}"
+                NAME="${MICROSERVICE_NAME}-v${env.BUILD_NUMBER}"
+                echo "Installing chart/${MICROSERVICE_NAME} chart with name "\${NAME}" and waiting for pods to be ready"
 
-                helm upgrade --install ${MICROSERVICE_NAME} `echo \${PARAMETERS}` chart/${MICROSERVICE_NAME} --wait --tls
+                set +x
+                helm upgrade --install \${NAME} \
+                    --set fullnameOverride=\${NAME} \
+                    --set image.repository=\${IMAGE} \
+                    --set image.tag=${env.BUILD_NUMBER}"
+                    --set labels.version=v${env.BUILD_NUMBER} \
+                    --set service.externalPort=${MICROSERVICE_PORT} \
+                    --set mysql.host=${MYSQL_HOST} \
+                    --set mysql.port=${MYSQL_PORT} \
+                    --set mysql.database=${MYSQL_DATABASE} \
+                    --set mysql.user=${MYSQL_USER} \
+                    --set mysql.password=${MYSQL_PASSWORD} \
+                    chart/${MICROSERVICE_NAME} --wait --tls
+
                 set -x
                 """
             }
@@ -234,14 +239,14 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get deployment
-                SERVICE=`kubectl --namespace=${NAMESPACE} get services -l ${SERVICE_LABELS} -o name | head -n 1`
-                POD=`kubectl --namespace=${NAMESPACE} get pods -l ${SERVICE_LABELS} -o name | head -n 1`
+                QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
+                POD=`kubectl --namespace=${NAMESPACE} get pods -l \${QUERY_LABELS} -o name | head -n 1`
 
                 # Wait for deployment to start accepting connections
                 sleep 35
 
                 # Port forwarding & logs
-                kubectl port-forward \${SERVICE} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
+                kubectl port-forward \${POD} ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} &
                 kubectl logs -f \${POD} &
                 echo "Sleeping for 3 seconds while connection is established..."
                 sleep 3
