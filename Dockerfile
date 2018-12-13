@@ -34,5 +34,5 @@ RUN mv ./micro-inventory-0.0.1.jar app.jar
 COPY startup.sh startup.sh
 COPY scripts scripts
 
-EXPOSE 8080
+EXPOSE 8080 8090
 ENTRYPOINT ["./startup.sh"]
