@@ -46,7 +46,7 @@ spec:
             value: "{{ .Values.jdbcURL }}"
           {{- else}}
           - name: jdbcURL
-            value: "jdbc:mysql://{{ .Release.Name }}-{{ .Values.service.dbname }}:{{ .Values.service.sqlport }}/inventorydb?useSSL=false"
+            value: "jdbc:mysql://{{ .Release.Name }}-{{ .Values.service.mysql }}:{{ .Values.service.sqlport }}/inventorydb?useSSL=false"
           {{- end }}
           - name: rabbit
             value: "{{ .Release.Name }}-{{ .Values.service.rabbitmq }}"

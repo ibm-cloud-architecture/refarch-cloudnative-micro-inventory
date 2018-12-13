@@ -22,6 +22,7 @@ service:
   rabbitmq: rabbitmq
   zipkinPort: 9411
   zipkinName: zipkin
+  mysql: mysql
 hpa:
   enabled: false
   minReplicas: 1
@@ -42,4 +43,14 @@ istio:
   enabled: false
   weight: 100
 travis: false
-jdbcURL: jdbc:mysql://mysql-inventorydb:3306/inventorydb?useSSL=false
+jdbcURL: jdbc:mysql://my-release-mysql:3306/inventorydb?useSSL=false
+mysql:
+  host: my-release-mysql
+  port: 3306
+  existingSecret:
+  user: root
+  password: password
+  image: "mysql"
+  imageTag: "5.7.14"
+  database: inventorydb
+  imagePullPolicy: Always
