@@ -232,11 +232,15 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     chart/${MICROSERVICE_NAME} --wait --tls
                 set -x
 
-                READY=`kubectl get deployments \${NAME} -o yaml | grep "readyReplicas" | awk "{print \$2}"`
+                function is_deployment_ready {
+                    kubectl get deployments \${NAME} -o=jsonpath='{.status.availableReplicas}'
+                }
+
+                READY=`is_deployment_ready`
                 echo \${READY}
 
                 until [ -n "\${READY}" ] && [ "\${READY}" -ge 1 ]; do
-                    READY=`kubectl get deployments \${NAME} -o yaml | grep "readyReplicas" | awk "{print \$2}"`
+                    READY=`is_deployment_ready`
                     kubectl get deployments -o wide;
                     echo "Waiting for \${NAME} to be ready";
                     sleep 10;
