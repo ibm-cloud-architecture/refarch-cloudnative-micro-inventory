@@ -151,7 +151,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 docker ps
 
                 # Check the logs
-                docker logs -f ${MICROSERVICE_NAME}
+                docker logs -f ${MICROSERVICE_NAME} &
+                PID=`echo \$!`
 
                 # Get the container IP Address
                 CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
@@ -161,6 +162,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Run tests
                 bash scripts/api_tests.sh \${CONTAINER_IP} ${MICROSERVICE_PORT}
+
+                # Kill process
+                kill \${PID}
 
                 # Kill Container
                 docker kill ${MICROSERVICE_NAME} || true
