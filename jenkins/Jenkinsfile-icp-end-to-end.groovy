@@ -235,9 +235,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 alias is_deployment_ready="kubectl get deployments \${NAME} -o yaml | grep \"readyReplicas\" | awk '{print \$2}'"
 
                 READY=`is_deployment_ready`
-                echo \$READY
+                echo \${READY}
 
-                until [ -n "\${READY}" ] && [ ${READY} -ge 1 ]; do
+                until [ -n "\${READY}" ] && [ \${READY} -ge 1 ]; do
                     READY=`is_deployment_ready`
                     kubectl get deployments -o wide;
                     echo "Waiting for \${NAME} to be ready";
