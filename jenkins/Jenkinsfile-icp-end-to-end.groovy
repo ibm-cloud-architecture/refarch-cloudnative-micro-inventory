@@ -89,7 +89,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 PID=`echo \$!`
 
                 # Let the application start
-                bash scripts/health_check.sh "http://127.0.0.1/${MANAGEMENT_PORT}"
+                bash scripts/health_check.sh "http://127.0.0.1:${MANAGEMENT_PORT}"
 
                 # Run tests
                 set +x
@@ -157,7 +157,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
 
                 # Let the application start
-                bash scripts/health_check.sh "http://\${CONTAINER_IP}/${MANAGEMENT_PORT}"
+                bash scripts/health_check.sh "http://\${CONTAINER_IP}:${MANAGEMENT_PORT}"
 
                 # Run tests
                 bash scripts/api_tests.sh \${CONTAINER_IP} ${MICROSERVICE_PORT}
@@ -254,7 +254,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sleep 3
 
                 # Let the application start
-                bash scripts/health_check.sh "http://127.0.0.1/${MANAGEMENT_PORT}"
+                bash scripts/health_check.sh "http://127.0.0.1:${MANAGEMENT_PORT}"
 
                 # Run tests
                 bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
