@@ -200,9 +200,9 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
 
                 # Get image
                 if [ "${REGISTRY}" == "docker.io" ]; then
-                    IMAGE=${IMAGE_NAME}
+                    IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
-                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}
+                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
 
                 # Get deployment
