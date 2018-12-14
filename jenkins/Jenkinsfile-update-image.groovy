@@ -206,8 +206,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 fi
 
                 # Get deployment
-                QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
-                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
+                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l ${SERVICE_LABELS} -o name | head -n 1`
 
                 # Check if deployment exists
                 kubectl --namespace=${NAMESPACE} get \${DEPLOYMENT}
@@ -226,8 +225,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get deployment
-                QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
-                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
+                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l ${SERVICE_LABELS} -o name | head -n 1`
 
                 # Wait for deployment to be ready
                 kubectl --namespace=${NAMESPACE} rollout status \${DEPLOYMENT}
