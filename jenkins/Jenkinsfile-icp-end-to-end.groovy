@@ -72,7 +72,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Local - Build and Unit Test') {
                 sh """
                 #!/bin/bash
-
                 ./gradlew build
                 """
             }
@@ -230,7 +229,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 echo "Installing chart/${MICROSERVICE_NAME} chart with name \${NAME} and waiting for pods to be ready"
 
                 set +x
-                helm upgrade --install \${NAME} \
+                helm upgrade --install \${NAME} --namespace ${NAMESPACE} \
                     --set fullnameOverride=\${NAME} \
                     --set image.repository=\${IMAGE} \
                     --set image.tag=${env.BUILD_NUMBER} \
@@ -254,11 +253,11 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
 
                 # Wait for deployment to be ready
-                kubectl rollout status \${DEPLOYMENT}
+                kubectl --namespace=${NAMESPACE} rollout status \${DEPLOYMENT}
 
                 # Port forwarding & logs
-                kubectl port-forward \${DEPLOYMENT} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
-                kubectl logs -f \${DEPLOYMENT} &
+                kubectl --namespace=${NAMESPACE} port-forward \${DEPLOYMENT} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
+                kubectl --namespace=${NAMESPACE} logs -f \${DEPLOYMENT} &
                 echo "Sleeping for 3 seconds while connection is established..."
                 sleep 3
 

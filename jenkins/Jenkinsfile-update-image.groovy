@@ -4,6 +4,11 @@
     - https://github.com/ibm-cloud-architecture/refarch-cloudnative-devops-kubernetes
 */
 
+// Environment
+def clusterURL = env.CLUSTER_URL
+def clusterAccountId = env.CLUSTER_ACCOUNT_ID
+def clusterCredentialId = env.CLUSTER_CREDENTIAL_ID ?: "cluster-credentials"
+
 // Pod Template
 def podLabel = "inventory"
 def cloud = env.CLOUD ?: "kubernetes"
@@ -14,38 +19,49 @@ def serviceAccount = env.SERVICE_ACCOUNT ?: "jenkins"
 def namespace = env.NAMESPACE ?: "default"
 def registry = env.REGISTRY ?: "docker.io"
 def imageName = env.IMAGE_NAME ?: "ibmcase/bluecompute-inventory"
-def deploymentLabels = env.DEPLOYMENT_LABELS ?: "app=inventory,tier=backend,version=v1"
-def podName = env.POD_NAME ?: "inventory"
-def servicePort = env.MICROSERVICE_PORT ?: "8081"
+def serviceLabels = env.SERVICE_LABELS ?: "app=inventory,tier=backend" //,version=v1"
+def microServiceName = env.MICROSERVICE_NAME ?: "inventory"
+def servicePort = env.MICROSERVICE_PORT ?: "8080"
+def managementPort = env.MANAGEMENT_PORT ?: "8090"
 
 // External Test Database Parameters
 // For username and passwords, set MYSQL_USER (as string parameter) and MYSQL_PASSWORD (as password parameter)
 //     - These variables get picked up by the Java application automatically
 //     - There were issues with Jenkins credentials plugin interfering with setting up the password directly
 
-def dbHost = env.DB_HOST
-def dbPort = env.DB_PORT ?: "3306"
-def dbDatabase = env.DB_DATABASE ?: "inventorydb"
+def mySQLHost = env.MYSQL_HOST
+def mySQLPort = env.MYSQL_PORT ?: "3306"
+def mySQLDatabase = env.MYSQL_DATABASE ?: "inventorydb"
+def mySQLCredsId = env.MYSQL_CREDENTIALS ?: "inventory-mysql-id"
+
+/*
+  Optional Pod Environment Variables
+ */
+def helmHome = env.HELM_HOME ?: env.JENKINS_HOME + "/.helm"
 
 podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, namespace: namespace, envVars: [
+        envVar(key: 'CLUSTER_URL', value: clusterURL),
+        envVar(key: 'CLUSTER_ACCOUNT_ID', value: clusterAccountId),
         envVar(key: 'NAMESPACE', value: namespace),
         envVar(key: 'REGISTRY', value: registry),
         envVar(key: 'IMAGE_NAME', value: imageName),
-        envVar(key: 'DEPLOYMENT_LABELS', value: deploymentLabels),
-        envVar(key: 'POD_NAME', value: podName),
+        envVar(key: 'SERVICE_LABELS', value: serviceLabels),
+        envVar(key: 'MICROSERVICE_NAME', value: microServiceName),
         envVar(key: 'MICROSERVICE_PORT', value: servicePort),
-        envVar(key: 'DB_HOST', value: dbHost),
-        envVar(key: 'DB_PORT', value: dbPort),
-        envVar(key: 'DB_DATABASE', value: dbDatabase)
+        envVar(key: 'MANAGEMENT_PORT', value: managementPort),
+        envVar(key: 'MYSQL_HOST', value: mySQLHost),
+        envVar(key: 'MYSQL_PORT', value: mySQLPort),
+        envVar(key: 'MYSQL_DATABASE', value: mySQLDatabase),
+        envVar(key: 'HELM_HOME', value: helmHome)
     ],
     volumes: [
-        hostPathVolume(hostPath: '/etc/docker/certs.d', mountPath: '/etc/docker/certs.d'),
+        hostPathVolume(mountPath: '/home/gradle/.gradle', hostPath: '/tmp/jenkins/.gradle'),
         hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
     ],
     containers: [
         containerTemplate(name: 'jdk', image: 'ibmcase/openjdk-bash:latest', ttyEnabled: true, command: 'cat'),
         containerTemplate(name: 'docker' , image: 'ibmcase/docker-bash:latest', ttyEnabled: true, command: 'cat'),
-        containerTemplate(name: 'kubectl', image: 'ibmcase/jenkins-slave-utils:latest', ttyEnabled: true, command: 'cat')
+        containerTemplate(name: 'kubernetes', image: 'ibmcase/jenkins-slave-utils:latest', ttyEnabled: true, command: 'cat')
   ]) {
 
     node(podLabel) {
@@ -56,7 +72,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
             stage('Local - Build and Unit Test') {
                 sh """
                 #!/bin/bash
-
                 ./gradlew build
                 """
             }
@@ -64,19 +79,24 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sh """
                 #!/bin/bash
 
-                JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_DATABASE}"
-                JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${env.DB_PORT}"
-                JAVA_OPTS="\${JAVA_OPTS} -Dserver.port=${env.MICROSERVICE_PORT}"
+                JAVA_OPTS="-Dspring.datasource.url=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
+                JAVA_OPTS="\${JAVA_OPTS} -Dspring.datasource.port=${MYSQL_PORT}"
+                JAVA_OPTS="\${JAVA_OPTS} -Dserver.port=${MICROSERVICE_PORT}"
 
                 java \${JAVA_OPTS} -jar build/libs/micro-inventory-0.0.1.jar &
 
+                PID=`echo \$!`
+
                 # Let the application start
-                sleep 25
+                bash scripts/health_check.sh "http://127.0.0.1:${MANAGEMENT_PORT}"
 
                 # Run tests
-                set -x
-                bash scripts/api_tests.sh 127.0.0.1 ${env.MICROSERVICE_PORT}
-                set +x;
+                set +x
+                bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
+                set -x;
+
+                # Kill process
+                kill \${PID}
                 """
             }
         }
@@ -88,10 +108,10 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get image
-                if [ "${env.REGISTRY}" = "docker.io" ]; then
-                    IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                if [ "${REGISTRY}" == "docker.io" ]; then
+                    IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
-                    IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
 
                 docker build -t \${IMAGE} .
@@ -102,40 +122,52 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get image
-                if [ "${env.REGISTRY}" = "docker.io" ]; then
-                    IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                if [ "${REGISTRY}" == "docker.io" ]; then
+                    IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
-                    IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
                 fi
 
                 # Kill Container if it already exists
-                docker kill ${env.POD_NAME} || true
-                docker rm ${env.POD_NAME} || true
+                docker kill ${MICROSERVICE_NAME} || true
+                docker rm ${MICROSERVICE_NAME} || true
 
                 # Start Container
-                docker run --name ${env.POD_NAME} -d -p 8080:8080 \
-                    -e SERVICE_PORT=${env.MICROSERVICE_PORT} \
-                    -e MYSQL_HOST=${env.DB_HOST} \
-                    -e MYSQL_PORT=${env.DB_PORT} \
+                echo "Starting ${MICROSERVICE_NAME} container"
+                set +x
+                docker run --name ${MICROSERVICE_NAME} -d \
+                    -p ${MICROSERVICE_PORT}:${MICROSERVICE_PORT} \
+                    -p ${MANAGEMENT_PORT}:${MANAGEMENT_PORT} \
+                    -e SERVICE_PORT=${MICROSERVICE_PORT} \
+                    -e MYSQL_HOST=${MYSQL_HOST} \
+                    -e MYSQL_PORT=${MYSQL_PORT} \
                     -e MYSQL_USER=${MYSQL_USER} \
                     -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-                    -e MYSQL_DATABASE=${env.DB_DATABASE} \${IMAGE}
-
-                # Let the application start
-                sleep 25
+                    -e MYSQL_DATABASE=${MYSQL_DATABASE} \${IMAGE}
+                set -x
 
                 # Check that application started successfully
                 docker ps
 
                 # Check the logs
-                docker logs ${env.POD_NAME}
+                docker logs -f ${MICROSERVICE_NAME} &
+                PID=`echo \$!`
+
+                # Get the container IP Address
+                CONTAINER_IP=`docker inspect ${MICROSERVICE_NAME} | jq -r '.[0].NetworkSettings.IPAddress'`
+
+                # Let the application start
+                bash scripts/health_check.sh "http://\${CONTAINER_IP}:${MANAGEMENT_PORT}"
 
                 # Run tests
-                bash scripts/api_tests.sh 127.0.0.1 ${env.MICROSERVICE_PORT}
+                bash scripts/api_tests.sh \${CONTAINER_IP} ${MICROSERVICE_PORT}
+
+                # Kill process
+                kill \${PID}
 
                 # Kill Container
-                docker kill ${env.POD_NAME} || true
-                docker rm ${env.POD_NAME} || true
+                docker kill ${MICROSERVICE_NAME} || true
+                docker rm ${MICROSERVICE_NAME} || true
                 """
             }
             stage('Docker - Push Image to Registry') {
@@ -146,13 +178,13 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     #!/bin/bash
 
                     # Get image
-                    if [ "${env.REGISTRY}" = "docker.io" ]; then
-                        IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                    if [ "${REGISTRY}" == "docker.io" ]; then
+                        IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                     else
-                        IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
+                        IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
                     fi
 
-                    docker login -u ${USERNAME} -p ${PASSWORD} ${env.REGISTRY}
+                    docker login -u ${USERNAME} -p ${PASSWORD} ${REGISTRY}
 
                     docker push \${IMAGE}
                     """
@@ -166,27 +198,27 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 sh """
                 #!/bin/bash
 
+                # Get image
+                if [ "${REGISTRY}" == "docker.io" ]; then
+                    IMAGE=${IMAGE_NAME}
+                else
+                    IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}
+                fi
+
                 # Get deployment
-                DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
+                QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
+                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
 
                 # Check if deployment exists
-                kubectl --namespace=${env.NAMESPACE} get \${DEPLOYMENT}
+                kubectl --namespace=${NAMESPACE} get \${DEPLOYMENT}
 
                 if [ \${?} -ne "0" ]; then
                     echo 'No deployment to update'
                     exit 1
                 fi
 
-                # Get image
-                if [ "${env.REGISTRY}" = "docker.io" ]; then
-                    IMAGE=${env.IMAGE_NAME}:${env.BUILD_NUMBER}
-                else
-                    IMAGE=${env.REGISTRY}/${env.NAMESPACE}/${env.IMAGE_NAME}:${env.BUILD_NUMBER}
-                fi
-
-                # Update deployment and check rollout status
-                kubectl --namespace=${env.NAMESPACE} set image \${DEPLOYMENT} ${env.POD_NAME}=\${IMAGE}
-                kubectl --namespace=${env.NAMESPACE} rollout status \${DEPLOYMENT}
+                # Update deployment
+                kubectl --namespace=${NAMESPACE} set image \${DEPLOYMENT} ${MICROSERVICE_NAME}=\${IMAGE}
                 """
             }
             stage('Kubernetes - Test') {
@@ -194,24 +226,23 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get deployment
-                DEPLOYMENT=`kubectl --namespace=${env.NAMESPACE} get deployments -l ${env.DEPLOYMENT_LABELS} -o name`
+                QUERY_LABELS="${SERVICE_LABELS},version=v${env.BUILD_NUMBER}"
+                DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
 
-                # Check if deployment exists
-                kubectl --namespace=${env.NAMESPACE} get \${DEPLOYMENT}
+                # Wait for deployment to be ready
+                kubectl --namespace=${NAMESPACE} rollout status \${DEPLOYMENT}
 
-                if [ \${?} -ne "0" ]; then
-                    echo 'No deployment to test'
-                    exit 1
-                fi
+                # Port forwarding & logs
+                kubectl --namespace=${NAMESPACE} port-forward \${DEPLOYMENT} ${MICROSERVICE_PORT} ${MANAGEMENT_PORT} &
+                kubectl --namespace=${NAMESPACE} logs -f \${DEPLOYMENT} &
+                echo "Sleeping for 3 seconds while connection is established..."
+                sleep 3
 
                 # Let the application start
-                sleep 25
-
-                # Check the logs
-                kubectl port-forward \${DEPLOYMENT} ${env.MICROSERVICE_PORT}:${env.MICROSERVICE_PORT} &
+                bash scripts/health_check.sh "http://127.0.0.1:${MANAGEMENT_PORT}"
 
                 # Run tests
-                bash scripts/api_tests.sh 127.0.0.1 ${env.MICROSERVICE_PORT}
+                bash scripts/api_tests.sh 127.0.0.1 ${MICROSERVICE_PORT}
 
                 # Kill port forwarding
                 killall kubectl || true
