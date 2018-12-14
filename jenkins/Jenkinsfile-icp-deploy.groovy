@@ -96,6 +96,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 # Helm Parameters
                 if [ "${DEPLOY_NEW_VERSION}" == "true" ]; then
                     NAME="${MICROSERVICE_NAME}-v${IMAGE_TAG}"
+                    VERSION_LABEL="--set labels.version=v${IMAGE_TAG}"
                 else
                     NAME="${MICROSERVICE_NAME}"
                 fi
@@ -103,11 +104,10 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 echo "Installing chart/${MICROSERVICE_NAME} chart with name \${NAME} and waiting for pods to be ready"
 
                 set +x
-                helm upgrade --install \${NAME} --namespace ${NAMESPACE} \
+                helm upgrade --install \${NAME} --namespace ${NAMESPACE} \${VERSION_LABEL} \
                     --set fullnameOverride=\${NAME} \
                     --set image.repository=\${IMAGE} \
                     --set image.tag=${IMAGE_TAG} \
-                    --set labels.version=v${IMAGE_TAG} \
                     --set service.externalPort=${MICROSERVICE_PORT} \
                     --set mysql.host=${MYSQL_HOST} \
                     --set mysql.port=${MYSQL_PORT} \
