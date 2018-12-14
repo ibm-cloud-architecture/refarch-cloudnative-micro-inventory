@@ -89,9 +89,9 @@ jobs:
       - CHART_VERSION="$(cat chart/${CHART_NAME}/Chart.yaml | grep version | awk '{print $2}')"
       - helm upgrade --install ${RELEASE_NAME} --set image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never,mysql.existingSecret=${RELEASE_NAME}-mysql ${CHART_NAME}-${CHART_VERSION}.tgz
       # Get Deployment Name
-      - DEPLOYMENT="${RELEASE_NAME}-${CHART_NAME}"
+      - DEPLOYMENT="deployment/${RELEASE_NAME}-${CHART_NAME}"
       # Wait for Inventory to be ready
-      - kubectl rollout status deployment/${DEPLOYMENT}
+      - kubectl rollout status ${DEPLOYMENT}
       # Port Forwarding
       - kubectl port-forward ${DEPLOYMENT} ${SERVICE_PORT} ${MANAGEMENT_PORT} &
       - kubectl logs -f ${DEPLOYMENT} &
