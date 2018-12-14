@@ -123,7 +123,12 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get deployment
-                QUERY_LABELS="${SERVICE_LABELS},version=v${IMAGE_TAG}"
+                if [ "${DEPLOY_NEW_VERSION}" == "true" ]; then
+                    QUERY_LABELS="${SERVICE_LABELS},version=v${IMAGE_TAG}"
+                else
+                    QUERY_LABELS="${SERVICE_LABELS}"
+                fi
+
                 DEPLOYMENT=`kubectl --namespace=${NAMESPACE} get deployments -l \${QUERY_LABELS} -o name | head -n 1`
 
                 # Wait for deployment to be ready
