@@ -109,7 +109,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get image
-                if [ "${REGISTRY}" = "docker.io" ]; then
+                if [ "${REGISTRY}" == "docker.io" ]; then
                     IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
                     IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
@@ -123,7 +123,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get image
-                if [ "${REGISTRY}" = "docker.io" ]; then
+                if [ "${REGISTRY}" == "docker.io" ]; then
                     IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                 else
                     IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
@@ -179,7 +179,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     #!/bin/bash
 
                     # Get image
-                    if [ "${REGISTRY}" = "docker.io" ]; then
+                    if [ "${REGISTRY}" == "docker.io" ]; then
                         IMAGE=${IMAGE_NAME}:${env.BUILD_NUMBER}
                     else
                         IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${env.BUILD_NUMBER}
@@ -214,14 +214,19 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                 #!/bin/bash
 
                 # Get image
-                if [ "${REGISTRY}" = "docker.io" ]; then
+                if [ "${REGISTRY}" == "docker.io" ]; then
                     IMAGE=${IMAGE_NAME}
                 else
                     IMAGE=${REGISTRY}/${NAMESPACE}/${IMAGE_NAME}
                 fi
 
-                # Build PARAMETERS
-                NAME="${MICROSERVICE_NAME}-v${env.BUILD_NUMBER}"
+                # Helm Parameters
+                if [ "${DEPLOY_NEW_VERSION}" == "true" ]; then
+                    NAME="${MICROSERVICE_NAME}-v${env.BUILD_NUMBER}"
+                else
+                    NAME="${MICROSERVICE_NAME}"
+                fi
+
                 echo "Installing chart/${MICROSERVICE_NAME} chart with name \${NAME} and waiting for pods to be ready"
 
                 set +x
