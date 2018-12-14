@@ -193,7 +193,7 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         }
 
         // Kubernetes
-        container(name:'kubectl', shell:'/bin/bash') {
+        container(name:'kubernetes', shell:'/bin/bash') {
             stage('Kubernetes - Deploy new Docker Image') {
                 sh """
                 #!/bin/bash
