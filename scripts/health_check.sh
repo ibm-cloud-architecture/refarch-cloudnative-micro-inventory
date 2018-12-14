@@ -1,4 +1,9 @@
 #!/bin/bash
+
+function is_healthy {
+	curl -s ${HEALTH_URL} | grep "status" | grep "UP";
+}
+
 URL="$1";
 HEALTH_CHECK="health";
 
@@ -9,12 +14,7 @@ fi
 
 HEALTH_URL="${URL}/${HEALTH_CHECK}"
 
-# Load Generation
 echo "Health Check on \"${HEALTH_URL}\"";
-
-function is_healthy {
-	curl -s ${HEALTH_URL} | grep "status" | grep "UP";
-}
 
 HEALTHY=$(is_healthy)
 
