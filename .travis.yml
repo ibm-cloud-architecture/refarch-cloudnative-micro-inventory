@@ -85,12 +85,12 @@ jobs:
       - helm lint chart/${CHART_NAME}
       # helm package
       - helm package chart/${CHART_NAME}
-      # helm install Inventory from packaged chart. Use pullPolicy=Never so it uses local docker image
+      # helm install from packaged chart. Use pullPolicy=Never so it uses local docker image
       - CHART_VERSION="$(cat chart/${CHART_NAME}/Chart.yaml | grep version | awk '{print $2}')"
       - helm upgrade --install ${RELEASE_NAME} --set image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never,mysql.existingSecret=${RELEASE_NAME}-mysql ${CHART_NAME}-${CHART_VERSION}.tgz
       # Get Deployment Name
       - DEPLOYMENT="deployment/${RELEASE_NAME}-${CHART_NAME}"
-      # Wait for Inventory to be ready
+      # Wait for deployment to be ready
       - kubectl rollout status ${DEPLOYMENT}
       # Port Forwarding
       - kubectl port-forward ${DEPLOYMENT} ${SERVICE_PORT} ${MANAGEMENT_PORT} &
