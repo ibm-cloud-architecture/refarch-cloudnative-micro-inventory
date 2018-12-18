@@ -141,8 +141,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     -e SERVICE_PORT=${MICROSERVICE_PORT} \
                     -e MYSQL_HOST=${MYSQL_HOST} \
                     -e MYSQL_PORT=${MYSQL_PORT} \
-                    -e MYSQL_USER=${MYSQL_USER} \
-                    -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+                    -e MYSQL_USER="${MYSQL_USER}" \
+                    -e MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
                     -e MYSQL_DATABASE=${MYSQL_DATABASE} \${IMAGE}
                 set -x
 
@@ -238,8 +238,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     --set mysql.host=${MYSQL_HOST} \
                     --set mysql.port=${MYSQL_PORT} \
                     --set mysql.database=${MYSQL_DATABASE} \
-                    --set mysql.user=${MYSQL_USER} \
-                    --set mysql.password=${MYSQL_PASSWORD} \
+                    --set mysql.user="${MYSQL_USER}" \
+                    --set mysql.password="${MYSQL_PASSWORD}" \
                     chart/${MICROSERVICE_NAME} --wait --tls
                 set -x
                 """
