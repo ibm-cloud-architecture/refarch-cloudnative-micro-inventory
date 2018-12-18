@@ -33,7 +33,6 @@ def managementPort = env.MANAGEMENT_PORT ?: "8090"
 def mySQLHost = env.MYSQL_HOST
 def mySQLPort = env.MYSQL_PORT ?: "3306"
 def mySQLDatabase = env.MYSQL_DATABASE ?: "inventorydb"
-def mySQLCredsId = env.MYSQL_CREDENTIALS ?: "inventory-mysql-id"
 
 /*
   Optional Pod Environment Variables
