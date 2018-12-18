@@ -55,9 +55,6 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
         envVar(key: 'MYSQL_DATABASE', value: mySQLDatabase),
         envVar(key: 'HELM_HOME', value: helmHome)
     ],
-    volumes: [
-        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
-    ],
     containers: [
         containerTemplate(name: 'kubernetes', image: 'ibmcase/jenkins-slave-utils:latest', ttyEnabled: true, command: 'cat')
   ]) {

@@ -141,7 +141,8 @@ podTemplate(label: podLabel, cloud: cloud, serviceAccount: serviceAccount, names
                     -e MYSQL_PORT=${MYSQL_PORT} \
                     -e MYSQL_USER="${MYSQL_USER}" \
                     -e MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
-                    -e MYSQL_DATABASE=${MYSQL_DATABASE} \${IMAGE}
+                    -e MYSQL_DATABASE=${MYSQL_DATABASE} \
+                    \${IMAGE}
                 set -x
 
                 # Check that application started successfully
