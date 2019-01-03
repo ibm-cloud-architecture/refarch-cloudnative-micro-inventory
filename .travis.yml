@@ -7,6 +7,8 @@ env:
     - IMAGE_NAME=bluecompute-inventory
     - RELEASE_NAME=inventory
     - TAG=travis-latest
+    - SERVICE_PORT=8080
+    - MANAGEMENT_PORT=8090
 stages:
   - local build and test
   - docker build, deploy, and test
@@ -25,16 +27,16 @@ jobs:
           - $HOME/.gradle/wrapper/
       before_script:
       # Wait for MySQL to start, then load it with inventory data
-      - until mysql -h 127.0.0.1 -P 3306 -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
+      - until mysql -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
       script:
       # Gradle Build
-      - ./gradlew build -x test
+      - ./gradlew build
       # Start Application
-      - java -jar build/libs/micro-inventory-0.0.1.jar &
-      # Wait for the Inventory container to start accepting connections
-      - sleep 25
-      # Run Inventory API Test
-      - bash scripts/api_tests.sh 127.0.0.1 8080
+      - java -jar build/libs/micro-${RELEASE_NAME}-0.0.1.jar &
+      # Let the application start
+      - bash scripts/health_check.sh
+      # Run API Test
+      - bash scripts/api_tests.sh 127.0.0.1 ${SERVICE_PORT}
     - stage: docker build, deploy, and test
       services:
       - mysql
@@ -43,50 +45,60 @@ jobs:
         - true
       before_script:
       # Wait for MySQL to start, then load it with inventory data
-      - until mysql -h 127.0.0.1 -P 3306 -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database";
+      - until mysql -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database";
       script:
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
-      # Start Inventory Container and Connect to local MySQL Service
-      - docker run --net=host --name inventory -d -p 8080:8080 "${IMAGE_NAME}:${TAG}"
-      # Wait for the Inventory container to start accepting connections
-      - sleep 25
-      # Check that the Inventory container is running
+      # Start Container and Connect to local MySQL Service
+      - docker run --net=host --name ${RELEASE_NAME} -d -p ${SERVICE_PORT}:${SERVICE_PORT} -p ${MANAGEMENT_PORT}:${MANAGEMENT_PORT} "${IMAGE_NAME}:${TAG}"
+      # Check that the container is running
       - docker ps
       # Check logs to see if it started properly
-      - docker logs inventory
-      # Run Inventory API Test
-      - bash scripts/api_tests.sh 127.0.0.1 8080
+      - docker logs -f ${RELEASE_NAME} &
+      # Let the application start
+      - bash scripts/health_check.sh
+      # Run API Test
+      - bash scripts/api_tests.sh 127.0.0.1 ${SERVICE_PORT}
     - stage: kubernetes build, deploy, and test
       services:
       - docker
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
+      - CHART_NAME=inventory
+      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_USER=dbuser
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=inventorydb
       install:
         - true
       before_script:
       # Install nsenter, which is needed for minikube to work
       - bash scripts/install_minikube_and_helm.sh
       # Install MySQL
-      - helm upgrade --install mysql --version 0.10.2 --set fullnameOverride=inventory-mysql,mysqlRootPassword=admin123,mysqlUser=dbuser,mysqlPassword=password,mysqlDatabase=inventorydb,persistence.enabled=false stable/mysql
+      - helm upgrade --install mysql --version 0.10.2 --set fullnameOverride=${RELEASE_NAME}-mysql,mysqlRootPassword=${MYSQL_ROOT_PASSWORD},mysqlUser=${MYSQL_USER},mysqlPassword=${MYSQL_PASSWORD},mysqlDatabase=${MYSQL_DATABASE},persistence.enabled=false stable/mysql
+      # Wait for MySQL to start
+      - kubectl rollout status deployment/${RELEASE_NAME}-mysql
       script:
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
       # helm lint
-      - helm lint chart/inventory
+      - helm lint chart/${CHART_NAME}
       # helm package
-      - helm package chart/inventory
-      # helm install Inventory from packaged chart. Use pullPolicy=Never so it uses local docker image
-      - CHART_VERSION="$(cat chart/inventory/Chart.yaml | grep version | awk '{print $2}')"
-      - helm upgrade --install inventory --set service.type=NodePort,image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never,mysql.existingSecret=inventory-mysql inventory-${CHART_VERSION}.tgz
-      # Wait for Inventory to be ready
-      - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
-      - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
-      - echo $READY
-      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get deployments -o wide; echo "Waiting for inventory to be ready"; sleep 10; done
-      # Wait for Inventory deployment to start accepting connections
-      - sleep 35
-      # Run Inventory API Test
-      - MINIKUBE_IP=$(minikube ip)
-      - NODE_PORT=$(kubectl get service ${RELEASE_NAME}-inventory -o=jsonpath='{.spec.ports[0].nodePort}')
-      - bash scripts/api_tests.sh $MINIKUBE_IP $NODE_PORT
+      - helm package chart/${CHART_NAME}
+      # helm install from packaged chart. Use pullPolicy=Never so it uses local docker image
+      - CHART_VERSION="$(cat chart/${CHART_NAME}/Chart.yaml | grep version | awk '{print $2}')"
+      - helm upgrade --install ${RELEASE_NAME} --set image.repository="${IMAGE_NAME}",image.tag="${TAG}",image.pullPolicy=Never,mysql.existingSecret=${RELEASE_NAME}-mysql ${CHART_NAME}-${CHART_VERSION}.tgz
+      # Get Deployment Name
+      - DEPLOYMENT="deployment/${RELEASE_NAME}-${CHART_NAME}"
+      # Wait for deployment to be ready
+      - kubectl rollout status ${DEPLOYMENT}
+      # Get logs
+      - kubectl logs -f ${DEPLOYMENT} &
+      # Port Forwarding
+      - kubectl port-forward ${DEPLOYMENT} ${SERVICE_PORT} ${MANAGEMENT_PORT} &
+      - echo "Sleeping for 3 seconds while connection is established..."
+      - sleep 3
+      # Let the application start
+      - bash scripts/health_check.sh
+      # Run API Test
+      - bash scripts/api_tests.sh
