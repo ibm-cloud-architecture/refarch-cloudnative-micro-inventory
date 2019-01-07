@@ -88,7 +88,7 @@ cd mysql
 cd ..
 ```
 
-In this case, your environement variables will be 
+In this case, your environment variables will be:
 
 ```
 export jdbcURL=jdbc:mysql://localhost:9041/inventorydb?useSSL=false
@@ -96,7 +96,7 @@ export dbuser=root
 export dbpassword=password
 ```
 
-## Setting up Zipkin 
+## Setting up Zipkin
 
 This is an optional step.
 
