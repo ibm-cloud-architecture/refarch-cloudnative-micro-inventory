@@ -45,7 +45,7 @@ istio:
 # For travis
 travis: false
 jdbcURL: jdbc:mysql://my-release-mysql:3306/inventorydb?useSSL=false
-minikubeIp: 10.20.0.169 # Will likely change
+minikubeIp:
 mysql:
   host: my-release-mysql
   port: 3306
