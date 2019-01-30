@@ -44,12 +44,14 @@ spec:
           {{- if .Values.travis }}
           - name: jdbcURL
             value: "{{ .Values.jdbcURL }}"
+          - name: rabbit
+            value: "{{ .Values.minikubeIp }}"
           {{- else}}
           - name: jdbcURL
             value: "jdbc:mysql://{{ .Release.Name }}-{{ .Values.service.mysql }}:{{ .Values.service.sqlport }}/inventorydb?useSSL=false"
-          {{- end }}
           - name: rabbit
             value: "{{ .Release.Name }}-{{ .Values.service.rabbitmq }}"
+          {{- end }}
           - name: PORT
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME
