@@ -162,16 +162,16 @@ public class MHConsumer {
 						logger.warn("Invalid message received: " + record.value() + ", ignoring");
 						continue;
                     }
-                    
+
 					logger.info("Valid object: " + object.getLong("itemId") + " count: " + object.getInt("count"));
-					
+
 					// get item for itemRepo:
 					final Inventory item = itemsRepo.findOne(object.getLong("itemId"));
 					if (item == null) {
 						logger.warn("Received message for item that does not exist!" + object.getLong("itemId"));
 						continue;
 					}
-					
+
 					item.setStock(item.getStock() - object.getInt("count"));
 					itemsRepo.save(item);
 					logger.info("Updated inventory: " + object.getLong("itemId") + " new stock: " + item.getStock());

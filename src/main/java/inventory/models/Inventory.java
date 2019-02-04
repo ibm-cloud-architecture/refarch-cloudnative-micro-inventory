@@ -14,12 +14,12 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "items")
 public class Inventory {
-  
+
   // Use generated ID
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
-  
+
   // Item name
   @NotNull
   private String name;
@@ -33,7 +33,7 @@ public class Inventory {
   private int price;
 
   // Item img_alt
-  private String img_alt;  
+  private String img_alt;
 
   // Item img
   @NotNull
@@ -45,10 +45,10 @@ public class Inventory {
 
   public Inventory() { }
 
-  public Inventory(long id) { 
+  public Inventory(long id) {
     this.id = id;
   }
-  
+
   public Inventory(String name, String description, int price, String img_alt, String img, int stock) {
     this.name = name;
     this.description = description;
@@ -69,11 +69,11 @@ public class Inventory {
   public String getDescription() {
     return description;
   }
-  
+
   public void setDescription(String value) {
     this.description = value;
   }
-  
+
   public String getName() {
     return name;
   }
@@ -89,11 +89,11 @@ public class Inventory {
   public void setPrice(int value) {
     this.price = value;
   }
-  
+
   public String getImg() {
 	  return img;
   }
-  
+
   public void setImg(String img) {
 	  this.img = img;
   }
@@ -101,7 +101,7 @@ public class Inventory {
   public String getImgAlt() {
     return img_alt;
   }
-  
+
   public void setImgAlt(String img_alt) {
     this.img_alt = img_alt;
   }
