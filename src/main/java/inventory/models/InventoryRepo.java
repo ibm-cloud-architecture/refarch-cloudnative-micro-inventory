@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Inventory Repository
- * 
+ *
  */
 
 @Repository("inventoryRepo")
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public interface InventoryRepo extends CrudRepository<Inventory, Long> {
 	// find all by naming like /inventory/name/{name}
 	List<Inventory> findByNameContaining(String name);
-	
+
 	// find all whose price is less than or equal to /inventory/price/{price}
 	List<Inventory> findByPriceLessThanEqual(int price);
 }

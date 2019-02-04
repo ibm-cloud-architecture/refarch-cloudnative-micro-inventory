@@ -19,20 +19,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @RestController("inventoryController")
 public class InventoryController {
-	
+
 	Logger logger =  LoggerFactory.getLogger(InventoryController.class);
 
 	@Autowired
 	@Qualifier("inventoryRepo")
 	private InventoryRepo itemsRepo;
-
-	/**
-	 * check
-	 */
-	@RequestMapping("/check")
-	@ResponseBody String check() {
-		return "it works!";
-	}
 
 	/**
 	 * @return all items in inventory
