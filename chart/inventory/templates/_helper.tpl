@@ -36,6 +36,10 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   {{- else }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -e status; do echo waiting for mysql; sleep 1; done"
   {{- end }}
+  resources:
+{{ toYaml .Values.resources | indent 4 }}
+  securityContext:
+  {{- include "inventory.securityContext" . | indent 4 }}
   env:
   {{- include "inventory.mysql.environmentvariables" . | indent 2 }}
 {{- end }}
@@ -67,6 +71,13 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   {{- else -}}
     {{ template "inventory.fullname" . }}-mysql-secret
   {{- end }}
+{{- end }}
+
+{{/* Inventory Security Context */}}
+{{- define "inventory.securityContext" }}
+{{- range $key, $value := .Values.securityContext }}
+{{ $key }}: {{ $value }}
+{{- end }}
 {{- end }}
 
 {{/* Istio Gateway */}}

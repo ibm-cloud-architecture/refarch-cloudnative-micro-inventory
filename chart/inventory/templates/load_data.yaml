@@ -28,6 +28,10 @@ spec:
         {{- else }}
         args: ["cp /inventory-data/mysql_data.sql .; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER}                     <mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
         {{- end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        securityContext:
+        {{- include "inventory.securityContext" . | indent 10 }}
         env:
         {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
       volumes:
