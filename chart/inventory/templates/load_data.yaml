@@ -32,6 +32,9 @@ spec:
 {{ toYaml .Values.resources | indent 10 }}
         securityContext:
         {{- include "inventory.securityContext" . | indent 10 }}
+          runAsUser: {{ .Values.securityContext.runAsUser }}
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
         env:
         {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
       volumes:
