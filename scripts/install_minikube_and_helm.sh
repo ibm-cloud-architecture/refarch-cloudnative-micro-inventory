@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Install nsenter, which is needed for minikube to work
-bash scripts/install_nsenter.sh
+# Install socat
+sudo apt-get update
+sudo apt-get install socat
+
 # Download kubectl, which is a requirement for using minikube.
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 # Download minikube.
