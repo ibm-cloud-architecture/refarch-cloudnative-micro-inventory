@@ -1,4 +1,5 @@
 sudo: required
+dist: xenial
 language: java
 jdk:
   - openjdk8
@@ -20,6 +21,10 @@ jobs:
       - docker
       env:
       - CHANGE_MINIKUBE_NONE_USER=true
+      - MINIKUBE_WANTUPDATENOTIFICATION=false
+      - MINIKUBE_WANTREPORTERRORPROMPT=false
+      - MINIKUBE_HOME=$HOME
+      - KUBECONFIG=$HOME/.kube/config
       - CHART_NAME=inventory
       - MYSQL_ROOT_PASSWORD=admin123
       - MYSQL_USER=dbuser

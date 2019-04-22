@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Install nsenter, which is needed for minikube to work
-bash scripts/install_nsenter.sh
+#bash scripts/install_nsenter.sh
 # Download kubectl, which is a requirement for using minikube.
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 # Download minikube.
-curl -Lo minikube https://storage.googleapis.com/minikube/releases/v1.0.0/minikube-linux-amd64 && chmod +x minikube && sudo cp minikube /usr/local/bin/ && rm minikube
-sudo minikube start --vm-driver=none --kubernetes-version=v1.14.0
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.35.0/minikube-linux-amd64 && chmod +x minikube && sudo cp minikube /usr/local/bin/ && rm minikube
+sudo minikube start --vm-driver=none --kubernetes-version=v1.13.0
 # Fix the kubectl context, as it's often stale.
 minikube update-context
 # Getting ip for testing
