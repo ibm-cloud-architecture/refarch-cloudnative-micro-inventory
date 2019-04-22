@@ -30,7 +30,8 @@ jobs:
       before_script:
       # Testing
       - ls -la /home/travis
-      - ls -la /home/travis/.docker
+      - docker ps
+      #- ls -la /home/travis/.docker
       # Install nsenter, which is needed for minikube to work
       - bash scripts/install_minikube_and_helm.sh
       # Install MySQL
@@ -38,6 +39,8 @@ jobs:
       # Wait for MySQL to start
       - kubectl rollout status deployment/${RELEASE_NAME}-mysql
       script:
+      - ls -la
+      - docker ps
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
       # helm lint
