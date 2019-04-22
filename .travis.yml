@@ -29,8 +29,8 @@ jobs:
         - true
       before_script:
       # Testing
-      ls -la /home/travis
-      ls -la /home/travis/.docker
+      - ls -la /home/travis
+      - ls -la /home/travis/.docker
       # Install nsenter, which is needed for minikube to work
       - bash scripts/install_minikube_and_helm.sh
       # Install MySQL
