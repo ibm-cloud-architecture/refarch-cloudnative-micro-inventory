@@ -10,8 +10,8 @@ env:
     - SERVICE_PORT=8080
     - MANAGEMENT_PORT=8090
 stages:
-  - local build and test
-  - docker build, deploy, and test
+  #- local build and test
+  #- docker build, deploy, and test
   - kubernetes build, deploy, and test
 jobs:
   include:
