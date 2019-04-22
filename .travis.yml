@@ -28,6 +28,7 @@ jobs:
       install:
         - true
       before_script:
+      # Testing
       ls -la /home/travis
       ls -la /home/travis/.docker
       # Install nsenter, which is needed for minikube to work
