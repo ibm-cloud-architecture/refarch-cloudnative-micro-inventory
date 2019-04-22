@@ -11,20 +11,66 @@ env:
     - SERVICE_PORT=8080
     - MANAGEMENT_PORT=8090
 stages:
-  #- local build and test
-  #- docker build, deploy, and test
+  - local build and test
+  - docker build, deploy, and test
   - kubernetes build, deploy, and test
 jobs:
   include:
+    - stage: local build and test
+      services:
+      - mysql
+      before_cache:
+        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+      cache:
+        directories:
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
+      before_script:
+      # Wait for MySQL to start, then load it with inventory data
+      - until mysql -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
+      script:
+      # Gradle Build
+      - ./gradlew build
+      # Start Application
+      - java -jar build/libs/micro-${RELEASE_NAME}-0.0.1.jar &
+      # Let the application start
+      - bash scripts/health_check.sh
+      # Run API Test
+      - bash scripts/api_tests.sh 127.0.0.1 ${SERVICE_PORT}
+    - stage: docker build, deploy, and test
+      services:
+      - mysql
+      - docker
+      install:
+        - true
+      before_script:
+      # Wait for MySQL to start, then load it with inventory data
+      - until mysql -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database";
+      script:
+      # Build Docker image
+      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      # Start Container and Connect to local MySQL Service
+      - docker run --net=host --name ${RELEASE_NAME} -d -p ${SERVICE_PORT}:${SERVICE_PORT} -p ${MANAGEMENT_PORT}:${MANAGEMENT_PORT} "${IMAGE_NAME}:${TAG}"
+      # Check that the container is running
+      - docker ps
+      # Check logs to see if it started properly
+      - docker logs -f ${RELEASE_NAME} &
+      # Let the application start
+      - bash scripts/health_check.sh
+      # Run API Test
+      - bash scripts/api_tests.sh 127.0.0.1 ${SERVICE_PORT}
     - stage: kubernetes build, deploy, and test
       services:
       - docker
       env:
+      # Minikube variables
       - CHANGE_MINIKUBE_NONE_USER=true
       - MINIKUBE_WANTUPDATENOTIFICATION=false
       - MINIKUBE_WANTREPORTERRORPROMPT=false
       - MINIKUBE_HOME=$HOME
       - KUBECONFIG=$HOME/.kube/config
+      # Application variables
       - CHART_NAME=inventory
       - MYSQL_ROOT_PASSWORD=admin123
       - MYSQL_USER=dbuser
@@ -33,15 +79,13 @@ jobs:
       install:
         - true
       before_script:
-      # Install nsenter, which is needed for minikube to work
-      - bash scripts/install_minikube_and_helm.sh
+      # Install minikube and helm
+      - wget https://raw.githubusercontent.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/spring/scripts/install_minikube_and_helm.sh && chmod +x install_minikube_and_helm.sh && bash install_minikube_and_helm.sh && rm install_minikube_and_helm.sh
       # Install MySQL
       - helm upgrade --install mysql --version 0.10.2 --set fullnameOverride=${RELEASE_NAME}-mysql,mysqlRootPassword=${MYSQL_ROOT_PASSWORD},mysqlUser=${MYSQL_USER},mysqlPassword=${MYSQL_PASSWORD},mysqlDatabase=${MYSQL_DATABASE},persistence.enabled=false stable/mysql
       # Wait for MySQL to start
       - kubectl rollout status deployment/${RELEASE_NAME}-mysql
       script:
-      - ls -la
-      - docker ps
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
       # helm lint
