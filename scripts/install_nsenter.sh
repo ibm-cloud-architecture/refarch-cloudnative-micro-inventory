@@ -18,4 +18,8 @@ sudo cp nsenter /usr/local/bin
 # Confirm that nsenter in installed
 nsenter --version
 
+# Install socat
+sudo apt-get update
+sudo apt-get install socat
+
 cd /home/travis/
