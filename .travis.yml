@@ -15,50 +15,6 @@ stages:
   - kubernetes build, deploy, and test
 jobs:
   include:
-    - stage: local build and test
-      services:
-      - mysql
-      before_cache:
-        - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-        - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-      cache:
-        directories:
-          - $HOME/.gradle/caches/
-          - $HOME/.gradle/wrapper/
-      before_script:
-      # Wait for MySQL to start, then load it with inventory data
-      - until mysql -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
-      script:
-      # Gradle Build
-      - ./gradlew build
-      # Start Application
-      - java -jar build/libs/micro-${RELEASE_NAME}-0.0.1.jar &
-      # Let the application start
-      - bash scripts/health_check.sh
-      # Run API Test
-      - bash scripts/api_tests.sh 127.0.0.1 ${SERVICE_PORT}
-    - stage: docker build, deploy, and test
-      services:
-      - mysql
-      - docker
-      install:
-        - true
-      before_script:
-      # Wait for MySQL to start, then load it with inventory data
-      - until mysql -uroot <./scripts/mysql_data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database";
-      script:
-      # Build Docker image
-      - docker build -t "${IMAGE_NAME}:${TAG}" .
-      # Start Container and Connect to local MySQL Service
-      - docker run --net=host --name ${RELEASE_NAME} -d -p ${SERVICE_PORT}:${SERVICE_PORT} -p ${MANAGEMENT_PORT}:${MANAGEMENT_PORT} "${IMAGE_NAME}:${TAG}"
-      # Check that the container is running
-      - docker ps
-      # Check logs to see if it started properly
-      - docker logs -f ${RELEASE_NAME} &
-      # Let the application start
-      - bash scripts/health_check.sh
-      # Run API Test
-      - bash scripts/api_tests.sh 127.0.0.1 ${SERVICE_PORT}
     - stage: kubernetes build, deploy, and test
       services:
       - docker
@@ -72,6 +28,8 @@ jobs:
       install:
         - true
       before_script:
+      ls -la /home/travis
+      ls -la /home/travis/.docker
       # Install nsenter, which is needed for minikube to work
       - bash scripts/install_minikube_and_helm.sh
       # Install MySQL
