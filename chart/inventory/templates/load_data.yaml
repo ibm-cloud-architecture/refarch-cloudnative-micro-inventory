@@ -19,18 +19,27 @@ spec:
         image: {{ .Values.mysql.image }}:{{ .Values.mysql.imageTag }}
         imagePullPolicy: {{ .Values.mysql.imagePullPolicy }}
         volumeMounts:
-        - mountPath: /inventory-data
-          name: inventory-data
-          readOnly: false
+        - mountPath: /config
+          name: config
+          readOnly: true
+        - mountPath: /db-data
+          name: db-data
         command: ["/bin/bash", "-c"]
         {{- if or .Values.mysql.password .Values.mysql.existingSecret }}
-        args: ["cp /inventory-data/mysql_data.sql .; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} <mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
+        args: ["cp /config/mysql_data.sql /db-data; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" /db-data/mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} </db-data/mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
         {{- else }}
-        args: ["cp /inventory-data/mysql_data.sql .; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER}                     <mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
+        args: ["cp /config/mysql_data.sql /db-data; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" /db-data/mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER}                     </db-data/mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
         {{- end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        securityContext:
+        {{- include "inventory.securityContext" . | indent 10 }}
         env:
         {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
       volumes:
-      - name: inventory-data
+      - name: config
         configMap:
           name: {{ template "inventory.fullname" . }}-data
+      - name: db-data
+        emptyDir:
+          medium: "Memory"
