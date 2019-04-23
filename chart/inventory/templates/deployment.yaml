@@ -17,6 +17,9 @@ spec:
       - name: {{ .Chart.Name | quote }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        volumeMounts:
+        - mountPath: /spring-tmp
+          name: spring-tmp
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           protocol: TCP
@@ -41,3 +44,7 @@ spec:
         env:
         {{- include "inventory.environmentvariables" . | indent 8 }}
         {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
+      volumes:
+      - name: spring-tmp
+        emptyDir:
+          medium: "Memory"
