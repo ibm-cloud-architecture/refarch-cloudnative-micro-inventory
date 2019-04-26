@@ -39,7 +39,7 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -e status; do echo waiting for mysql; sleep 1; done"
   {{- end }}
   resources:
-{{ toYaml .Values.resources | indent 4 }}
+  {{- include "inventory.resources" . | indent 4 }}
   securityContext:
   {{- include "inventory.securityContext" . | indent 4 }}
   env:
@@ -73,6 +73,14 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
   {{- else -}}
     {{ template "inventory.fullname" . }}-mysql-secret
   {{- end }}
+{{- end }}
+
+{{/* Inventory Resources */}}
+{{- define "inventory.resources" }}
+limits:
+  memory: {{ .Values.resources.limits.memory }}
+requests:
+  memory: {{ .Values.resources.requests.memory }}
 {{- end }}
 
 {{/* Inventory Security Context */}}

@@ -31,7 +31,7 @@ spec:
         args: ["cp /config/mysql_data.sql /db-data; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" /db-data/mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER}                     </db-data/mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
         {{- end }}
         resources:
-{{ toYaml .Values.resources | indent 10 }}
+        {{- include "inventory.resources" . | indent 10 }}
         securityContext:
         {{- include "inventory.securityContext" . | indent 10 }}
         env:
