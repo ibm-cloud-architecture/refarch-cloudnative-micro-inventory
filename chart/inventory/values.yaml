@@ -1,17 +1,25 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
-revisionHistoryLimit: 1
+
+labels:
+  app: inventory
+  version: v1
+  tier: backend
+  implementation: microprofile
+
 image:
-  #repository: registry.csplab.cloudns.cx/microprofile/inventory-mp
   repository: ibmcase/inventory-mp
-  #repository: inventory-mp
   tag: v2.0.0
   pullPolicy: IfNotPresent
-  resources:
-    requests:
-      cpu: 200m
-      memory: 300Mi
+  
+resources:
+  requests:
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 300Mi
+
 service:
   name: inventory
   type: NodePort
@@ -23,6 +31,7 @@ service:
   zipkinPort: 9411
   zipkinName: zipkin
   mysql: mysql
+
 hpa:
   enabled: false
   minReplicas: 1
@@ -31,28 +40,54 @@ hpa:
     cpu:
       targetAverageUtilization: 70
     memory:
-      targetAverageUtilization: 70
-services:
-base:
-  enabled: false
-  replicaCount: 1
-  image:
-    tag : v0.9.9
-  weight: 100
+      targetAverageUtilization: 70=
+
 istio:
   enabled: false
   weight: 100
+  mTLS: SIMPLE
+  gateway:
+    enabled: false
+    name:
+    hosts:
+      - "inventory.bluecompute.com"
+    TLS:
+      enabled: false
+      # SIMPLE, MUTUAL
+      mode: SIMPLE
+      httpsRedirect: false
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      caCertificates: /etc/istio/ingressgateway-ca-certs/ca-chain.cert.pem
+
+ingress:
+  enabled: false
+  hostname: #inventory.bluecompute.com
+  path: /micro/inventory
+  annotations:
+    ingress.bluemix.net/redirect-to-https: "True"
+  enableTLS: false
+  TLS:
+  - secretName: inventory.bluecompute.com
+    hosts:
+      - inventory.bluecompute.com
+
 # For travis
 travis: false
-jdbcURL: jdbc:mysql://my-release-mysql:3306/inventorydb?useSSL=false
+jdbcURL: jdbc:mysql://inventory-mysql:3306/inventorydb?useSSL=false
 minikubeIp:
+
 mysql:
-  host: my-release-mysql
+  host: inventory-mysql
   port: 3306
   existingSecret:
-  user: root
+  user: dbuser
   password: password
+  database: inventorydb
+  # For mysql init container
   image: "mysql"
   imageTag: "5.7.14"
-  database: inventorydb
   imagePullPolicy: Always
+  istio:
+    mTLS: ISTIO_MUTUAL
+    loadBalancer: LEAST_CONN

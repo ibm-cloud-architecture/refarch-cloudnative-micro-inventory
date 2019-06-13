@@ -1,3 +1,26 @@
+{{/* Inventory Init Container Template */}}
+{{- define "inventory.labels" }}
+{{- range $key, $value := .Values.labels }}
+{{ $key }}: {{ $value | quote }}
+{{- end }}
+app.kubernetes.io/name: {{ .Release.Name }}-inventory
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+heritage: {{ .Release.Service | quote }}
+release: {{ .Release.Name | quote }}
+chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+{{- end }}
+
+{{/* Inventory Resources */}}
+{{- define "inventory.resources" }}
+limits:
+  memory: {{ .Values.resources.limits.memory }}
+requests:
+  cpu: {{ .Values.resources.limits.cpu }}
+  memory: {{ .Values.resources.requests.memory }}
+{{- end }}
+
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.mysql.initcontainer" }}
 - name: test-mysql
@@ -20,9 +43,11 @@
 {{- if .Values.travis }}
 - name: MYSQL_HOST
   value: {{ .Values.mysql.host | quote }}
+  #value: localhost
 {{- else}}
 - name: MYSQL_HOST
   value: {{ .Release.Name }}-{{ .Values.service.mysql }}
+  #value: localhost
 {{- end }}
 - name: MYSQL_PORT
   value: {{ .Values.mysql.port | quote }}

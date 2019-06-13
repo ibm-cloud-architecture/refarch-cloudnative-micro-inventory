@@ -3,19 +3,14 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}-{{ .Values.service.name }}
   labels:
-    chart: '{{ .Release.Name }}-{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}'
-    release: {{ .Release.Name }}
-    implementation: microprofile
+    {{- include "inventory.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   template:
     metadata:
       labels:
-        app: "{{ .Release.Name }}-{{  .Chart.Name }}-selector"
-        version: "current"
-        release: {{ .Release.Name }}
-        implementation: microprofile
+        {{- include "inventory.labels" . | indent 8 }}
     spec:
       containers:
       - name: "{{  .Chart.Name  }}"
@@ -37,9 +32,7 @@ spec:
           timeoutSeconds: 500
 {{ end }}
         resources:
-          requests:
-            cpu: "{{ .Values.image.resources.requests.cpu }}"
-            memory: "{{ .Values.image.resources.requests.memory }}"
+        {{- include "inventory.resources" . | indent 10 }}
         env:
           {{- if .Values.travis }}
           - name: jdbcURL
@@ -60,3 +53,24 @@ spec:
             value: "{{ .Release.Name }}-{{ .Values.service.zipkinName }}"
           - name: zipkinPort
             value: "{{ .Values.service.zipkinPort }}"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    bluecompute: "true"
+    #prometheus.io/scrape: "true"
+  name: {{ .Release.Name }}-{{ .Values.service.name }}
+  labels:
+    {{- include "inventory.labels" . | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - name: http
+    port: {{ .Values.service.servicePort }}
+  - name: https
+    port: {{ .Values.service.servicePortHttps }}
+  selector:
+    {{- include "inventory.labels" . | indent 4 }}
