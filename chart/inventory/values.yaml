@@ -21,16 +21,15 @@ resources:
     memory: 300Mi
 
 service:
+  database: mysql
   name: inventory
   type: NodePort
   servicePort: 9080
   servicePortHttps: 9443
-  sqlport: 3306
   dbname: inventorydb
   rabbitmq: rabbitmq
   zipkinPort: 9411
   zipkinName: zipkin
-  mysql: mysql
 
 hpa:
   enabled: false
@@ -40,7 +39,7 @@ hpa:
     cpu:
       targetAverageUtilization: 70
     memory:
-      targetAverageUtilization: 70=
+      targetAverageUtilization: 70
 
 istio:
   enabled: false
@@ -74,20 +73,29 @@ ingress:
 
 # For travis
 travis: false
-jdbcURL: jdbc:mysql://inventory-mysql:3306/inventorydb?useSSL=false
 minikubeIp:
 
 mysql:
-  host: inventory-mysql
-  port: 3306
-  existingSecret:
-  user: dbuser
-  password: password
-  database: inventorydb
-  # For mysql init container
   image: "mysql"
   imageTag: "5.7.14"
   imagePullPolicy: Always
+  port: 3306
+  mysqlUser: dbuser
+  mysqlPassword: password
+  mysqlDatabase: inventorydb
+  mysqlRootPassword: password
+  existingSecret:
+  # For mysql init container
   istio:
     mTLS: ISTIO_MUTUAL
     loadBalancer: LEAST_CONN
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
+
+# For deploying Inventory alone, enable RabbitMQ to pass the Inventory Health check
+rabbitmq:
+  enabled: true
+  mainPort: 5672
+  managePort: 15672
+  epmd: 4369
+  dist: 25672

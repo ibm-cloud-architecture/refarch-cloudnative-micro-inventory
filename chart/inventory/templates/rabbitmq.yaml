@@ -1,0 +1,41 @@
+# For deploying Inventory standalone, otherwise provided in the Orders service
+{{if .Values.rabbitmq.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.service.rabbitmq }}
+  labels:
+    {{- include "inventory.labels" . | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - name: main
+    port: {{ .Values.rabbitmq.mainPort }}
+  - name: management
+    port: {{ .Values.rabbitmq.managePort }}
+  - name: epmd
+    port: {{ .Values.rabbitmq.epmd }}
+  - name: dist
+    port: {{ .Values.rabbitmq.dist }}
+  selector:
+    {{- include "inventory.labels" . | indent 4 }}
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.service.rabbitmq }}
+  labels:
+    {{- include "inventory.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        {{- include "inventory.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: "rabbitmq"
+        image: rabbitmq
+{{end }}
