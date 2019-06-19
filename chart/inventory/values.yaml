@@ -87,7 +87,7 @@ mysql:
   existingSecret:
   # For mysql init container
   istio:
-    mTLS: ISTIO_MUTUAL
+    mTLS: DISABLE
     loadBalancer: LEAST_CONN
   podAnnotations:
     sidecar.istio.io/inject: "false"
