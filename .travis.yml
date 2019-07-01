@@ -1,4 +1,5 @@
 sudo: required
+dist: xenial
 language: java
 env:
   global:
@@ -8,7 +9,7 @@ env:
     - zipkinHost=localhost
     - zipkinPort=9411
     - IMAGE_NAME=inventory-mp
-    - TAG=travis-latest
+    - TAG=travis
     - SQL_IMAGE_NAME=bc-inventorydb
     - RELEASE_NAME=inv
 stages:
@@ -21,7 +22,7 @@ jobs:
       services:
       - mysql
       before_script:
-      # Wait for MySQL to start, then load it with catalog data
+      # Wait for MySQL to start, then load it with inventory data
       - until mysql -h 127.0.0.1 -P 3306 -uroot <./mysql/scripts/load-data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
       # Wait for MySQL to load data
       - sleep 25
@@ -43,7 +44,7 @@ jobs:
       - cd mysql
       # Build the docker image
       - docker build -t "${SQL_IMAGE_NAME}:${TAG}" .
-      # Wait for MySQL to start, then load it with catalog data
+      # Wait for MySQL to start, then load it with inventory data
       - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password "${SQL_IMAGE_NAME}:${TAG}"
       # Wait for MySQL to load data
       - sleep 25
@@ -54,7 +55,7 @@ jobs:
       # Build Docker image
       - docker build -t "${IMAGE_NAME}:${TAG}" .
       # Start Inventory Container and Connect to local MySQL Service
-      - docker run -d -p 9081:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password --env zipkinHost=localhost --env zipkinPort=9411 "${IMAGE_NAME}:${TAG}"
+      - docker run -d -p 9081:9080 --name inventory -t --link mysql:mysql -e jdbcURL=$jdbcURL -e dbuser=$dbuser -e dbpassword=$dbpassword -e zipkinHost=$zipkinHost -e zipkinPort=$zipkinPort "${IMAGE_NAME}:${TAG}"
       # Wait for the Inventory container to start accepting connections
       - sleep 25
       # Check that the Inventory container is running
