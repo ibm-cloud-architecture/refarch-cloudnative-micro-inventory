@@ -36,9 +36,9 @@ spec:
         resources:
         {{- include "inventory.resources" . | indent 10 }}
         env:
-          {{- if .Values.travis }}
+          {{- if .Values.travis.external }}
           - name: rabbit
-            value: "{{ .Values.minikubeIp }}"
+            value: "{{ .Values.travis.releaseName }}-{{ .Values.service.rabbitmq }}"
           {{- else}}
           - name: rabbit
             value: "{{ .Release.Name }}-{{ .Values.service.rabbitmq }}"

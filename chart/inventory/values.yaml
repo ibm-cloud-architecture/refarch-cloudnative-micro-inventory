@@ -71,10 +71,6 @@ ingress:
     hosts:
       - inventory.bluecompute.com
 
-# For travis
-travis: false
-minikubeIp:
-
 mysql:
   image: "mysql"
   imageTag: "5.7.14"
@@ -92,10 +88,15 @@ mysql:
   podAnnotations:
     sidecar.istio.io/inject: "false"
 
-# For deploying Inventory alone, enable RabbitMQ to pass the Inventory Health check
+# For deploying Inventory alone on Kube, enable RabbitMQ to pass health
 rabbitmq:
-  enabled: true
+  enabled: false
   mainPort: 5672
   managePort: 15672
   epmd: 4369
   dist: 25672
+
+# For Travis testing with other services
+travis:
+  external: false
+  releaseName:

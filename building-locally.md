@@ -23,7 +23,7 @@ To build the application, we used maven build. Maven is a project management too
 
 3. Run this command. This command builds the project and installs it.
 
-   `mvn install`
+   `mvn clean install`
    
    If this runs successfully, you will be able to see the below messages.
 
