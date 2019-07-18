@@ -1,3 +1,26 @@
+{{/* Inventory Init Container Template */}}
+{{- define "inventory.labels" }}
+{{- range $key, $value := .Values.labels }}
+{{ $key }}: {{ $value | quote }}
+{{- end }}
+app.kubernetes.io/name: {{ .Release.Name }}-inventory
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+heritage: {{ .Release.Service | quote }}
+release: {{ .Release.Name | quote }}
+chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+{{- end }}
+
+{{/* Inventory Resources */}}
+{{- define "inventory.resources" }}
+limits:
+  memory: {{ .Values.resources.limits.memory }}
+requests:
+  cpu: {{ .Values.resources.limits.cpu }}
+  memory: {{ .Values.resources.requests.memory }}
+{{- end }}
+
 {{/* MySQL Init Container Template */}}
 {{- define "inventory.mysql.initcontainer" }}
 - name: test-mysql
@@ -6,7 +29,7 @@
   command:
   - "/bin/bash"
   - "-c"
-  {{- if or .Values.mysql.password .Values.mysql.existingSecret }}
+  {{- if or .Values.mysql.mysqlPassword .Values.mysql.existingSecret }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e status; do echo waiting for mysql; sleep 1; done"
   {{- else }}
   - "until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -e status; do echo waiting for mysql; sleep 1; done"
@@ -17,20 +40,15 @@
 
 {{/* Inventory MySQL Environment Variables */}}
 {{- define "inventory.mysql.environmentvariables" }}
-{{- if .Values.travis }}
 - name: MYSQL_HOST
-  value: {{ .Values.mysql.host | quote }}
-{{- else}}
-- name: MYSQL_HOST
-  value: {{ .Release.Name }}-{{ .Values.service.mysql }}
-{{- end }}
+  value: {{ .Release.Name }}-{{ .Values.service.database }}
 - name: MYSQL_PORT
   value: {{ .Values.mysql.port | quote }}
 - name: MYSQL_DATABASE
-  value: {{ .Values.mysql.database | quote }}
+  value: {{ .Values.mysql.mysqlDatabase | quote }}
 - name: MYSQL_USER
-  value: {{ .Values.mysql.user | quote }}
-{{- if or .Values.mysql.password .Values.mysql.existingSecret }}
+  value: {{ .Values.mysql.mysqlUser | quote }}
+{{- if or .Values.mysql.mysqlPassword .Values.mysql.existingSecret }}
 - name: MYSQL_PASSWORD
   valueFrom:
     secretKeyRef:

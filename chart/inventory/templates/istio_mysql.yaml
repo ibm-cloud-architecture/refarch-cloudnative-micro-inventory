@@ -1,0 +1,44 @@
+{{ if .Values.istio.enabled }}
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "Policy"
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.service.database }}
+spec:
+  targets:
+  - name: {{ .Release.Name }}-{{ .Values.service.database }}
+    ports:
+    - number: {{ .Values.mysql.port }}
+  peers:
+  - mtls: {}
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.service.database }}
+spec:
+  host: {{ .Release.Name }}-{{ .Values.service.database }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: {{ .Values.mysql.istio.loadBalancer }}
+    portLevelSettings:
+    - port:
+        number: {{ .Values.mysql.port }}
+      tls:
+        mode: {{ .Values.mysql.istio.mTLS }}
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.service.database }}
+spec:
+  hosts:
+    - {{ .Release.Name }}-{{ .Values.service.database }}.{{ .Release.Namespace }}.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: {{ .Release.Name }}-{{ .Values.service.database }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ end }}

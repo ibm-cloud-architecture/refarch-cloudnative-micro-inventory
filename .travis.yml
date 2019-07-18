@@ -1,15 +1,16 @@
 sudo: required
+dist: xenial
 language: java
+jdk:
+  - openjdk8
 env:
   global:
-    - jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false
     - dbuser=root
     - dbpassword=password
     - zipkinHost=localhost
     - zipkinPort=9411
     - IMAGE_NAME=inventory-mp
-    - TAG=travis-latest
-    - SQL_IMAGE_NAME=bc-inventorydb
+    - TAG=travis
     - RELEASE_NAME=inv
 stages:
   - local build and test
@@ -20,41 +21,46 @@ jobs:
     - stage: local build and test
       services:
       - mysql
+      env:
+        - jdbcURL=jdbc:mysql://127.0.0.1:3306/inventorydb?useSSL=false
       before_script:
-      # Wait for MySQL to start, then load it with catalog data
-      - until mysql -h 127.0.0.1 -P 3306 -uroot <./mysql/scripts/load-data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
-      # Wait for MySQL to load data
-      - sleep 25
+      # Setting root password for app
+      - mysqladmin -uroot password password
+      # Wait for MySQL to start, then load it with inventory data
+      - until mysql -h 127.0.0.1 -P 3306 -uroot -ppassword < ./mysql/scripts/load-data.sql; do echo "waiting for mysql"; sleep 1; done; echo "Loaded data into database"
       script:
       # Maven Build
-      - mvn install
+      - mvn clean install
       # Start Application
       - mvn liberty:start-server -DtestServerHttpPort=9081
       # Wait for the Inventory container to start accepting connections
       - sleep 25
       # Run Catalog API Test
       - bash scripts/api_tests.sh 127.0.0.1 9081
+      # - cat target/liberty/wlp/usr/servers/defaultServer/logs/messages.log
     - stage: docker build, deploy, and test
       services:
       - docker
+      env:
+        - SQL_IMAGE_NAME=inventorydb
       install:
         - true
       before_script:
       - cd mysql
       # Build the docker image
-      - docker build -t "${SQL_IMAGE_NAME}:${TAG}" .
-      # Wait for MySQL to start, then load it with catalog data
-      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=password "${SQL_IMAGE_NAME}:${TAG}"
-      # Wait for MySQL to load data
-      - sleep 25
-      - cd ..
+      - docker build -t "$SQL_IMAGE_NAME:$TAG" .
+      # Start MySQL, then load it with inventory data
+      - docker run -p 9041:3306 -d --name mysql -e MYSQL_ROOT_PASSWORD=$dbpassword "$SQL_IMAGE_NAME:$TAG"
+      - export GATEWAY=$(docker network inspect bridge | jq '.[].IPAM.Config' | jq '.[].Gateway' | sed 's/"//g')
+      - export jdbcURL=jdbc:mysql://$GATEWAY:9041/inventorydb?useSSL=false
+      - cd -
       script:
       # Maven Build
-      - mvn install
+      - mvn clean install
       # Build Docker image
-      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      - docker build -t "$IMAGE_NAME:$TAG" .
       # Start Inventory Container and Connect to local MySQL Service
-      - docker run -d -p 9081:9080 --name inventory -t --link mysql:mysql --env jdbcURL=jdbc:mysql://mysql:3306/inventorydb?useSSL=false --env dbuser=root --env dbpassword=password --env zipkinHost=localhost --env zipkinPort=9411 "${IMAGE_NAME}:${TAG}"
+      - docker run -d -p 9081:9080 --name inventory -t --link mysql:mysql -e jdbcURL=$jdbcURL -e dbuser=$dbuser -e dbpassword=$dbpassword -e zipkinHost=$zipkinHost -e zipkinPort=$zipkinPort "$IMAGE_NAME:$TAG"
       # Wait for the Inventory container to start accepting connections
       - sleep 25
       # Check that the Inventory container is running
@@ -62,7 +68,7 @@ jobs:
       # Check logs to see if it started properly
       - docker logs inventory
       # Run Inventory API Test
-      - bash scripts/api_tests.sh 127.0.0.1 9081
+      - bash scripts/api_tests.sh localhost 9081
     - stage: kubernetes build, deploy, and test
       services:
       - docker
@@ -71,24 +77,28 @@ jobs:
       install:
         - true
       before_script:
-      # Install nsenter, which is needed for minikube to work
-      - bash scripts/install_minikube_and_helm.sh
+      # Fetch the install script and run
+      - curl -O https://raw.githubusercontent.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/microprofile/utility_scripts/install_minikube_and_helm.sh
+      - chmod +x install_minikube_and_helm.sh
+      - bash install_minikube_and_helm.sh
       # Install MySQL
-      - helm install --name my-release --set mysqlRootPassword=password,mysqlUser=dbuser,mysqlPassword=password,mysqlDatabase=inventorydb stable/mysql
+      - helm dependency update chart/inventory
       script:
       # Maven Build
-      - mvn install
+      - mvn clean install
       # Build Docker image
-      - docker build -t "${IMAGE_NAME}:${TAG}" .
+      - docker build -t "$IMAGE_NAME:$TAG" .
       # Install Inventory
-      - helm install --set travis=true --set image.repository=${IMAGE_NAME} --set image.tag=${TAG} --name inv ./chart/inventory
+      - helm install --set image.repository=$IMAGE_NAME,image.tag=$TAG,rabbitmq.enabled=true --name $RELEASE_NAME ./chart/inventory
       # Wait for Inventory to be ready
-      - kubectl get deployments ${RELEASE_NAME}-inventory -o yaml
+      - kubectl get deployments $RELEASE_NAME-inventory -o yaml
       - READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}')
       - echo $READY
-      - until [ -n "$READY" ] && [ ${READY} -ge 1 ]; do READY=$(kubectl get deployments ${RELEASE_NAME}-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get deployments -o wide; echo "Waiting for inventory to be ready"; sleep 10; done
-      # Wait for Inventory deployment to start accepting connections
-      - sleep 35
+      - until [ -n "$READY" ] && [ $READY -ge 1 ]; do READY=$(kubectl get deployments $RELEASE_NAME-inventory -o yaml | grep "readyReplicas" | awk '{print $2}'); kubectl get pods -o wide; echo "Waiting for inventory to be ready"; sleep 10; done
+      # Wait for database population
+      - COMPLETION=$(kubectl get jobs -o yaml | grep succeeded | awk '{print $2}')
+      - echo $COMPLETION
+      - until [ -n "$COMPLETION" ] && [ $COMPLETION -ge 1 ]; do COMPLETION=$(kubectl get jobs -o yaml | grep succeeded | awk '{print $2}'); kubectl get pods -o wide; echo "Waiting for inventory populate job to be completed"; sleep 10; done
       # Run Inventory API Test
       - MINIKUBE_IP=$(minikube ip)
       - NODE_PORT=$(kubectl get service ${RELEASE_NAME}-inventory -o=jsonpath='{.spec.ports[0].nodePort}')

@@ -24,3 +24,5 @@ src/main/resources/localdev-config.json
 /target
 /.m2
 /bin/
+
+chart/inventory/charts
