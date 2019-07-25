@@ -2,13 +2,13 @@
 
 ## Table of Contents
 
-* [Building the app using Maven](#building-the-app-using-maven)
+* [Building Inventory using Maven](#building-inventory-using-maven)
 * [Setting up MySQL](#setting-up-mysql)
 * [Setting up Zipkin](#setting-up-zipkin) (Optional)
-* [Running the app and stopping it](#running-the-app-and-stopping-it)
-* [Install using Helm Charts](#installing-the-inventory-service-using-helm-charts)
+* [Running Inventory and stopping it](#running-inventory-and-stopping-it)
+* [Deploying Inventory using Helm charts](#deploying-inventory-using-helm-charts)
 
-## Building the app using Maven
+## Building Inventory using Maven
 
 To build the application, we used maven build. Maven is a project management tool that is based on the Project Object Model (POM). Typically, people use Maven for project builds, dependencies, and documentation. Maven simplifies the project build. In this task, you use Maven to build the project.
 
@@ -106,7 +106,7 @@ In our sample application, we used Zipkin as our distributed tracing system.
 If you want to access the traces for inventory service, run Zipkin as a docker container locally. You can find the instructions and more details [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/blob/microprofile/Zipkin/README.md)
 
 
-## Running the app and stopping it
+## Running Inventory and stopping it
 
 1. Set the JDBC URL before you start your application. The host and port depends on the service you use. You can run the MySQL server locally on your system using the MySQL docker container or use the [MySQL Compose](https://www.ibm.com/cloud/compose/mysql) available in [IBM Cloud](https://www.ibm.com/cloud/).
 
@@ -168,7 +168,7 @@ Once you do this, you see the below messages.
 [INFO] ------------------------------------------------------------------------
 ```
 
-## Installing the Inventory service using Helm Charts
+## Deploying Inventory using Helm Charts
 
 The most convenient solution to start the Inventory service uses [Kubernetes](https://kubernetes.io/), as a container orchestration tool, and [Helm](https://helm.sh/), to deploy the necessary containers with the correct configuration. 
 
