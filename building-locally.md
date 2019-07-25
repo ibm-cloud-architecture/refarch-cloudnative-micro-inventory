@@ -2,12 +2,13 @@
 
 ## Table of Contents
 
-* [Building the app](#building-the-app)
+* [Building the app using Maven](#building-the-app-using-maven)
 * [Setting up MySQL](#setting-up-mysql)
 * [Setting up Zipkin](#setting-up-zipkin) (Optional)
 * [Running the app and stopping it](#running-the-app-and-stopping-it)
+* [Install using Helm Charts](#installing-the-inventory-service-using-helm-charts)
 
-## Building the app
+## Building the app using Maven
 
 To build the application, we used maven build. Maven is a project management tool that is based on the Project Object Model (POM). Typically, people use Maven for project builds, dependencies, and documentation. Maven simplifies the project build. In this task, you use Maven to build the project.
 
@@ -166,3 +167,21 @@ Once you do this, you see the below messages.
 [INFO] Final Memory: 13M/245M
 [INFO] ------------------------------------------------------------------------
 ```
+
+## Installing the Inventory service using Helm Charts
+
+The most convenient solution to start the Inventory service uses [Kubernetes](https://kubernetes.io/), as a container orchestration tool, and [Helm](https://helm.sh/), to deploy the necessary containers with the correct configuration. 
+
+The Inventory service has a required dependency, MySQL, which first must be obtained with:
+
+```
+helm update dependencies
+```
+
+Then run the Inventory service standalone with:
+
+```
+helm install --set rabbit.enabled=true chart/inventory
+```
+
+RabbitMQ must be enabled to satisfy the readiness probe. It is set to `false` by default because normally it's provided by the Orders service.
