@@ -1,0 +1,26 @@
+apiVersion: v1
+entries:
+  inventory:
+  - apiVersion: v1
+    created: "2019-07-25T12:17:50.507011-05:00"
+    description: A Helm chart for Kubernetes
+    digest: 203603128f7e720d87453eb34bfb37db5e1f29494577d675ac35f465757f0ddb
+    home: https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile
+    name: inventory
+    sources:
+    - https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory
+    urls:
+    - inventory-0.1.0.tgz
+    version: 0.1.0
+  - apiVersion: v1
+    created: "2019-07-25T12:17:50.503571-05:00"
+    description: A Helm chart for Kubernetes
+    digest: 89818c5c39deae0e81c9bf5827b63bcebf61002ccf4409d0719bacbe282045ec
+    home: https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile
+    name: inventory
+    sources:
+    - https://github.com/ibm-cloud-architecture/refarch-cloudnative-micro-inventory/tree/microprofile/inventory
+    urls:
+    - inventory-0.0.1.tgz
+    version: 0.0.1
+generated: "2019-07-25T12:17:50.500962-05:00"
