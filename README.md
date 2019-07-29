@@ -19,10 +19,10 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 * [Implementation](#implementation)
     + [Microprofile](#microprofile)
 * [Features](#features)
-* [Deploying the App](#deploying-the-app)
+* [Deploying the Bluecompute App](#deploying-the-bluecompute-app)
     + [IBM Cloud Private](#ibm-cloud-private)
     + [Minikube](#minikube)
-    + [Run Inventory Service locally](#run-inventory-service-locally)
+* [Run Inventory Service locally](#run-inventory-service-locally)
 * [References](#references)
 
 ## Introduction
@@ -107,7 +107,7 @@ In our sample application, we used @Timed, @Counted and @Metered annotations. Th
 
 In our sample application, we used [Zipkin](https://zipkin.io/) as our distributed tracing system. We used @Traced and an ActiveSpan object to retrieve messages.
 
-## Deploying the App
+## Deploying the Bluecompute App
 
 To build and run the entire BlueCompute demo application, each MicroService must be spun up together. This is due to how we
 set up our Helm charts structure and how we dynamically produce our endpoints and URLs.  
@@ -122,9 +122,9 @@ To deploy it on IBM Cloud Private, please follow the instructions provided [here
 
 To deploy it on Minikube, please follow the instructions provided [here](https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile#locally-in-minikube).
 
-### Run Inventory Service locally
+## Run Inventory Service locally
 
-To deploy the app locally and test the individual service, please follow the instructions provided [here](/building-locally.md).
+To deploy the Inventory locally using Maven or Helm and test the individual service, please follow the instructions provided [here](/building-locally.md).
 
 ## References
 
