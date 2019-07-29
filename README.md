@@ -19,10 +19,10 @@ This repository contains the **MicroProfile** implementation of the **Inventory 
 * [Implementation](#implementation)
     + [Microprofile](#microprofile)
 * [Features](#features)
-* [Deploying the App](#deploying-the-app)
+* [Deploying the Bluecompute App](#deploying-the-bluecompute-app)
     + [IBM Cloud Private](#ibm-cloud-private)
     + [Minikube](#minikube)
-    + [Run Inventory Service locally](#run-inventory-service-locally)
+* [Run Inventory Service locally](#run-inventory-service-locally)
 * [References](#references)
 
 ## Introduction
