@@ -14,10 +14,8 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 
 {{/* Inventory Resources */}}
 {{- define "inventory.resources" }}
-limits:
-  memory: {{ .Values.resources.limits.memory }}
 requests:
-  cpu: {{ .Values.resources.limits.cpu }}
+  cpu: {{ .Values.resources.requests.cpu }}
   memory: {{ .Values.resources.requests.memory }}
 {{- end }}
 
