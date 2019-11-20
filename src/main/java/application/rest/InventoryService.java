@@ -10,6 +10,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
+
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.metrics.annotation.Counted;
@@ -61,6 +63,7 @@ public class InventoryService {
 
     @GET
     @Produces("application/json")
+    @Retry(maxRetries = 2)
     @APIResponses(value = {
             @APIResponse(
                     responseCode = "404",
@@ -122,6 +125,7 @@ public class InventoryService {
     @GET
     @Path("/stock")
     @Produces("text/plain")
+    @Retry(maxRetries = 2, maxDuration = 5000)
     @APIResponses(value = {
             @APIResponse(
                     responseCode = "500",

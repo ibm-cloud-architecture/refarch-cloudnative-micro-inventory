@@ -8,6 +8,9 @@
     <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
                   id="defaultHttpEndpoint" host="*"/>
 
+    <!-- Disable metrics authentication to use with prometheus --> 
+    <mpMetrics authentication="false"/>
+
     <quickStartSecurity userName="admin" userPassword="password"/>
 
     <opentracingZipkin host="${env.zipkinHost}" port="${env.zipkinPort}"/>
