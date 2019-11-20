@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   inventory:
   - apiVersion: v1
-    created: "2019-11-19T16:35:25.946338-06:00"
+    created: "2019-11-20T14:28:07.617912-06:00"
     description: Inventory service for the Bluecompute project
-    digest: 325a88449eff20a04db96b7e094f17f9eb0749f7f05af426c8996566061d49ed
+    digest: c724ea893e5ee26b4df2a025feeefb1e9bde0191ad936b85c1c0f6bc80eb923d
     home: https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile
     name: inventory
     sources:
@@ -13,7 +13,7 @@ entries:
     - inventory-0.1.2.tgz
     version: 0.1.2
   - apiVersion: v1
-    created: "2019-11-19T16:35:25.94527-06:00"
+    created: "2019-11-20T14:28:07.616842-06:00"
     description: Inventory service for the Bluecompute project
     digest: 6af0958fbc6fa16d72ce8d136d2055bc35e43ba53a989528ccd6343d4928623c
     home: https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile
@@ -24,7 +24,7 @@ entries:
     - inventory-0.1.1.tgz
     version: 0.1.1
   - apiVersion: v1
-    created: "2019-11-19T16:35:25.943627-06:00"
+    created: "2019-11-20T14:28:07.615614-06:00"
     description: Inventory service for the Bluecompute project
     digest: dbb8c950f277ba072cf68fbc9f158aeb6fb9cfa60875d2d0fe617495ea82b4db
     home: https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile
@@ -35,7 +35,7 @@ entries:
     - inventory-0.1.0.tgz
     version: 0.1.0
   - apiVersion: v1
-    created: "2019-11-19T16:35:25.941164-06:00"
+    created: "2019-11-20T14:28:07.613905-06:00"
     description: A Helm chart for Kubernetes
     digest: 89818c5c39deae0e81c9bf5827b63bcebf61002ccf4409d0719bacbe282045ec
     home: https://github.com/ibm-cloud-architecture/refarch-cloudnative-kubernetes/tree/microprofile
@@ -45,4 +45,4 @@ entries:
     urls:
     - inventory-0.0.1.tgz
     version: 0.0.1
-generated: "2019-11-19T16:35:25.939856-06:00"
+generated: "2019-11-20T14:28:07.612575-06:00"
