@@ -63,7 +63,7 @@ public class InventoryService {
 
     @GET
     @Produces("application/json")
-    @Retry(maxRetries = 2, maxDuration = 2000)
+    @Retry(maxRetries = 2)
     @APIResponses(value = {
             @APIResponse(
                     responseCode = "404",
