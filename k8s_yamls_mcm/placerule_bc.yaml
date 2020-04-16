@@ -1,0 +1,13 @@
+apiVersion: app.ibm.com/v1alpha1
+kind: PlacementRule
+metadata:
+  name: bluecompute-placementrule
+  namespace: bluecompute
+  generation: 1
+  labels:
+    purpose: bluecompute
+spec:
+  clusterReplicas: 1
+  clusterLabels:
+    matchLabels:
+      cluster: bluecompute

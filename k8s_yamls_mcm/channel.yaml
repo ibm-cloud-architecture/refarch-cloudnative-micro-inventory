@@ -1,0 +1,13 @@
+apiVersion: app.ibm.com/v1alpha1
+kind: Channel
+metadata:
+  name: bluecompute-channel
+  namespace: bluecompute
+spec:
+  sourceNamespaces:
+  - bluecompute
+  type: Namespace
+  pathname: bluecompute
+  gates:
+    annotations:
+      dev-ready: approved

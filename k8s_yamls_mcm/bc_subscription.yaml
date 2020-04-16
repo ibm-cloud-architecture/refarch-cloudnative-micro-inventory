@@ -1,0 +1,15 @@
+apiVersion: app.ibm.com/v1alpha1
+kind: Subscription
+metadata:
+  name: bluecompute-subscription
+  namespace: bluecompute
+  labels:
+    purpose: bluecompute
+spec:
+  channel: bluecompute/bluecompute-channel
+  name: inventory-deploy
+  placement:
+    placementRef:
+      name: bluecompute-placementrule
+      kind: PlacementRule
+      group: app.ibm.com
