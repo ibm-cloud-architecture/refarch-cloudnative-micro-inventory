@@ -2,11 +2,11 @@ package inventory;
 
 import java.util.Properties;
 import java.util.Arrays;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.time.Duration;
 
 import inventory.config.MHConfig;
 import inventory.models.Inventory;
@@ -150,7 +150,7 @@ public class MHConsumer {
         consumer.subscribe(Arrays.asList(topic));
 
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(3000);
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(3000));
             for (ConsumerRecord<String, String> record : records) {
                 logger.debug("\nMessage = %s\n", record.value());
 
@@ -166,7 +166,7 @@ public class MHConsumer {
 					logger.info("Valid object: " + object.getLong("itemId") + " count: " + object.getInt("count"));
 
 					// get item for itemRepo:
-					final Inventory item = itemsRepo.findOne(object.getLong("itemId"));
+					final Inventory item = itemsRepo.findById(object.getLong("itemId")).orElse(null);
 					if (item == null) {
 						logger.warn("Received message for item that does not exist!" + object.getLong("itemId"));
 						continue;

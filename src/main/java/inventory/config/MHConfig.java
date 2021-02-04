@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component("MHConfig")
-@ConfigurationProperties(prefix = "message_hub")
+@ConfigurationProperties(prefix = "message-hub")
 public class MHConfig {
     private String topic;
     private String user;

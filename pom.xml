@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.springframework</groupId>
-  <artifactId>liberty-inventory-spring</artifactId>
-  <version>0.1-SNAPSHOT</version>
 
   <parent>
   	<groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.5.8.RELEASE</version>
+    <version>2.4.2</version>
+    <relativePath/> <!-- lookup parent from repository -->
   </parent>
+  <groupId>com.ibm</groupId>
+  <artifactId>liberty-inventory-spring</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <name>inventory</name>
 
   <dependencies>
     <dependency>
@@ -41,6 +43,10 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
     </dependency>
@@ -52,6 +58,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
+      <version>20201115</version>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
@@ -65,7 +72,7 @@
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
-      <version>1.0.2</version>
+      <version>2.7.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -77,6 +84,10 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.8.1</version>
      </dependency>
+     <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-1.2-api</artifactId>
+   </dependency>
   </dependencies>
 
   <build>
@@ -97,21 +108,28 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>io.openliberty.boost</groupId>
-                <artifactId>boost-maven-plugin</artifactId>
-                <version>0.1</version>
-                <executions>
-                  <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>package</goal>
-                    </goals>
-                    <!-- <goals>
-                      <goal>docker-build</goal>
-                    </goals> -->
-                  </execution>
-                </executions>
-            </plugin>
+              <groupId>io.openliberty.tools</groupId>
+              <artifactId>liberty-maven-plugin</artifactId>
+              <version>3.3.3</version>
+              <configuration>
+                <appsDirectory>apps</appsDirectory>
+                <installAppPackages>spring-boot-project</installAppPackages>
+                <include>minify,runnable</include>
+                <packageName>liberty-inventory-spring</packageName>
+              </configuration>
+              <executions>
+                <execution>
+                <id>package-server</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>create</goal>
+                  <goal>install-feature</goal>
+                  <goal>deploy</goal>
+                  <goal>package</goal>
+                </goals>
+                </execution>
+              </executions>
+              </plugin>
         </plugins>
     </build>
 

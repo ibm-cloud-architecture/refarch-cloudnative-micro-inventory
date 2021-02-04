@@ -1,45 +1,35 @@
-# STAGE: Build
-FROM gradle:4.9.0-jdk8-alpine as builder
+# Stage and thin the application
+FROM openliberty/open-liberty:21.0.0.1-full-java11-openj9-ubi as staging
 
-# Create Working Directory
-ENV BUILD_DIR=/home/gradle/app/
-RUN mkdir $BUILD_DIR
-WORKDIR $BUILD_DIR
+COPY --chown=1001:0 target/liberty-inventory-spring-0.1-SNAPSHOT.jar /staging/fat-liberty-inventory-spring-0.1-SNAPSHOT.jar
 
-# Download Dependencies
-COPY build.gradle $BUILD_DIR
-RUN gradle build -x :bootRepackage -x test --continue
+RUN springBootUtility thin --sourceAppPath=/staging/fat-liberty-inventory-spring-0.1-SNAPSHOT.jar --targetThinAppPath=/staging/thin-liberty-inventory-spring-0.1-SNAPSHOT.jar --targetLibCachePath=/staging/lib.index.cache
 
-# Copy Code Over and Build jar
-COPY src src
-RUN gradle build -x test
+# Build the image
+FROM openliberty/open-liberty:21.0.0.1-kernel-slim-java11-openj9-ubi
 
-# STAGE: Deploy
-FROM openjdk:8-jre-alpine
+ARG VERSION=1.0
+ARG REVISION=SNAPSHOT
 
-# Install Extra Packages
-RUN apk --no-cache update \
- && apk add jq bash bc ca-certificates curl \
- && update-ca-certificates
+LABEL org.opencontainers.image.authors="UCLL"\
+  org.opencontainers.image.vendor="UCLL OpenLiberty"\
+  org.opencontainers.image.url="local"\
+  org.opencontainers.image.source="https://github.com/cattoire/refarch-cloudnative-micro-inventory"\
+  org.opencontainers.image.version="$VERSION"\
+  org.opencontainers.image.revision="$REVISION"\
+  vendor="UCLL Open Liberty"\
+  name="inventory"\
+  version="$VERSION-$REVISION"\
+  summary="The inventory service"\
+  description="This image contains the inventory service running with the Open Liberty runtime."
 
-# Create app directory
-ENV APP_HOME=/app
-RUN mkdir -p $APP_HOME/scripts
-WORKDIR $APP_HOME
+COPY --chown=1001:0 src/main/liberty/config /config/
 
-# Copy jar file over from builder stage
-COPY --from=builder /home/gradle/app/build/libs/micro-inventory-0.0.1.jar $APP_HOME
-RUN mv ./micro-inventory-0.0.1.jar app.jar
+# This script will add the requested XML snippets to enable Liberty features and grow image to be fit-for-purpose using featureUtility.
+# Only available in 'kernel-slim'. The 'full' tag already includes all features for convenience.
+RUN features.sh
 
-COPY startup.sh startup.sh
-COPY scripts/max_heap.sh scripts/
-
-# Create user, chown, and chmod
-RUN adduser -u 2000 -G root -D blue \
-	&& chown -R 2000:0 $APP_HOME \
-	&& chmod -R u+x $APP_HOME/app.jar
-
-USER 2000
+COPY --chown=1001:0 --from=staging /staging/lib.index.cache /lib.index.cache
+COPY --chown=1001:0 --from=staging /staging/thin-liberty-inventory-spring-0.1-SNAPSHOT.jar /config/apps/thin-liberty-inventory-spring-0.1-SNAPSHOT.jar
 
 EXPOSE 8080 8090
-ENTRYPOINT ["./startup.sh"]

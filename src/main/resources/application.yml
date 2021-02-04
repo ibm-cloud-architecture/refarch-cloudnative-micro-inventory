@@ -20,13 +20,18 @@ spring:
   # MySQL Data source configuration
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:inventorydb}
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:}
-    port: ${MYSQL_PORT:3306}
+#    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:inventorydb}
+#    username: ${MYSQL_USER:root}
+#    password: ${MYSQL_PASSWORD:}
+#    port: ${MYSQL_PORT:3306}
     max-active: 4
     testOnBorrow: true
     validationQuery: SELECT 1
+    url: jdbc:mysql://10.112.230.204:9041/inventorydb?useSSL=false
+    username: dbuser
+    password: password
+    port: 9041
+
 
   jpa:
     database: MYSQL
